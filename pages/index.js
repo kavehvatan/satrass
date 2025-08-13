@@ -1,6 +1,6 @@
 // pages/index.js
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const SERVICES = [
   { title: "نصب و راه‌اندازی" },
@@ -10,7 +10,10 @@ const SERVICES = [
   { title: "راهبری" },
 ];
 
-const LOGO_COLORS = ["#14b8a6", "#f4c21f"]; // رنگ‌های لوگوی ساتراس (فیروزه‌ای و زرد)
+const TEAL = "#14b8a6";
+const YELLOW = "#f4c21f";
+const LOGO_COLORS = [TEAL, YELLOW]; // فیروزه‌ای و زرد
+
 const CARD_CLASS =
   "flex flex-col items-center justify-center gap-3 p-5 bg-white border rounded-lg " +
   "hover:shadow-md transition text-center w-full max-w-[520px] mx-auto h-[120px]";
@@ -54,6 +57,44 @@ function ServiceCard({ title }) {
   );
 }
 
+// جابجایی نوبتی + با کلیک؛ وضعیت در localStorage می‌ماند
+function useAlternatingBrandPair() {
+  const [primary, setPrimary] = useState(YELLOW);   // پر (Filled)
+  const [secondary, setSecondary] = useState(TEAL); // خطی (Outlined)
+
+  useEffect(() => {
+    try {
+      const lastIsTealPrimary = localStorage.getItem("satrass_btn_pair") === "1";
+      const nextIsTealPrimary = !lastIsTealPrimary;
+      localStorage.setItem("satrass_btn_pair", nextIsTealPrimary ? "1" : "0");
+
+      if (nextIsTealPrimary) {
+        setPrimary(TEAL);
+        setSecondary(YELLOW);
+      } else {
+        setPrimary(YELLOW);
+        setSecondary(TEAL);
+      }
+    } catch {
+      /* no-op */
+    }
+  }, []);
+
+  const swap = () => {
+    setPrimary((prev) => {
+      const newPrimary = prev === TEAL ? YELLOW : TEAL;
+      const newSecondary = newPrimary === TEAL ? YELLOW : TEAL;
+      setSecondary(newSecondary);
+      try {
+        localStorage.setItem("satrass_btn_pair", newPrimary === TEAL ? "1" : "0");
+      } catch {}
+      return newPrimary;
+    });
+  };
+
+  return { primary, secondary, swap };
+}
+
 export default function Home() {
   const EQUIPMENT = [
     { name: "Dell EMC", slug: "dell", href: "/products/dell" },
@@ -67,6 +108,9 @@ export default function Home() {
     { name: "NetBackup", slug: "netbackup", href: "/solutions/netbackup" },
   ];
 
+  const { primary, secondary, swap } = useAlternatingBrandPair();
+  const primaryIsYellow = primary.toLowerCase() === YELLOW;
+
   return (
     <main className="min-h-screen font-sans">
       {/* Hero */}
@@ -77,16 +121,38 @@ export default function Home() {
               زیرساخت هوشمند، با دقت مهندسی
             </h1>
             <p className="mt-4 text-gray-300">از مشاوره تا پشتیبانی، کنار شماییم.</p>
+
+            {/* دکمه‌ها: یکی پر با primary و یکی خطی با secondary */}
             <div className="mt-6 flex gap-3">
+              {/* ارائه مشاوره — Filled */}
               <a
                 href="/contact"
-                className="rounded-full px-5 py-2.5 font-bold bg-amber-400 text-black hover:bg-amber-300 transition"
+                onClick={swap}
+                className="rounded-full px-5 py-2.5 font-bold transition"
+                style={{
+                  backgroundColor: primary,
+                  color: primaryIsYellow ? "#000" : "#fff",
+                }}
               >
-                مشاوره رایگان
+                ارائه مشاوره
               </a>
+
+              {/* مشاهده ابزارها — Outlined */}
               <a
                 href="/tools"
-                className="rounded-full px-5 py-2.5 font-semibold border border-amber-400 text-amber-400 hover:bg-amber-400/10 transition"
+                onClick={swap}
+                className="rounded-full px-5 py-2.5 font-semibold transition"
+                style={{
+                  border: `1px solid ${secondary}`,
+                  color: secondary,
+                  backgroundColor: "transparent",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = `${secondary}1A`; // ~10% opacity
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                }}
               >
                 مشاهده ابزارها
               </a>

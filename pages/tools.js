@@ -4,26 +4,22 @@ export default function Tools() {
     {
       title: "PowerStore Configurator",
       desc: "انتخاب و پیکربندی کامل مدل‌های PowerStore",
-      href: "#",         // لینک ابزار
-      guide: "#"         // (اختیاری) لینک راهنما
+      href: "#", // ← لینک واقعی ابزار رو بذار
     },
     {
       title: "Unity MidrangeSizer",
       desc: "محاسبه ظرفیت و پیکربندی بهینه برای سری Unity Midrange",
       href: "#",
-      guide: "#"
     },
     {
       title: "PowerStore RAID Calculator",
       desc: "محاسبه ظرفیت و افزونگی آرایه‌های RAID در PowerStore",
       href: "#",
-      guide: "#"
     },
     {
       title: "Unity Configurator",
       desc: "طراحی و انتخاب پیکربندی مناسب برای خانواده Unity XT",
       href: "#",
-      guide: "#"
     },
   ];
 
@@ -41,24 +37,15 @@ export default function Tools() {
               <h2 className="text-xl font-bold">{t.title}</h2>
               <p className="mt-2 text-gray-600">{t.desc}</p>
 
-              <div className="mt-5 flex flex-wrap gap-3">
+              <div className="mt-5">
                 <a
                   href={t.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded-full px-4 py-2.5 font-semibold bg-amber-400 text-black hover:bg-amber-300 transition"
+                  className="inline-block rounded-full px-4 py-2.5 font-semibold bg-amber-400 text-black hover:bg-amber-300 transition"
                 >
                   باز کردن ابزار
                 </a>
-
-                {t.guide && (
-                  <a
-                    href={t.guide}
-                    className="rounded-full px-4 py-2.5 font-semibold border border-amber-400 text-amber-600 hover:bg-amber-50 transition"
-                  >
-                    راهنما
-                  </a>
-                )}
               </div>
             </article>
           ))}

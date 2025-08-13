@@ -2,8 +2,6 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import ContactHero from "../components/ContactHero";
-
 const LOGO_COLORS = ["#14b8a6", "#f4c21f"]; // teal & yellow
 
 function BrandCard({ name, slug }) {

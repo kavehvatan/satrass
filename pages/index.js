@@ -1,3 +1,26 @@
+// pages/index.js
+import { useState } from "react";
+
+const LOGO_COLORS = ["var(--logo-teal)", "var(--logo-yellow)"];
+
+function ServiceCard({ title, desc }) {
+  const [border, setBorder] = useState("#e5e7eb"); // gray-200
+
+  return (
+    <div
+      onMouseEnter={() =>
+        setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
+      }
+      onMouseLeave={() => setBorder("#e5e7eb")}
+      className="p-5 bg-white border rounded-lg transition hover:shadow-md hover:-translate-y-[1px]"
+      style={{ borderColor: border }}
+    >
+      <h3 className="font-bold mb-2">{title}</h3>
+      <p className="text-gray-600 text-sm leading-6">{desc}</p>
+    </div>
+  );
+}
+
 export default function Home() {
   return (
     <main className="min-h-screen">
@@ -26,7 +49,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* آواتار — کوچک‌تر و بدون حاشیه/سایه */}
           <div className="flex justify-center">
             <img
               src="/satrass-hero.png"
@@ -49,10 +71,7 @@ export default function Home() {
             { title: "مشاوره فنی", desc: "طراحی راهکار متناسب با بارکاری و بودجه" },
             { title: "نگهداشت دوره‌ای", desc: "PM، به‌روزرسانی، بهینه‌سازی و ظرفیت‌سنجی" },
           ].map((s, i) => (
-            <div key={i} className="p-5 bg-white border rounded-lg hover:shadow-md transition">
-              <h3 className="font-bold mb-2">{s.title}</h3>
-              <p className="text-gray-600 text-sm leading-6">{s.desc}</p>
-            </div>
+            <ServiceCard key={i} title={s.title} desc={s.desc} />
           ))}
         </div>
       </section>
@@ -77,6 +96,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* FOOTER */}
       <footer className="bg-black text-white">
         <div className="max-w-6xl mx-auto px-4 py-6 text-center">
           <p>© {new Date().getFullYear()} ساتراس، همه حقوق محفوظ است</p>

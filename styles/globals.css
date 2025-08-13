@@ -8,3 +8,9 @@ html, body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+:root{
+  /* رنگ‌های تقریبی لوگو؛ اگر کد دقیق‌تون چیز دیگه‌ایه جایگزین کن */
+  --logo-teal: #14b8a6;   /* teal-500 */
+  --logo-yellow: #f4c21f; /* زرد لوگو */
+}

@@ -2,6 +2,14 @@
 import Link from "next/link";
 import { useState } from "react";
 
+const SERVICES = [
+  { title: "نصب و راه‌اندازی" },
+  { title: "پایش" },
+  { title: "آموزش" },
+  { title: "مشاوره و طراحی" },
+  { title: "راهبری" },
+];
+
 const LOGO_COLORS = ["#14b8a6", "#f4c21f"]; // teal & yellow
 
 function BrandCard({ name, slug, href }) {
@@ -9,7 +17,9 @@ function BrandCard({ name, slug, href }) {
   return (
     <Link
       href={href}
-      onMouseEnter={() => setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])}
+      onMouseEnter={() =>
+        setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
+      }
       onMouseLeave={() => setBorder("#e5e7eb")}
       className="flex flex-col items-center justify-center gap-3 p-5 bg-white border rounded-lg
                  hover:shadow-md transition text-center w-full max-w-[520px] mx-auto"
@@ -26,18 +36,33 @@ function BrandCard({ name, slug, href }) {
   );
 }
 
+function ServiceCard({ title }) {
+  const [border, setBorder] = useState("#e5e7eb");
+  return (
+    <div
+      onMouseEnter={() =>
+        setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
+      }
+      onMouseLeave={() => setBorder("#e5e7eb")}
+      className="w-full max-w-[520px] mx-auto text-center p-4 rounded-lg border bg-white hover:shadow-md transition"
+      style={{ borderColor: border }}
+    >
+      <span className="font-semibold text-gray-900">{title}</span>
+    </div>
+  );
+}
+
 export default function Home() {
   const EQUIPMENT = [
-    { name: "Dell EMC", slug: "dell",   href: "/products/dell" },
-    { name: "Cisco",    slug: "cisco",  href: "/products/cisco" },
-    { name: "HPE",      slug: "hpe",    href: "/products/hpe" },
-    { name: "Lenovo",   slug: "lenovo", href: "/products/lenovo" },
+    { name: "Dell EMC", slug: "dell", href: "/products/dell" },
+    { name: "Cisco", slug: "cisco", href: "/products/cisco" },
+    { name: "HPE", slug: "hpe", href: "/products/hpe" },
+    { name: "Lenovo", slug: "lenovo", href: "/products/lenovo" },
   ];
 
   const SOLUTIONS = [
     { name: "Commvault", slug: "commvault", href: "/solutions/commvault" },
     { name: "NetBackup", slug: "netbackup", href: "/solutions/netbackup" },
-    // اگر بعداً Veeam یا Metallic خواستی، راحت اضافه کنیم
   ];
 
   return (
@@ -51,18 +76,35 @@ export default function Home() {
             </h1>
             <p className="mt-4 text-gray-300">از مشاوره تا پشتیبانی، کنار شماییم.</p>
             <div className="mt-6 flex gap-3">
-              <a href="/contact" className="rounded-full px-5 py-2.5 font-bold bg-amber-400 text-black hover:bg-amber-300 transition">مشاوره رایگان</a>
-              <a href="/tools" className="rounded-full px-5 py-2.5 font-semibold border border-amber-400 text-amber-400 hover:bg-amber-400/10 transition">مشاهده ابزارها</a>
+              <a
+                href="/contact"
+                className="rounded-full px-5 py-2.5 font-bold bg-amber-400 text-black hover:bg-amber-300 transition"
+              >
+                مشاوره رایگان
+              </a>
+              <a
+                href="/tools"
+                className="rounded-full px-5 py-2.5 font-semibold border border-amber-400 text-amber-400 hover:bg-amber-400/10 transition"
+              >
+                مشاهده ابزارها
+              </a>
             </div>
           </div>
           <div className="flex justify-center">
-            <img src="/satrass-hero.png" alt="آواتار ساتراس" className="w-[280px] md:w-[340px] lg:w-[400px] h-auto object-contain" />
+            <img
+              src="/satrass-hero.png"
+              alt="آواتار ساتراس"
+              className="w-[280px] md:w-[340px] lg:w-[400px] h-auto object-contain"
+            />
           </div>
         </div>
       </section>
 
       {/* EQUIPMENT */}
-      <section id="products" className="max-w-6xl mx-auto px-4 py-10 border-t border-black/10">
+      <section
+        id="products"
+        className="max-w-6xl mx-auto px-4 py-10 border-t border-black/10"
+      >
         <h2 className="text-2xl font-bold mb-6">تجهیزات</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
           {EQUIPMENT.map((b) => (
@@ -71,12 +113,22 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SOLUTIONS */}
+      {/* SOLUTIONS + SERVICES */}
       <section id="solutions" className="max-w-6xl mx-auto px-4 pb-10">
         <h2 className="text-2xl font-bold mb-6">راهکارها</h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+
+        {/* وندورها */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center mb-10">
           {SOLUTIONS.map((b) => (
             <BrandCard key={b.slug} name={b.name} slug={b.slug} href={b.href} />
+          ))}
+        </div>
+
+        {/* خدمات زیرِ راهکارها */}
+        <h3 className="text-xl font-bold mb-4">خدمات</h3>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 justify-items-center">
+          {SERVICES.map((s, i) => (
+            <ServiceCard key={i} title={s.title} />
           ))}
         </div>
       </section>

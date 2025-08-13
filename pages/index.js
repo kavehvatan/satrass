@@ -2,27 +2,24 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import ContactHero from "../components/ContactHero";
-
 const LOGO_COLORS = ["#14b8a6", "#f4c21f"]; // teal & yellow
 
-function BrandCard({ name, slug }) {
-  const [border, setBorder] = useState("#e5e7eb");
-
+function BrandCard({ name, slug, href }) {
+  const [border, setBorder] = useState("#e5e7eb"); // gray-200
   return (
     <Link
-      href={`/products/${slug}`}
-      onMouseEnter={() => setBorder(LOGO_COLORS[Math.floor(Math.random()*LOGO_COLORS.length)])}
+      href={href}
+      onMouseEnter={() => setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])}
       onMouseLeave={() => setBorder("#e5e7eb")}
-      className="flex items-center justify-center gap-4 p-5 bg-white border rounded-lg
+      className="flex flex-col items-center justify-center gap-3 p-5 bg-white border rounded-lg
                  hover:shadow-md transition text-center w-full max-w-[520px] mx-auto"
       style={{ borderColor: border }}
     >
       <img
         src={`/avatars/${slug}.png`}
         alt={name}
-        className="w-10 h-10 object-contain"
-        onError={(e)=>e.currentTarget.src="/avatars/default.png"}
+        className="w-12 h-12 object-contain"
+        onError={(e) => (e.currentTarget.src = "/avatars/default.png")}
       />
       <div className="font-bold text-gray-900">{name}</div>
     </Link>
@@ -30,12 +27,17 @@ function BrandCard({ name, slug }) {
 }
 
 export default function Home() {
-  const brands = [
-    { name: "Dell EMC", slug: "dell" },
-    { name: "Cisco", slug: "cisco" },
-    { name: "Commvault", slug: "commvault" },
-    { name: "NetBackup", slug: "netbackup" },
-    // { name: "HPE", slug: "hpe" }, // اگر لوگوش رو گذاشتی اضافه کن
+  const EQUIPMENT = [
+    { name: "Dell EMC", slug: "dell",   href: "/products/dell" },
+    { name: "Cisco",    slug: "cisco",  href: "/products/cisco" },
+    { name: "HPE",      slug: "hpe",    href: "/products/hpe" },
+    { name: "Lenovo",   slug: "lenovo", href: "/products/lenovo" },
+  ];
+
+  const SOLUTIONS = [
+    { name: "Commvault", slug: "commvault", href: "/solutions/commvault" },
+    { name: "NetBackup", slug: "netbackup", href: "/solutions/netbackup" },
+    // اگر بعداً Veeam یا Metallic خواستی، راحت اضافه کنیم
   ];
 
   return (
@@ -59,33 +61,28 @@ export default function Home() {
         </div>
       </section>
 
-      {/* PRODUCTS */}
-   <section id="products" className="max-w-6xl mx-auto px-4 py-10 border-t border-black/10">
-  <h2 className="text-2xl font-bold mb-6">محصولات</h2>
-
-  {/* فقط این کلاس رو اضافه کن */}
-  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-    {brands.map((b) => (<BrandCard key={b.slug} {...b} />))}
-  </div>
-</section>
-
-      {/* CONTACT */}
-      <section id="contact" className="max-w-6xl mx-auto px-4 py-10">
-        <h2 className="text-2xl font-bold mb-6">تماس با ما</h2>
-        <div className="grid md:grid-cols-2 gap-6">
-          <form className="space-y-4">
-            <input type="text" placeholder="نام" className="w-full p-2 border rounded" />
-            <input type="email" placeholder="ایمیل" className="w-full p-2 border rounded" />
-            <textarea placeholder="پیام شما" className="w-full p-2 border rounded h-28"></textarea>
-            <button className="rounded px-4 py-2 font-semibold bg-amber-400 text-black hover:bg-amber-300 transition">ارسال پیام</button>
-          </form>
-          <div className="text-gray-700">
-            <p>آدرس: تهران، میدان فاطمی، خیابان گلها، پلاک ۲۵</p>
-            <p>تلفن: ۰۲۱-۸۸۰۶۶۲۲۱</p>
-            <p>ایمیل: info@satrass.com</p>
-          </div>
+      {/* EQUIPMENT */}
+      <section id="products" className="max-w-6xl mx-auto px-4 py-10 border-t border-black/10">
+        <h2 className="text-2xl font-bold mb-6">تجهیزات</h2>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+          {EQUIPMENT.map((b) => (
+            <BrandCard key={b.slug} name={b.name} slug={b.slug} href={b.href} />
+          ))}
         </div>
       </section>
+
+      {/* SOLUTIONS */}
+      <section id="solutions" className="max-w-6xl mx-auto px-4 pb-10">
+        <h2 className="text-2xl font-bold mb-6">راهکارها</h2>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+          {SOLUTIONS.map((b) => (
+            <BrandCard key={b.slug} name={b.name} slug={b.slug} href={b.href} />
+          ))}
+        </div>
+      </section>
+
+      {/* CONTACT (اگر صفحهٔ جدا داری، می‌تونی حذفش کنی) */}
+      {/* <ContactHero /> */}
 
       <footer className="bg-black text-white">
         <div className="max-w-6xl mx-auto px-4 py-6 text-center">

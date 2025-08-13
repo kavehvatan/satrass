@@ -10,7 +10,6 @@ export default function Brands() {
   return (
     <div className="min-h-screen font-sans">
         <div className="container flex justify-between items-center">
-          <a href="/" className="text-sm hover:text-brand.teal">بازگشت به خانه</a>
         </div>
       <main className="container p-8">
         <h1 className="text-2xl font-bold mb-6">برندها</h1>

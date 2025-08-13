@@ -10,7 +10,10 @@ const SERVICES = [
   { title: "راهبری" },
 ];
 
-const LOGO_COLORS = ["#14b8a6", "#f4c21f"]; // teal & yellow
+const LOGO_COLORS = ["#14b8a6", "#f4c21f"]; // رنگ‌های لوگوی ساتراس (فیروزه‌ای و زرد)
+const CARD_CLASS =
+  "flex flex-col items-center justify-center gap-3 p-5 bg-white border rounded-lg " +
+  "hover:shadow-md transition text-center w-full max-w-[520px] mx-auto h-[120px]";
 
 function BrandCard({ name, slug, href }) {
   const [border, setBorder] = useState("#e5e7eb"); // gray-200
@@ -21,8 +24,7 @@ function BrandCard({ name, slug, href }) {
         setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
       }
       onMouseLeave={() => setBorder("#e5e7eb")}
-      className="flex flex-col items-center justify-center gap-3 p-5 bg-white border rounded-lg
-                 hover:shadow-md transition text-center w-full max-w-[520px] mx-auto"
+      className={CARD_CLASS}
       style={{ borderColor: border }}
     >
       <img
@@ -44,7 +46,7 @@ function ServiceCard({ title }) {
         setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
       }
       onMouseLeave={() => setBorder("#e5e7eb")}
-      className="w-full max-w-[520px] mx-auto text-center p-4 rounded-lg border bg-white hover:shadow-md transition"
+      className={CARD_CLASS}
       style={{ borderColor: border }}
     >
       <span className="font-semibold text-gray-900">{title}</span>
@@ -66,8 +68,8 @@ export default function Home() {
   ];
 
   return (
-    <main className="min-h-screen">
-      {/* HERO */}
+    <main className="min-h-screen font-sans">
+      {/* Hero */}
       <section className="bg-[linear-gradient(135deg,#000_0%,#0a0a0a_60%,#111_100%)] text-white">
         <div className="max-w-6xl mx-auto px-4 py-12 md:py-16 grid md:grid-cols-2 items-center gap-10">
           <div>
@@ -90,6 +92,8 @@ export default function Home() {
               </a>
             </div>
           </div>
+
+          {/* آواتار */}
           <div className="flex justify-center">
             <img
               src="/satrass-hero.png"
@@ -100,11 +104,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* EQUIPMENT */}
-      <section
-        id="products"
-        className="max-w-6xl mx-auto px-4 py-10 border-t border-black/10"
-      >
+      {/* تجهیزات */}
+      <section id="products" className="max-w-6xl mx-auto px-4 py-10 border-t border-black/10">
         <h2 className="text-2xl font-bold mb-6">تجهیزات</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
           {EQUIPMENT.map((b) => (
@@ -113,7 +114,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SOLUTIONS + SERVICES */}
+      {/* راهکارها + خدمات */}
       <section id="solutions" className="max-w-6xl mx-auto px-4 pb-10">
         <h2 className="text-2xl font-bold mb-6">راهکارها</h2>
 
@@ -124,17 +125,14 @@ export default function Home() {
           ))}
         </div>
 
-        {/* خدمات زیرِ راهکارها */}
+        {/* خدمات زیر راهکارها */}
         <h3 className="text-xl font-bold mb-4">خدمات</h3>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 justify-items-center">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
           {SERVICES.map((s, i) => (
             <ServiceCard key={i} title={s.title} />
           ))}
         </div>
       </section>
-
-      {/* CONTACT (اگر صفحهٔ جدا داری، می‌تونی حذفش کنی) */}
-      {/* <ContactHero /> */}
 
       <footer className="bg-black text-white">
         <div className="max-w-6xl mx-auto px-4 py-6 text-center">

@@ -5,19 +5,21 @@ import { useState } from "react";
 const LOGO_COLORS = ["#14b8a6", "#f4c21f"]; // teal & yellow
 
 function BrandCard({ name, slug }) {
-  const [border, setBorder] = useState("#e5e7eb"); // gray-200
+  const [border, setBorder] = useState("#e5e7eb");
+
   return (
     <Link
       href={`/products/${slug}`}
       onMouseEnter={() => setBorder(LOGO_COLORS[Math.floor(Math.random()*LOGO_COLORS.length)])}
       onMouseLeave={() => setBorder("#e5e7eb")}
-      className="flex items-center gap-4 p-5 bg-white border rounded-lg hover:shadow-md transition"
+      className="flex items-center justify-center gap-4 p-5 bg-white border rounded-lg
+                 hover:shadow-md transition text-center w-full max-w-[520px] mx-auto"
       style={{ borderColor: border }}
     >
       <img
         src={`/avatars/${slug}.png`}
         alt={name}
-        className="w-12 h-12 object-contain"
+        className="w-10 h-10 object-contain"
         onError={(e)=>e.currentTarget.src="/avatars/default.png"}
       />
       <div className="font-bold text-gray-900">{name}</div>
@@ -56,12 +58,14 @@ export default function Home() {
       </section>
 
       {/* PRODUCTS */}
-      <section id="products" className="max-w-6xl mx-auto px-4 py-10 border-t border-black/10">
-        <h2 className="text-2xl font-bold mb-6">محصولات</h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {brands.map((b) => (<BrandCard key={b.slug} {...b} />))}
-        </div>
-      </section>
+   <section id="products" className="max-w-6xl mx-auto px-4 py-10 border-t border-black/10">
+  <h2 className="text-2xl font-bold mb-6">محصولات</h2>
+
+  {/* فقط این کلاس رو اضافه کن */}
+  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+    {brands.map((b) => (<BrandCard key={b.slug} {...b} />))}
+  </div>
+</section>
 
       {/* CONTACT */}
       <section id="contact" className="max-w-6xl mx-auto px-4 py-10">

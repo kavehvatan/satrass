@@ -58,20 +58,38 @@ export default function ContactHero() {
         <div className="flex justify-center md:justify-start">
           <div className="text-gray-200">
             {/* بدنه مانیتور */}
-            <div className="relative w-[320px] md:w-[440px] h-[220px] md:h-[260px] rounded-xl border border-white/10
-                            bg-gradient-to-b from-neutral-900 to-neutral-950
-                            shadow-[inset_0_0_24px_rgba(255,255,255,0.06)]">
-              <div className="absolute inset-0 p-6 md:p-8">
-                <h3 className="text-xl md:text-2xl font-extrabold text-white mb-3">Satrass — تماس با ما</h3>
-                <ul className="space-y-2 text-sm md:text-base leading-7">
-                  <li>📍 آدرس: تهران، میدان فاطمی، خیابان گل‌ها، پلاک ۲۵</li>
-                  <li>
-                    ☎️ تلفن: <a href="tel:+982188066221" className="text-amber-400 hover:underline">۰۲۱-۸۸۰۶۶۲۲۱</a>
-                  </li>
-                  <li>
-                    ✉️ ایمیل: <a href="mailto:info@satrass.com" className="text-amber-400 hover:underline">info@satrass.com</a>
-                  </li>
-                </ul>
+          <ul className="space-y-2 text-sm md:text-base leading-7">
+  <li>
+    📍 آدرس:
+    <span className="mr-1">
+      ونک، ملاصدرا، شیراز جنوبی، خیابان وحدت، پلاک ۲، طبقه ۴
+    </span>
+    <a
+      href="https://www.google.com/maps/search/?api=1&query=%D9%88%D9%86%DA%A9%D8%8C%20%D9%85%D9%84%D8%A7%D8%B5%D8%AF%D8%B1%D8%A7%D8%8C%20%D8%B4%DB%8C%D8%B1%D8%A7%D8%B2%20%D8%AC%D9%86%D9%88%D8%A8%DB%8C%D8%8C%20%D8%AE%DB%8C%D8%A7%D8%A8%D8%A7%D9%86%20%D9%88%D8%AD%D8%AF%D8%AA%D8%8C%20%D9%BE%D9%84%D8%A7%DA%A9%202%D8%8C%20%D8%B7%D8%A8%D9%82%D9%87%204"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-amber-400 hover:underline"
+      title="مشاهده روی نقشه"
+    >
+      (نقشه)
+    </a>
+ <li>
+  ☎️ تلفن:{" "}
+  <a
+    href="tel:+982188066022"
+    className="text-amber-400 hover:underline"
+    dir="ltr"
+  >
+    +98(۲۱۸۸۰۶۶۰۲۲)
+  </a>
+</li>
+  <li>
+    ✉️ ایمیل:{" "}
+    <a href="mailto:info@satrass.com" className="text-amber-400 hover:underline">
+      info@satrass.com
+    </a>
+  </li>
+</ul>
               </div>
             </div>
             {/* پایه مانیتور */}

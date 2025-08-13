@@ -1,27 +1,39 @@
 // pages/index.js
+import Link from "next/link";
 import { useState } from "react";
 
-const LOGO_COLORS = ["var(--logo-teal)", "var(--logo-yellow)"];
+const LOGO_COLORS = ["#14b8a6", "#f4c21f"]; // teal & yellow
 
-function ServiceCard({ title, desc }) {
+function BrandCard({ name, slug }) {
   const [border, setBorder] = useState("#e5e7eb"); // gray-200
-
   return (
-    <div
-      onMouseEnter={() =>
-        setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
-      }
+    <Link
+      href={`/products/${slug}`}
+      onMouseEnter={() => setBorder(LOGO_COLORS[Math.floor(Math.random()*LOGO_COLORS.length)])}
       onMouseLeave={() => setBorder("#e5e7eb")}
-      className="p-5 bg-white border rounded-lg transition hover:shadow-md hover:-translate-y-[1px]"
+      className="flex items-center gap-4 p-5 bg-white border rounded-lg hover:shadow-md transition"
       style={{ borderColor: border }}
     >
-      <h3 className="font-bold mb-2">{title}</h3>
-      <p className="text-gray-600 text-sm leading-6">{desc}</p>
-    </div>
+      <img
+        src={`/avatars/${slug}.png`}
+        alt={name}
+        className="w-12 h-12 object-contain"
+        onError={(e)=>e.currentTarget.src="/avatars/default.png"}
+      />
+      <div className="font-bold text-gray-900">{name}</div>
+    </Link>
   );
 }
 
 export default function Home() {
+  const brands = [
+    { name: "Dell EMC", slug: "dell" },
+    { name: "Cisco", slug: "cisco" },
+    { name: "Commvault", slug: "commvault" },
+    { name: "NetBackup", slug: "netbackup" },
+    // { name: "HPE", slug: "hpe" }, // اگر لوگوش رو گذاشتی اضافه کن
+  ];
+
   return (
     <main className="min-h-screen">
       {/* HERO */}
@@ -32,47 +44,22 @@ export default function Home() {
               زیرساخت هوشمند، با دقت مهندسی
             </h1>
             <p className="mt-4 text-gray-300">از مشاوره تا پشتیبانی، کنار شماییم.</p>
-
             <div className="mt-6 flex gap-3">
-              <a
-                href="/contact"
-                className="rounded-full px-5 py-2.5 font-bold bg-amber-400 text-black hover:bg-amber-300 transition"
-              >
-                مشاوره رایگان
-              </a>
-              <a
-                href="/tools"
-                className="rounded-full px-5 py-2.5 font-semibold border border-amber-400 text-amber-400 hover:bg-amber-400/10 transition"
-              >
-                مشاهده ابزارها
-              </a>
+              <a href="/contact" className="rounded-full px-5 py-2.5 font-bold bg-amber-400 text-black hover:bg-amber-300 transition">مشاوره رایگان</a>
+              <a href="/tools" className="rounded-full px-5 py-2.5 font-semibold border border-amber-400 text-amber-400 hover:bg-amber-400/10 transition">مشاهده ابزارها</a>
             </div>
           </div>
-
           <div className="flex justify-center">
-            <img
-              src="/satrass-hero.png"
-              alt="آواتار ساتراس"
-              className="w-[280px] md:w-[340px] lg:w-[400px] h-auto object-contain"
-            />
+            <img src="/satrass-hero.png" alt="آواتار ساتراس" className="w-[280px] md:w-[340px] lg:w-[400px] h-auto object-contain" />
           </div>
         </div>
       </section>
 
-      {/* SERVICES */}
-      <section id="services" className="max-w-6xl mx-auto px-4 py-10 border-t border-black/10">
-        <h2 className="text-2xl font-bold mb-6">خدمات ما</h2>
-        <div className="grid md:grid-cols-3 gap-6">
-          {[
-            { title: "نصب و راه‌اندازی", desc: "استقرار سریع و بهینه‌ی تجهیزات با استانداردهای بین‌المللی" },
-            { title: "تضمین کیفیت و پشتیبانی", desc: "پایش مداوم و SLA برای حفظ کارایی زیرساخت" },
-            { title: "آموزش نیروها", desc: "کوچ به معماری‌های جدید با انتقال دانش واقعی" },
-            { title: "تأمین تجهیزات", desc: "از برندهای معتبر با گارانتی معتبر" },
-            { title: "مشاوره فنی", desc: "طراحی راهکار متناسب با بارکاری و بودجه" },
-            { title: "نگهداشت دوره‌ای", desc: "PM، به‌روزرسانی، بهینه‌سازی و ظرفیت‌سنجی" },
-          ].map((s, i) => (
-            <ServiceCard key={i} title={s.title} desc={s.desc} />
-          ))}
+      {/* PRODUCTS */}
+      <section id="products" className="max-w-6xl mx-auto px-4 py-10 border-t border-black/10">
+        <h2 className="text-2xl font-bold mb-6">محصولات</h2>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {brands.map((b) => (<BrandCard key={b.slug} {...b} />))}
         </div>
       </section>
 
@@ -84,9 +71,7 @@ export default function Home() {
             <input type="text" placeholder="نام" className="w-full p-2 border rounded" />
             <input type="email" placeholder="ایمیل" className="w-full p-2 border rounded" />
             <textarea placeholder="پیام شما" className="w-full p-2 border rounded h-28"></textarea>
-            <button className="rounded px-4 py-2 font-semibold bg-amber-400 text-black hover:bg-amber-300 transition">
-              ارسال پیام
-            </button>
+            <button className="rounded px-4 py-2 font-semibold bg-amber-400 text-black hover:bg-amber-300 transition">ارسال پیام</button>
           </form>
           <div className="text-gray-700">
             <p>آدرس: تهران، میدان فاطمی، خیابان گلها، پلاک ۲۵</p>
@@ -96,7 +81,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FOOTER */}
       <footer className="bg-black text-white">
         <div className="max-w-6xl mx-auto px-4 py-6 text-center">
           <p>© {new Date().getFullYear()} ساتراس، همه حقوق محفوظ است</p>

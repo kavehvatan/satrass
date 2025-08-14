@@ -68,7 +68,7 @@ const ContactHero = () => {
                   <div>
                     <div className="font-semibold">تلفن</div>
                     <a href="tel:+982188066022" className="text-gray-300 hover:text-white transition">
-                      +98 (۲۱) ۸۸۰۶۶۰۲۲
+                      +982188066022
                     </a>
                   </div>
                 </li>

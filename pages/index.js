@@ -1,12 +1,12 @@
 // pages/index.js
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const TEAL = "#14b8a6";
 const YELLOW = "#f4c21f";
 const LOGO_COLORS = [TEAL, YELLOW];
 
-// تجهیزات
+// ——— تجهیزات
 const EQUIPMENT = [
   { name: "Dell EMC", slug: "dell", href: "/products/dell" },
   { name: "Cisco", slug: "cisco", href: "/products/cisco" },
@@ -18,7 +18,7 @@ const EQUIPMENT = [
   { name: "Fujitsu", slug: "fujitsu", href: "/products/fujitsu" },
 ];
 
-// راهکارها (مودال با متن طولانی‌تر)
+// ——— راهکارها (متن بلندتر؛ مودال خنثی)
 const SOLUTIONS = [
   {
     name: "Commvault",
@@ -36,7 +36,7 @@ const SOLUTIONS = [
   },
 ];
 
-// خدمات (۲ پاراگراف)
+// ——— خدمات (مودال خنثی)
 const SERVICES = [
   {
     title: "نصب و راه‌اندازی",
@@ -75,62 +75,48 @@ const SERVICES = [
   },
 ];
 
-const CARD_CLASS =
-  "flex flex-col items-center justify-center gap-3 p-5 bg-white border rounded-lg hover:shadow-md " +
-  "transition text-center w-full max-w-[520px] mx-auto h-[120px]";
-
-// ——— helper: انتخاب رنگ با شفافیت
-function tint(color, alpha) {
-  if (color === TEAL) return `rgba(20,184,166,${alpha})`;
-  return `rgba(244,194,31,${alpha})`;
+// ——— قفل اسکرول بدنه وقتی مودال بازه
+function useBodyScrollLock(locked) {
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    if (locked) document.body.style.overflow = "hidden";
+    return () => (document.body.style.overflow = prev);
+  }, [locked]);
 }
 
-// ——— دکمه‌های هیرو: جابجایی نوبتی + کلیک (persist با localStorage)
+// ——— دکمه‌های هیرو (دوحالته)
 function useAlternatingBrandPair() {
   const [primary, setPrimary] = useState(YELLOW);   // Filled
   const [secondary, setSecondary] = useState(TEAL); // Outlined
-
   useEffect(() => {
     try {
-      const lastIsTealPrimary = localStorage.getItem("satrass_btn_pair") === "1";
-      const nextIsTealPrimary = !lastIsTealPrimary;
-      localStorage.setItem("satrass_btn_pair", nextIsTealPrimary ? "1" : "0");
-      if (nextIsTealPrimary) {
-        setPrimary(TEAL);
-        setSecondary(YELLOW);
-      } else {
-        setPrimary(YELLOW);
-        setSecondary(TEAL);
-      }
+      const lastIsTeal = localStorage.getItem("satrass_btn_pair") === "1";
+      const nextIsTeal = !lastIsTeal;
+      localStorage.setItem("satrass_btn_pair", nextIsTeal ? "1" : "0");
+      if (nextIsTeal) { setPrimary(TEAL); setSecondary(YELLOW); }
+      else { setPrimary(YELLOW); setSecondary(TEAL); }
     } catch {}
   }, []);
-
   const swap = () => {
-    setPrimary((prev) => {
-      const newPrimary = prev === TEAL ? YELLOW : TEAL;
-      const newSecondary = newPrimary === TEAL ? YELLOW : TEAL;
-      setSecondary(newSecondary);
-      try {
-        localStorage.setItem("satrass_btn_pair", newPrimary === TEAL ? "1" : "0");
-      } catch {}
-      return newPrimary;
+    setPrimary((p) => {
+      const np = p === TEAL ? YELLOW : TEAL;
+      setSecondary(np === TEAL ? YELLOW : TEAL);
+      try { localStorage.setItem("satrass_btn_pair", np === TEAL ? "1" : "0"); } catch {}
+      return np;
     });
   };
-
   return { primary, secondary, swap };
 }
 
-// ——— کارت برندها
+// ——— کارت برند
 function BrandCard({ name, slug, href }) {
   const [border, setBorder] = useState("#e5e7eb");
   return (
     <Link
       href={href}
-      onMouseEnter={() =>
-        setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
-      }
+      onMouseEnter={() => setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])}
       onMouseLeave={() => setBorder("#e5e7eb")}
-      className={CARD_CLASS}
+      className="flex flex-col items-center justify-center gap-3 p-5 bg-white border rounded-lg hover:shadow-md transition text-center w-full max-w-[520px] mx-auto h-[120px]"
       style={{ borderColor: border }}
     >
       <img
@@ -144,21 +130,9 @@ function BrandCard({ name, slug, href }) {
   );
 }
 
-// ——— قفل اسکرول بدنه وقتی مودال بازه
-function useBodyScrollLock(locked) {
-  useEffect(() => {
-    const prev = document.body.style.overflow;
-    if (locked) document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, [locked]);
-}
-
-// ——— مودال شیشه‌ای (یک‌رنگ، یکنواخت، وسط صفحه)
-function GlassModal({ open, onClose, title, paragraphs, accent }) {
+// ——— مودال «شیشه‌ای خنثی» (برای خدمات و راهکارها)
+function GlassModalNeutral({ open, onClose, title, paragraphs }) {
   const [closing, setClosing] = useState(false);
-
   useEffect(() => {
     if (!open) return;
     const onKey = (e) => e.key === "Escape" && handleClose();
@@ -166,142 +140,86 @@ function GlassModal({ open, onClose, title, paragraphs, accent }) {
     return () => window.removeEventListener("keydown", onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
-
   const handleClose = () => {
     setClosing(true);
-    setTimeout(() => {
-      setClosing(false);
-      onClose?.();
-    }, 220);
+    setTimeout(() => { setClosing(false); onClose?.(); }, 220);
   };
-
   useBodyScrollLock(open);
   if (!open) return null;
-
   return (
-    <div
-      className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity
-                  ${closing ? "opacity-0" : "opacity-100"} duration-200`}
-    >
-      {/* بک‌درُپ */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={handleClose} />
-
+    <div className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity ${closing ? "opacity-0" : "opacity-100"} duration-200`}>
+      {/* بک‌درُپ تیره برای کنتراست متن */}
+      <div className="absolute inset-0 bg-black/55 backdrop-blur-sm" onClick={handleClose} />
       {/* پنجره */}
-      <div
-        className={`relative z-10 w-[min(92vw,760px)] mx-auto rounded-2xl overflow-hidden
-                    transform transition-all duration-200
-                    ${closing ? "opacity-0 scale-95" : "opacity-100 scale-100"}`}
-        role="dialog"
-        aria-modal="true"
+      <article
+        role="dialog" aria-modal="true"
+        className={`relative z-10 w-[min(92vw,760px)] mx-auto rounded-2xl overflow-hidden transform transition-all duration-200 ${closing ? "opacity-0 scale-95" : "opacity-100 scale-100"}`}
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* ✅ تینت یکنواخت با یک رنگ برند (بدون گرادیان) */}
-        <div className="absolute inset-0" style={{ backgroundColor: tint(accent, 0.22) }} />
-
-        {/* شیشهٔ مات + متن خوانا */}
-        <div className="relative rounded-2xl border border-white/15 bg-white/10 backdrop-blur-xl shadow-[0_20px_60px_-15px_rgba(0,0,0,.5)]">
-          <div className="p-6 md:p-8">
+        {/* شیشهٔ مات و بی‌رنگ */}
+        <div className="relative rounded-2xl border border-black/10 bg-white/85 backdrop-blur-xl shadow-[0_20px_60px_-15px_rgba(0,0,0,.5)]">
+          <div className="p-6 md:p-8 text-gray-900">
             <div className="flex items-start justify-between gap-6">
-              <h4 className="text-xl md:text-2xl font-extrabold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.45)]">
-                {title}
-              </h4>
-              <button
-                onClick={handleClose}
-                className="text-white/85 hover:text-white transition text-2xl leading-none"
-                aria-label="بستن"
-              >
-                ×
-              </button>
+              <h4 className="text-xl md:text-2xl font-extrabold">{title}</h4>
+              <button onClick={handleClose} aria-label="بستن" className="text-gray-700 hover:text-black transition text-2xl leading-none">×</button>
             </div>
-
-            {paragraphs.map((tx, i) => {
-              const cls =
-                (i === 0
-                  ? "text-white/95 mt-4"
-                  : "text-white/90 mt-3") +
-                " leading-8 drop-shadow-[0_1px_1px_rgba(0,0,0,0.35)]";
-              return (
-                <p key={i} className={cls}>
-                  {tx}
-                </p>
-              );
-            })}
-
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                onClick={handleClose}
-                className="px-4 py-2 rounded-lg bg-white/15 hover:bg-white/25 text-white transition"
-              >
+            {paragraphs.map((tx, i) => (
+              <p key={i} className={`leading-8 ${i === 0 ? "mt-4" : "mt-3"} text-gray-800`}>
+                {tx}
+              </p>
+            ))}
+            <div className="mt-6 flex justify-end">
+              <button onClick={handleClose} className="px-4 py-2 rounded-lg border border-black/10 hover:bg-black/[0.03] transition">
                 بستن
               </button>
             </div>
           </div>
         </div>
-      </div>
+      </article>
     </div>
   );
 }
 
-// ——— کارت خدمات + مودال
+// ——— کارت خدمات
 function ServiceCard({ title, desc1, desc2 }) {
   const [border, setBorder] = useState("#e5e7eb");
   const [open, setOpen] = useState(false);
-  const [accent, setAccent] = useState(TEAL);
-
   return (
     <>
       <div
-        onMouseEnter={() =>
-          setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
-        }
+        onMouseEnter={() => setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])}
         onMouseLeave={() => setBorder("#e5e7eb")}
-        onClick={() => {
-          setAccent(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)]);
-          setOpen(true);
-        }}
-        className={CARD_CLASS + " cursor-pointer select-none"}
+        onClick={() => setOpen(true)}
+        className="flex flex-col items-center justify-center gap-3 p-5 bg-white border rounded-lg hover:shadow-md transition text-center w-full max-w-[520px] mx-auto h-[120px] cursor-pointer select-none"
         style={{ borderColor: border }}
-        role="button"
-        tabIndex={0}
-        aria-haspopup="dialog"
-        aria-expanded={open}
+        role="button" tabIndex={0} aria-haspopup="dialog" aria-expanded={open}
       >
         <span className="font-semibold text-gray-900">{title}</span>
       </div>
 
-      <GlassModal
+      <GlassModalNeutral
         open={open}
         onClose={() => setOpen(false)}
         title={title}
-        accent={accent}
         paragraphs={[desc1, desc2]}
       />
     </>
   );
 }
 
-// ——— کارت راهکار + مودال طولانی‌تر
+// ——— کارت راهکار (همان مودال خنثی)
 function SolutionCard({ name, slug, p1, p2, p3 }) {
   const [border, setBorder] = useState("#e5e7eb");
   const [open, setOpen] = useState(false);
-  const [accent, setAccent] = useState(TEAL);
-
   return (
     <>
       <div
-        onMouseEnter={() =>
-          setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
-        }
+        onMouseEnter={() => setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])}
         onMouseLeave={() => setBorder("#e5e7eb")}
-        onClick={() => {
-          setAccent(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)]);
-          setOpen(true);
-        }}
-        className={CARD_CLASS + " cursor-pointer select-none"}
+        onClick={() => setOpen(true)}
+        className="flex flex-col items-center justify-center gap-3 p-5 bg-white border rounded-lg hover:shadow-md transition text-center w-full max-w-[520px] mx-auto h-[120px] cursor-pointer select-none"
         style={{ borderColor: border }}
-        role="button"
-        tabIndex={0}
-        aria-haspopup="dialog"
-        aria-expanded={open}
+        role="button" tabIndex={0} aria-haspopup="dialog" aria-expanded={open}
       >
         <img
           src={`/avatars/${slug}.png`}
@@ -312,11 +230,10 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
         <div className="font-bold text-gray-900">{name}</div>
       </div>
 
-      <GlassModal
+      <GlassModalNeutral
         open={open}
         onClose={() => setOpen(false)}
         title={`${name} — راهکارها`}
-        accent={accent}
         paragraphs={[p1, p2, p3]}
       />
     </>
@@ -336,17 +253,14 @@ export default function Home() {
             <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">
               زیرساخت هوشمند، با دقت مهندسی
             </h1>
-            <p className="mt-4 text-gray-300">از مشاوره تا پشتیبانی،در کنار شماییم.</p>
+            <p className="mt-4 text-gray-300">از مشاوره تا پشتیبانی، کنار شماییم.</p>
             <div className="mt-6 flex gap-3">
               {/* ارائه مشاوره — Filled */}
               <a
                 href="/contact"
                 onClick={swap}
                 className="rounded-full px-5 py-2.5 font-bold transition"
-                style={{
-                  backgroundColor: primary,
-                  color: primaryIsYellow ? "#000" : "#fff",
-                }}
+                style={{ backgroundColor: primary, color: primaryIsYellow ? "#000" : "#fff" }}
               >
                 ارائه مشاوره
               </a>
@@ -355,11 +269,7 @@ export default function Home() {
                 href="/tools"
                 onClick={swap}
                 className="rounded-full px-5 py-2.5 font-semibold transition"
-                style={{
-                  border: `1px solid ${secondary}`,
-                  color: secondary,
-                  backgroundColor: "transparent",
-                }}
+                style={{ border: `1px solid ${secondary}`, color: secondary, backgroundColor: "transparent" }}
                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${secondary}1A`)}
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
               >
@@ -368,7 +278,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* آواتار */}
+          {/* آواتار هِرو */}
           <div className="flex justify-center">
             <img
               src="/satrass-hero.png"
@@ -408,7 +318,7 @@ export default function Home() {
 
       <footer className="bg-black text-white">
         <div className="max-w-6xl mx-auto px-4 py-6 text-center">
-          <p>© {new Date().getFullYear()} .ساتراس، همه حقوق محفوظ است</p>
+          <p>© {new Date().getFullYear()} ساتراس، همه حقوق محفوظ است</p>
         </div>
       </footer>
     </main>

@@ -10,6 +10,7 @@ export default function Header() {
           <Link href="/" className="hover:text-black/70">خانه</Link>
           <Link href="/tools" className="hover:text-black/70">ابزارها</Link>
 	<Link href="/downloads" className="hover:text-brand-teal transition">دانلودها</Link>
+	<Link href="/warranty" className="hover:text-black/70"> گارانتی</Link>
           <Link href="/about" className="hover:text-black/70">درباره ما</Link>
           <Link href="/contact" className="hover:text-black/70">تماس با ما</Link>
         </nav>

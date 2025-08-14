@@ -1,10 +1,16 @@
 // pages/api/warranty.js
-// JSON لوکال؛ داخل باندل Next هم میاد (standalone-friendly)
-let DB = {};
-try {
-  DB = require("../../data/warranty.json");
-} catch (e) {
-  DB = {};
+import fs from "fs";
+import path from "path";
+
+function loadDB() {
+  try {
+    const p = path.join(process.cwd(), "data", "warranty.json");
+    if (fs.existsSync(p)) {
+      const raw = fs.readFileSync(p, "utf8");
+      return JSON.parse(raw || "{}");
+    }
+  } catch (e) {}
+  return {};
 }
 
 export default function handler(req, res) {
@@ -16,11 +22,11 @@ export default function handler(req, res) {
     return res.status(400).json({ error: "serials required" });
   }
 
+  const DB = loadDB();
   const items = serials.map((raw) => {
     const serial = String(raw || "").trim();
     const hit = DB[serial];
-    if (hit) return { serial, ...hit };
-    return { serial, status: "not_found" };
+    return hit ? { serial, ...hit } : { serial, status: "not_found" };
   });
 
   res.json({ items, source: "local-json", count: items.length });

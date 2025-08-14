@@ -1,58 +1,7 @@
 {
-  "install": {
-    "title": "نصب و راه‌اندازی",
-    "intro": "اجرای استاندارد از پیش‌نیازها تا استیجینگ؛ کابل‌کشی، کانفیگ اولیه، ارتقای Firmware و هم‌ترازی با Best Practice هر برند.",
-    "items": [
-      {
-        "vendor": "Dell EMC",
-        "model": "Unity XT 480",
-        "desc": "استقرار و بهینه‌سازی اولیه، Pool/RAID، NAS/SAN، Snapshot و Replication.",
-        "image": "/services/install/unity-xt480.png",
-        "specsheet": "/specs/dell/unity-xt480-datasheet.pdf"
-      },
-      {
-        "vendor": "Cisco",
-        "model": "MDS Switches",
-        "desc": "پیکربندی zoning و ویندوزهای عملکردی برای SAN کم‌تاخیر.",
-        "image": "/services/install/cisco-mds.png",
-        "specsheet": "/specs/cisco/mds-series.pdf"
-      }
-    ]
-  },
-  "monitoring": {
-    "title": "پایش",
-    "intro": "طراحی مانیتورینگ با آستانه‌های درست، داشبورد و هشدارهای عملیاتی؛ گزارش SLA و ظرفیت.",
-    "items": [
-      {
-        "vendor": "HPE",
-        "model": "iLO/OneView",
-        "desc": "یکپارچه‌سازی هشدارها و سلامت سخت‌افزار در داشبورد مرکزی.",
-        "image": "/services/monitoring/hpe-oneview.png",
-        "specsheet": "/specs/hpe/oneview.pdf"
-      }
-    ]
-  },
-  "training": {
-    "title": "آموزش",
-    "intro": "انتقال دانش مبتنی بر سناریوهای واقعی: از اصول راهبری تا تِریبل‌شوتینگ.",
-    "items": []
-  },
-  "consulting-design": {
-    "title": "مشاوره و طراحی",
-    "intro": "نیازسنجی، سایزینگ، HA/DR و انتخاب راهکار با نگاه TCO.",
-    "items": [
-      {
-        "vendor": "Lenovo",
-        "model": "ThinkSystem DE Series",
-        "desc": "طرح مرجع برای بارکاری‌های Tier-2 با پشتیبانی NVMe-oF.",
-        "image": "/services/consulting/lenovo-de.png",
-        "specsheet": "/specs/lenovo/de-series.pdf"
-      }
-    ]
-  },
-  "operations": {
-    "title": "راهبری",
-    "intro": "Managed Service: پچینگ، بکاپ‌وریفای، بررسی لاگ‌ها و رسیدگی به رخدادها طبق SLA.",
-    "items": []
-  }
+  "install": { "title": "نصب و راه‌اندازی", "intro": "…" , "items": [] },
+  "monitoring": { "title": "پایش", "intro": "…" , "items": [] },
+  "training": { "title": "آموزش", "intro": "…" , "items": [] },
+  "consulting-design": { "title": "مشاوره و طراحی", "intro": "…" , "items": [] },
+  "operations": { "title": "راهبری", "intro": "…" , "items": [] }
 }

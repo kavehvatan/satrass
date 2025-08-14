@@ -127,42 +127,93 @@ function BrandCard({ name, slug }) {
 }
 
 // ——— مودال شیشه‌ای خنثی (برای خدمات و راهکارها)
+// ——— مودال شیشه‌ای شفاف و خوانا
 function GlassModal({ open, onClose, title, paragraphs }) {
   const [closing, setClosing] = useState(false);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e) => e.key === "Escape" && handleClose();
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
-  useEffect(() => {
-    if (!open) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    return () => (document.body.style.overflow = prev);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
   }, [open]);
-  const handleClose = () => { setClosing(true); setTimeout(() => { setClosing(false); onClose?.(); }, 200); };
+
+  const handleClose = () => {
+    setClosing(true);
+    setTimeout(() => {
+      setClosing(false);
+      onClose?.();
+    }, 200);
+  };
+
   if (!open) return null;
 
   return (
-    <div className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-200 ${closing ? "opacity-0" : "opacity-100"}`}>
-      <div className="absolute inset-0 bg-black/55 backdrop-blur-sm" onClick={handleClose} />
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-200 ${
+        closing ? "opacity-0" : "opacity-100"
+      }`}
+    >
+      {/* پس‌زمینه نیمه‌تیره برای تمرکز */}
+      <div
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        onClick={handleClose}
+      />
+
+      {/* خود باکس شیشه‌ای */}
       <article
-        role="dialog" aria-modal="true"
-        className={`relative z-10 w-[min(92vw,760px)] mx-auto rounded-2xl overflow-hidden transform transition-all duration-200 ${closing ? "opacity-0 scale-95" : "opacity-100 scale-100"}`}
+        role="dialog"
+        aria-modal="true"
+        className={`relative z-10 w-[min(92vw,760px)] mx-auto rounded-2xl overflow-hidden transform transition-all duration-200 ${
+          closing ? "opacity-0 scale-95" : "opacity-100 scale-100"
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="relative rounded-2xl border border-black/10 bg-white/85 backdrop-blur-xl shadow-[0_20px_60px_-15px_rgba(0,0,0,.5)]">
+        <div
+          className="
+            relative rounded-2xl
+            bg-white/45
+            supports-[backdrop-filter]:bg-white/40
+            backdrop-blur-2xl
+            ring-1 ring-white/20
+            shadow-[0_20px_60px_-15px_rgba(0,0,0,.45)]
+          "
+        >
           <div className="p-6 md:p-8 text-gray-900">
             <div className="flex items-start justify-between gap-6">
-              <h4 className="text-xl md:text-2xl font-extrabold">{title}</h4>
-              <button onClick={handleClose} aria-label="بستن" className="text-gray-700 hover:text-black transition text-2xl leading-none">×</button>
+              <h4 className="text-xl md:text-2xl font-extrabold drop-shadow-[0_1px_1px_rgba(255,255,255,.6)]">
+                {title}
+              </h4>
+              <button
+                onClick={handleClose}
+                aria-label="بستن"
+                className="text-gray-800 hover:text-black transition text-2xl leading-none"
+              >
+                ×
+              </button>
             </div>
+
             {paragraphs.map((tx, i) => (
-              <p key={i} className={`leading-8 ${i === 0 ? "mt-4" : "mt-3"} text-gray-800`}>{tx}</p>
+              <p
+                key={i}
+                className={`leading-8 ${
+                  i === 0 ? "mt-4" : "mt-3"
+                } text-gray-900/95 drop-shadow-[0_1px_1px_rgba(255,255,255,.55)]`}
+              >
+                {tx}
+              </p>
             ))}
+
             <div className="mt-6 flex justify-end">
-              <button onClick={handleClose} className="px-4 py-2 rounded-lg border border-black/10 hover:bg-black/[0.03] transition">
+              <button
+                onClick={handleClose}
+                className="px-4 py-2 rounded-lg border border-black/10 bg-white/30 hover:bg-white/40 transition"
+              >
                 بستن
               </button>
             </div>

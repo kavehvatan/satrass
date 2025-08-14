@@ -34,8 +34,8 @@ const ContactHero = () => {
             <div
               className="rounded-2xl border border-white/10 p-6 md:p-8 shadow-xl"
               style={{
-                background:
-                  "linear-gradient(180deg, rgba(20,184,166,0.14) 0%, rgba(20,184,166,0.14) 100%)",
+                background: 
+		"linear-gradient(180deg, rgba(244,194,31,0.14) 0%, rgba(244,194,31,0.14) 100%)",
                 backdropFilter: "blur(10px)",
               }}
             >

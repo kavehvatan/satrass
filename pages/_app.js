@@ -1,11 +1,11 @@
+// pages/_app.js
 import "../styles/globals.css";
-import Header from "../components/Header";
+import Layout from "../components/Layout";
 
 export default function App({ Component, pageProps }) {
   return (
-    <div dir="rtl" lang="fa">
-      <Header />
+    <Layout>
       <Component {...pageProps} />
-    </div>
+    </Layout>
   );
 }

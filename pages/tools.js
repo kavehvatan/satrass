@@ -8,7 +8,7 @@ export default function Tools() {
     },
     {
       title: "Unity MidrangeSizer",
-      desc: "محاسبه ظرفیت و پیکربندی بهینه برای سری Unity Midrange",
+      desc: "محاسبه ظرفیت و پیکربندی بهینه Unity",
       href: "#",
     },
     {

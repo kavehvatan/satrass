@@ -1,12 +1,14 @@
 // pages/index.js
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import Layout from "../components/Layout";
+import Section from "../components/Section";
+import GlassModal from "../components/GlassModal";
 
 const TEAL = "#14b8a6";
 const YELLOW = "#f4c21f";
 const LOGO_COLORS = [TEAL, YELLOW];
 
-// ——— تجهیزات
 const EQUIPMENT = [
   { name: "Dell EMC", slug: "dell", href: "/products/dell" },
   { name: "Cisco", slug: "cisco", href: "/products/cisco" },
@@ -18,7 +20,6 @@ const EQUIPMENT = [
   { name: "Fujitsu", slug: "fujitsu", href: "/products/fujitsu" },
 ];
 
-// ——— راهکارها (متن بلندتر؛ مودال خنثی)
 const SOLUTIONS = [
   {
     name: "Commvault",
@@ -36,7 +37,6 @@ const SOLUTIONS = [
   },
 ];
 
-// ——— خدمات (مودال خنثی)
 const SERVICES = [
   {
     title: "نصب و راه‌اندازی",
@@ -75,19 +75,9 @@ const SERVICES = [
   },
 ];
 
-// ——— قفل اسکرول بدنه وقتی مودال بازه
-function useBodyScrollLock(locked) {
-  useEffect(() => {
-    const prev = document.body.style.overflow;
-    if (locked) document.body.style.overflow = "hidden";
-    return () => (document.body.style.overflow = prev);
-  }, [locked]);
-}
-
-// ——— دکمه‌های هیرو (دوحالته)
 function useAlternatingBrandPair() {
-  const [primary, setPrimary] = useState(YELLOW);   // Filled
-  const [secondary, setSecondary] = useState(TEAL); // Outlined
+  const [primary, setPrimary] = useState(YELLOW);
+  const [secondary, setSecondary] = useState(TEAL);
   useEffect(() => {
     try {
       const lastIsTeal = localStorage.getItem("satrass_btn_pair") === "1";
@@ -108,7 +98,6 @@ function useAlternatingBrandPair() {
   return { primary, secondary, swap };
 }
 
-// ——— کارت برند
 function BrandCard({ name, slug, href }) {
   const [border, setBorder] = useState("#e5e7eb");
   return (
@@ -130,57 +119,6 @@ function BrandCard({ name, slug, href }) {
   );
 }
 
-// ——— مودال «شیشه‌ای خنثی» (برای خدمات و راهکارها)
-function GlassModalNeutral({ open, onClose, title, paragraphs }) {
-  const [closing, setClosing] = useState(false);
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e) => e.key === "Escape" && handleClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
-  const handleClose = () => {
-    setClosing(true);
-    setTimeout(() => { setClosing(false); onClose?.(); }, 220);
-  };
-  useBodyScrollLock(open);
-  if (!open) return null;
-  return (
-    <div className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity ${closing ? "opacity-0" : "opacity-100"} duration-200`}>
-      {/* بک‌درُپ تیره برای کنتراست متن */}
-      <div className="absolute inset-0 bg-black/55 backdrop-blur-sm" onClick={handleClose} />
-      {/* پنجره */}
-      <article
-        role="dialog" aria-modal="true"
-        className={`relative z-10 w-[min(92vw,760px)] mx-auto rounded-2xl overflow-hidden transform transition-all duration-200 ${closing ? "opacity-0 scale-95" : "opacity-100 scale-100"}`}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* شیشهٔ مات و بی‌رنگ */}
-        <div className="relative rounded-2xl border border-black/10 bg-white/85 backdrop-blur-xl shadow-[0_20px_60px_-15px_rgba(0,0,0,.5)]">
-          <div className="p-6 md:p-8 text-gray-900">
-            <div className="flex items-start justify-between gap-6">
-              <h4 className="text-xl md:text-2xl font-extrabold">{title}</h4>
-              <button onClick={handleClose} aria-label="بستن" className="text-gray-700 hover:text-black transition text-2xl leading-none">×</button>
-            </div>
-            {paragraphs.map((tx, i) => (
-              <p key={i} className={`leading-8 ${i === 0 ? "mt-4" : "mt-3"} text-gray-800`}>
-                {tx}
-              </p>
-            ))}
-            <div className="mt-6 flex justify-end">
-              <button onClick={handleClose} className="px-4 py-2 rounded-lg border border-black/10 hover:bg-black/[0.03] transition">
-                بستن
-              </button>
-            </div>
-          </div>
-        </div>
-      </article>
-    </div>
-  );
-}
-
-// ——— کارت خدمات
 function ServiceCard({ title, desc1, desc2 }) {
   const [border, setBorder] = useState("#e5e7eb");
   const [open, setOpen] = useState(false);
@@ -192,22 +130,25 @@ function ServiceCard({ title, desc1, desc2 }) {
         onClick={() => setOpen(true)}
         className="flex flex-col items-center justify-center gap-3 p-5 bg-white border rounded-lg hover:shadow-md transition text-center w-full max-w-[520px] mx-auto h-[120px] cursor-pointer select-none"
         style={{ borderColor: border }}
-        role="button" tabIndex={0} aria-haspopup="dialog" aria-expanded={open}
+        role="button"
+        tabIndex={0}
+        aria-haspopup="dialog"
+        aria-expanded={open}
       >
         <span className="font-semibold text-gray-900">{title}</span>
       </div>
 
-      <GlassModalNeutral
+      <GlassModal
         open={open}
         onClose={() => setOpen(false)}
         title={title}
+        variant="neutral"
         paragraphs={[desc1, desc2]}
       />
     </>
   );
 }
 
-// ——— کارت راهکار (همان مودال خنثی)
 function SolutionCard({ name, slug, p1, p2, p3 }) {
   const [border, setBorder] = useState("#e5e7eb");
   const [open, setOpen] = useState(false);
@@ -219,7 +160,10 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
         onClick={() => setOpen(true)}
         className="flex flex-col items-center justify-center gap-3 p-5 bg-white border rounded-lg hover:shadow-md transition text-center w-full max-w-[520px] mx-auto h-[120px] cursor-pointer select-none"
         style={{ borderColor: border }}
-        role="button" tabIndex={0} aria-haspopup="dialog" aria-expanded={open}
+        role="button"
+        tabIndex={0}
+        aria-haspopup="dialog"
+        aria-expanded={open}
       >
         <img
           src={`/avatars/${slug}.png`}
@@ -230,10 +174,11 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
         <div className="font-bold text-gray-900">{name}</div>
       </div>
 
-      <GlassModalNeutral
+      <GlassModal
         open={open}
         onClose={() => setOpen(false)}
         title={`${name} — راهکارها`}
+        variant="neutral" // الان خنثی؛ اگر بخوای رنگی شه: variant="tint" accent="#14b8a6"
         paragraphs={[p1, p2, p3]}
       />
     </>
@@ -245,7 +190,7 @@ export default function Home() {
   const primaryIsYellow = primary === YELLOW;
 
   return (
-    <main className="min-h-screen font-sans">
+    <Layout title="Satrass — زیرساخت هوشمند">
       {/* Hero */}
       <section className="bg-[linear-gradient(135deg,#000_0%,#0a0a0a_60%,#111_100%)] text-white">
         <div className="max-w-6xl mx-auto px-4 py-12 md:py-16 grid md:grid-cols-2 items-center gap-10">
@@ -255,7 +200,6 @@ export default function Home() {
             </h1>
             <p className="mt-4 text-gray-300">از مشاوره تا پشتیبانی، کنار شماییم.</p>
             <div className="mt-6 flex gap-3">
-              {/* ارائه مشاوره — Filled */}
               <a
                 href="/contact"
                 onClick={swap}
@@ -264,7 +208,6 @@ export default function Home() {
               >
                 ارائه مشاوره
               </a>
-              {/* مشاهده ابزارها — Outlined */}
               <a
                 href="/tools"
                 onClick={swap}
@@ -278,7 +221,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* آواتار هِرو */}
           <div className="flex justify-center">
             <img
               src="/satrass-hero.png"
@@ -290,18 +232,16 @@ export default function Home() {
       </section>
 
       {/* تجهیزات */}
-      <section id="products" className="max-w-6xl mx-auto px-4 py-10 border-t border-black/10">
-        <h2 className="text-2xl font-bold mb-6">تجهیزات</h2>
+      <Section id="products" title="تجهیزات" className="py-10 border-t border-black/10">
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
           {EQUIPMENT.map((b) => (
-            <BrandCard key={b.slug} name={b.name} slug={b.slug} href={b.href} />
+            <BrandCard key={b.slug} {...b} />
           ))}
         </div>
-      </section>
+      </Section>
 
-      {/* راهکارها + خدمات */}
-      <section id="solutions" className="max-w-6xl mx-auto px-4 pb-10">
-        <h2 className="text-2xl font-bold mb-6">راهکارها</h2>
+      {/* راهکارها */}
+      <Section id="solutions" title="راهکارها" className="pb-10">
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center mb-10">
           {SOLUTIONS.map((s) => (
             <SolutionCard key={s.slug} {...s} />
@@ -311,16 +251,10 @@ export default function Home() {
         <h3 className="text-xl font-bold mb-4">خدمات</h3>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
           {SERVICES.map((s, i) => (
-            <ServiceCard key={i} title={s.title} desc1={s.desc1} desc2={s.desc2} />
+            <ServiceCard key={i} {...s} />
           ))}
         </div>
-      </section>
-
-      <footer className="bg-black text-white">
-        <div className="max-w-6xl mx-auto px-4 py-6 text-center">
-          <p>© {new Date().getFullYear()} ساتراس، همه حقوق محفوظ است</p>
-        </div>
-      </footer>
-    </main>
+      </Section>
+    </Layout>
   );
 }

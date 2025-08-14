@@ -6,11 +6,16 @@ const TEAL = "#14b8a6";
 const YELLOW = "#f4c21f";
 const LOGO_COLORS = [TEAL, YELLOW];
 
+// تجهیزات
 const EQUIPMENT = [
   { name: "Dell EMC", slug: "dell", href: "/products/dell" },
   { name: "Cisco", slug: "cisco", href: "/products/cisco" },
   { name: "HPE", slug: "hpe", href: "/products/hpe" },
   { name: "Lenovo", slug: "lenovo", href: "/products/lenovo" },
+  { name: "Quantum", slug: "quantum", href: "/products/quantum" },
+  { name: "Juniper", slug: "juniper", href: "/products/juniper" },
+  { name: "Oracle", slug: "oracle", href: "/products/oracle" },
+  { name: "Fujitsu", slug: "fujitsu", href: "/products/fujitsu" },
 ];
 
 // راهکارها (مودال با متن طولانی‌تر)

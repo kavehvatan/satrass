@@ -7,8 +7,8 @@ const YELLOW = "#f4c21f";
 
 // همون منطق دوحالته: نوبتی روی لود + سوئیچ با کلیک (Persist با localStorage)
 function useAlternatingBrandPair() {
-  const [primary, setPrimary] = useState(YELLOW);   // Filled
-  const [secondary, setSecondary] = useState(TEAL); // Outlined
+  const [primary, setPrimary] = useState(YELLOW);   // رنگ زمینه دکمه
+  const [secondary, setSecondary] = useState(TEAL); // رنگ حاشیه/حالت دوم
 
   useEffect(() => {
     try {
@@ -69,67 +69,39 @@ export default function ToolsPage() {
 
   return (
     <main className="min-h-screen font-sans">
-      {/* Hero کوچک ابزارها با دو دکمه متغیر مثل صفحه اول */}
-      <section className="bg-[linear-gradient(135deg,#000_0%,#0a0a0a_60%,#111_100%)] text-white">
-        <div className="max-w-6xl mx-auto px-4 py-10 md:py-14">
-          <h1 className="text-3xl md:text-4xl font-extrabold">ابزارها</h1>
-          <p className="mt-3 text-gray-300">
-            مجموعه‌ای از ابزارهای محاسباتی و چک‌لیست‌ها برای طراحی و راهبری زیرساخت.
-          </p>
-
-          <div className="mt-6 flex flex-wrap gap-3">
-            {/* دکمه Filled */}
-            <Link
-              href="/tools/unity-calculator"
-              onClick={swap}
-              className="rounded-full px-5 py-2.5 font-bold transition"
-              style={{
-                backgroundColor: primary,
-                color: primaryIsYellow ? "#000" : "#fff",
-              }}
-            >
-              Unity Calculator
-            </Link>
-
-            {/* دکمه Outlined */}
-            <Link
-              href="/tools/cisco"
-              onClick={swap}
-              className="rounded-full px-5 py-2.5 font-semibold transition"
-              style={{
-                border: `1px solid ${secondary}`,
-                color: secondary,
-                backgroundColor: "transparent",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${secondary}1A`)}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-            >
-              ابزارهای سیسکو
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* لیست ابزارها */}
+      {/* فقط گرید ابزارها (هیرو حذف شد) */}
       <section className="max-w-6xl mx-auto px-4 py-10">
+        <h1 className="text-2xl md:text-3xl font-extrabold mb-6">ابزارها</h1>
+
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {TOOLS.map((t) => (
             <Link
               key={t.href}
               href={t.href}
+              onClick={swap} // کلیک روی هر کارت، رنگ دکمه‌ها رو جابه‌جا می‌کند
               className="group rounded-lg border bg-white p-5 hover:shadow-md transition flex flex-col"
             >
               <div className="text-lg font-bold text-gray-900 group-hover:opacity-90">
                 {t.title}
               </div>
+
               <p className="mt-2 text-sm text-gray-600 leading-6">{t.desc}</p>
-              <span className="mt-4 inline-flex items-center text-sm font-semibold text-gray-900/80 group-hover:text-gray-900">
+
+              {/* دکمه «ورود» — دوحالته مثل هیرو: زمینه = primary، حاشیه = secondary */}
+              <span
+                className="mt-4 inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-semibold transition"
+                style={{
+                  backgroundColor: primary,
+                  color: primaryIsYellow ? "#000" : "#fff",
+                  border: `1px solid ${secondary}`,
+                }}
+              >
                 ورود
                 <svg
                   viewBox="0 0 24 24"
                   width="18"
                   height="18"
-                  className="ml-1 inline-block"
+                  className="inline-block"
                   fill="currentColor"
                   aria-hidden="true"
                 >

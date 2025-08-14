@@ -1,14 +1,13 @@
 // pages/tools.js
-import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const TEAL = "#14b8a6";
 const YELLOW = "#f4c21f";
 
-// همون منطق دوحالته: نوبتی روی لود + سوئیچ با کلیک (Persist با localStorage)
+// نوبتی روی لود + سوئیچ با کلیک (Persist با localStorage مثل صفحهٔ اول)
 function useAlternatingBrandPair() {
-  const [primary, setPrimary] = useState(YELLOW);   // رنگ زمینه دکمه
-  const [secondary, setSecondary] = useState(TEAL); // رنگ حاشیه/حالت دوم
+  const [primary, setPrimary] = useState(YELLOW);   // Filled
+  const [secondary, setSecondary] = useState(TEAL); // Outlined
 
   useEffect(() => {
     try {
@@ -40,84 +39,89 @@ function useAlternatingBrandPair() {
   return { primary, secondary, swap };
 }
 
-const TOOLS = [
-  {
-    title: "Unity Calculator",
-    href: "/tools/unity-calculator",
-    desc: "برآورد ظرفیت/RAID/Overhead برای Dell EMC Unity.",
-  },
-  {
-    title: "Cisco Tools",
-    href: "/tools/cisco",
-    desc: "جمع ابزارهای کاربردی سیسکو (SFP Matrix، PoE Budget، QoS cheatsheet…).",
-  },
-  {
-    title: "RAID Capacity",
-    href: "/tools/raid",
-    desc: "محاسبه ظرفیت مؤثر و Fault Tolerance برای آرایه‌های RAID.",
-  },
-  {
-    title: "Power & BTU",
-    href: "/tools/power-btu",
-    desc: "توان مصرفی و گرمای تولیدی تجهیزات دیتاسنتر.",
-  },
-];
-
-export default function ToolsPage() {
+export default function Tools() {
   const { primary, secondary, swap } = useAlternatingBrandPair();
   const primaryIsYellow = primary === YELLOW;
 
+  const tools = [
+    {
+      title: "PowerStore Configurator",
+      desc: "انتخاب و پیکربندی کامل مدل‌های PowerStore",
+      href: "#", // ← لینک واقعی ابزار رو بذار
+    },
+    {
+      title: "Unity MidrangeSizer",
+      desc: "محاسبه ظرفیت و پیکربندی بهینه Unity",
+      href: "#",
+    },
+    {
+      title: "PowerStore RAID Calculator",
+      desc: "محاسبه ظرفیت و افزونگی آرایه‌های RAID در PowerStore",
+      href: "#",
+    },
+    {
+      title: "Unity Configurator",
+      desc: "طراحی و انتخاب پیکربندی مناسب برای خانواده Unity XT",
+      href: "#",
+    },
+  ];
+
   return (
-    <main className="min-h-screen font-sans">
-      {/* فقط گرید ابزارها (هیرو حذف شد) */}
+    <main className="min-h-screen">
       <section className="max-w-6xl mx-auto px-4 py-10">
-        <h1 className="text-2xl md:text-3xl font-extrabold mb-6">ابزارها</h1>
+        <h1 className="text-3xl font-extrabold mb-8">ابزارها</h1>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {TOOLS.map((t) => (
-            <Link
-              key={t.href}
-              href={t.href}
-              onClick={swap} // کلیک روی هر کارت، رنگ دکمه‌ها رو جابه‌جا می‌کند
-              className="group rounded-lg border bg-white p-5 hover:shadow-md transition flex flex-col"
+        <div className="grid md:grid-cols-2 gap-8">
+          {tools.map((t, i) => (
+            <article
+              key={i}
+              className="border rounded-2xl p-6 shadow-sm hover:shadow-md transition"
             >
-              <div className="text-lg font-bold text-gray-900 group-hover:opacity-90">
-                {t.title}
-              </div>
+              <h2 className="text-xl font-bold">{t.title}</h2>
+              <p className="mt-2 text-gray-600">{t.desc}</p>
 
-              <p className="mt-2 text-sm text-gray-600 leading-6">{t.desc}</p>
-
-              {/* دکمه «ورود» — دوحالته مثل هیرو: زمینه = primary، حاشیه = secondary */}
-              <span
-                className="mt-4 inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-semibold transition"
-                style={{
-                  backgroundColor: primary,
-                  color: primaryIsYellow ? "#000" : "#fff",
-                  border: `1px solid ${secondary}`,
-                }}
-              >
-                ورود
-                <svg
-                  viewBox="0 0 24 24"
-                  width="18"
-                  height="18"
-                  className="inline-block"
-                  fill="currentColor"
-                  aria-hidden="true"
+              <div className="mt-5 flex flex-wrap gap-3">
+                {/* دکمهٔ اصلی — Filled (مثل هیرو) */}
+                <a
+                  href={t.href}
+                  onClick={swap}
+                  className="rounded-full px-5 py-2.5 font-bold transition"
+                  style={{
+                    backgroundColor: primary,
+                    color: primaryIsYellow ? "#000" : "#fff",
+                  }}
+                  target="_blank"
+                  rel="noreferrer"
                 >
-                  <path d="M13.172 12l-4.95-4.95 1.414-1.414L16 12l-6.364 6.364-1.414-1.414z" />
-                </svg>
-              </span>
-            </Link>
+                  باز کردن ابزار
+                </a>
+
+                {/* دکمهٔ دوم — Outlined (اختیاری، همون لینک یا توضیحات) */}
+                <a
+                  href={t.href}
+                  onClick={swap}
+                  className="rounded-full px-5 py-2.5 font-semibold transition"
+                  style={{
+                    border: `1px solid ${secondary}`,
+                    color: secondary,
+                    backgroundColor: "transparent",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.backgroundColor = `${secondary}1A`)
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.backgroundColor = "transparent")
+                  }
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  جزئیات
+                </a>
+              </div>
+            </article>
           ))}
         </div>
       </section>
-
-      <footer className="bg-black text-white">
-        <div className="max-w-6xl mx-auto px-4 py-6 text-center">
-          <p>© {new Date().getFullYear()} ساتراس</p>
-        </div>
-      </footer>
     </main>
   );
 }

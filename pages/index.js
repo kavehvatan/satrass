@@ -18,7 +18,7 @@ const SOLUTIONS = [
   { name: "NetBackup", slug: "netbackup", href: "/solutions/netbackup" },
 ];
 
-// توضیحات ۲ پاراگرافی برای هر خدمت
+// توضیحات ۲ پاراگرافی خدمات
 const SERVICES = [
   {
     title: "نصب و راه‌اندازی",
@@ -58,10 +58,10 @@ const SERVICES = [
 ];
 
 const CARD_CLASS =
-  "flex flex-col items-center justify-center gap-3 p-5 bg-white border rounded-lg " +
-  "hover:shadow-md transition text-center w-full max-w-[520px] mx-auto h-[120px]";
+  "flex flex-col items-center justify-center gap-3 p-5 bg-white border rounded-lg hover:shadow-md " +
+  "transition text-center w-full max-w-[520px] mx-auto h-[120px]";
 
-// ====== دکمه‌های هیرو: جابه‌جایی نوبتی + با کلیک (persist با localStorage)
+// ===== دکمه‌های هیرو: جابجایی نوبتی + با کلیک (persist با localStorage)
 function useAlternatingBrandPair() {
   const [primary, setPrimary] = useState(YELLOW);   // پر (Filled)
   const [secondary, setSecondary] = useState(TEAL); // خطی (Outlined)
@@ -96,7 +96,7 @@ function useAlternatingBrandPair() {
   return { primary, secondary, swap };
 }
 
-// ====== کارت برندها
+// ===== کارت برندها
 function BrandCard({ name, slug, href }) {
   const [border, setBorder] = useState("#e5e7eb");
   return (
@@ -120,35 +120,56 @@ function BrandCard({ name, slug, href }) {
   );
 }
 
-// ====== کارت خدمات + پنل شیشه‌ای روی hover/click
+// ===== هلسپر قفل اسکرول بدنه وقتی مودال بازه
+function useBodyScrollLock(locked) {
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    if (locked) document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [locked]);
+}
+
+// ===== کارت خدمات + مودال شیشه‌ای وسط صفحه
 function ServiceCard({ title, desc1, desc2 }) {
   const [border, setBorder] = useState("#e5e7eb");
   const [open, setOpen] = useState(false);
+  const [closing, setClosing] = useState(false);
   const [accent, setAccent] = useState(TEAL);
 
-  const handleEnter = () => {
-    setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)]);
-    const a = LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)];
-    setAccent(a);
+  // باز کردن مودال با رنگ تصادفی
+  const openModal = () => {
+    setAccent(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)]);
     setOpen(true);
   };
-  const handleLeave = () => setOpen(false);
-  const toggle = () => {
-    const a = LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)];
-    setAccent(a);
-    setOpen((v) => !v);
+  // بستن با انیمیشن نرم‌تر
+  const closeModal = () => {
+    setClosing(true);
+    setTimeout(() => {
+      setOpen(false);
+      setClosing(false);
+    }, 220); // کمی آهسته‌تر از باز شدن
   };
 
-  const other = accent === TEAL ? YELLOW : TEAL;
+  // ESC برای بستن
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => e.key === "Escape" && closeModal();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  useBodyScrollLock(open);
 
   return (
-    <div className="relative w-full max-w-[520px] mx-auto">
+    <>
       <div
-        onMouseEnter={handleEnter}
-        onMouseLeave={handleLeave}
-        onFocus={handleEnter}
-        onBlur={handleLeave}
-        onClick={toggle}
+        onMouseEnter={() =>
+          setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
+        }
+        onMouseLeave={() => setBorder("#e5e7eb")}
+        onClick={openModal}
         className={CARD_CLASS + " cursor-pointer select-none"}
         style={{ borderColor: border }}
         role="button"
@@ -159,37 +180,65 @@ function ServiceCard({ title, desc1, desc2 }) {
         <span className="font-semibold text-gray-900">{title}</span>
       </div>
 
-      {/* پنل شیشه‌ای */}
+      {/* مودال شیشه‌ای مرکز صفحه */}
       {open && (
         <div
-          className="absolute left-1/2 -translate-x-1/2 top-full mt-3 z-20
-                     rounded-xl border shadow-2xl bg-white/35 backdrop-blur-md
-                     w-[min(92vw,560px)]"
-          onMouseEnter={() => setOpen(true)}
-          onMouseLeave={handleLeave}
+          className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity
+                      ${closing ? "opacity-0" : "opacity-100"} duration-200`}
         >
-          {/* لهجه رنگی (گرادینت بار باریک بالا) */}
+          {/* بک‌درُپ تار */}
           <div
-            className="h-1.5 w-full rounded-t-xl"
-            style={{
-              background: `linear-gradient(90deg, ${accent} 0%, ${other} 100%)`,
-            }}
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={closeModal}
           />
-          <div className="relative p-5">
-            {/* حاشیه و هاله رنگی نرم */}
+          {/* جعبه شیشه‌ای مات (بدون لبه رنگی) */}
+          <div
+            className={`relative z-10 w-[min(92vw,720px)] mx-auto rounded-2xl overflow-hidden
+                        transform transition-all duration-200
+                        ${closing ? "opacity-0 scale-95" : "opacity-100 scale-100"}`}
+            role="dialog"
+            aria-modal="true"
+          >
+            {/* لایه هاله‌ی رنگی خیلی لطیف */}
             <div
-              className="absolute inset-0 rounded-xl pointer-events-none"
+              className="pointer-events-none absolute -inset-8 blur-3xl opacity-25"
               style={{
-                boxShadow: `inset 0 0 0 1px ${accent}40, 0 16px 40px -12px ${accent}44`,
+                background: `radial-gradient(60% 60% at 50% 40%, ${accent}55 0%, transparent 60%),
+                             radial-gradient(40% 40% at 70% 70%, ${
+                               accent === TEAL ? YELLOW : TEAL
+                             }44 0%, transparent 60%)`,
               }}
             />
-            <h4 className="font-bold text-gray-900 mb-2">{title}</h4>
-            <p className="text-gray-800 leading-7">{desc1}</p>
-            <p className="text-gray-700 leading-7 mt-3">{desc2}</p>
+            {/* بدنه مات */}
+            <div className="relative rounded-2xl border border-white/15 bg-white/15 backdrop-blur-xl shadow-[0_20px_60px_-15px_rgba(0,0,0,.5)]">
+              <div className="p-6 md:p-8">
+                <div className="flex items-start justify-between gap-6">
+                  <h4 className="text-xl md:text-2xl font-extrabold text-white">{title}</h4>
+                  <button
+                    onClick={closeModal}
+                    className="text-white/80 hover:text-white transition text-2xl leading-none"
+                    aria-label="بستن"
+                  >
+                    ×
+                  </button>
+                </div>
+                <p className="text-gray-100/90 leading-8 mt-4">{desc1}</p>
+                <p className="text-gray-100/80 leading-8 mt-3">{desc2}</p>
+
+                <div className="mt-6 flex justify-end">
+                  <button
+                    onClick={closeModal}
+                    className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition"
+                  >
+                    بستن
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
 
@@ -230,12 +279,8 @@ export default function Home() {
                   color: secondary,
                   backgroundColor: "transparent",
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = `${secondary}1A`;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "transparent";
-                }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${secondary}1A`)}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
               >
                 مشاهده ابزارها
               </a>

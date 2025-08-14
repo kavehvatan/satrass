@@ -336,7 +336,7 @@ export default function Home() {
             <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">
               زیرساخت هوشمند، با دقت مهندسی
             </h1>
-            <p className="mt-4 text-gray-300">از مشاوره تا پشتیبانی، کنار شماییم.</p>
+            <p className="mt-4 text-gray-300">از مشاوره تا پشتیبانی،در کنار شماییم.</p>
             <div className="mt-6 flex gap-3">
               {/* ارائه مشاوره — Filled */}
               <a
@@ -408,7 +408,7 @@ export default function Home() {
 
       <footer className="bg-black text-white">
         <div className="max-w-6xl mx-auto px-4 py-6 text-center">
-          <p>© {new Date().getFullYear()} ساتراس، همه حقوق محفوظ است</p>
+          <p>© {new Date().getFullYear()} .ساتراس، همه حقوق محفوظ است</p>
         </div>
       </footer>
     </main>

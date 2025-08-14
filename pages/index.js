@@ -6,6 +6,7 @@ const TEAL = "#14b8a6";
 const YELLOW = "#f4c21f";
 const LOGO_COLORS = [TEAL, YELLOW];
 
+// ——— تجهیزات
 const EQUIPMENT = [
   { name: "Dell EMC", slug: "dell", href: "/products/dell" },
   { name: "Cisco", slug: "cisco", href: "/products/cisco" },
@@ -17,6 +18,7 @@ const EQUIPMENT = [
   { name: "Fujitsu", slug: "fujitsu", href: "/products/fujitsu" },
 ];
 
+// ——— راهکارها (مودال خنثی)
 const SOLUTIONS = [
   {
     name: "Commvault",
@@ -34,27 +36,19 @@ const SOLUTIONS = [
   },
 ];
 
+// ——— خدمات (با slug برای مسیر صفحهٔ جدا)
 const SERVICES = [
-  { title: "نصب و راه‌اندازی",
-    desc1: "اجرای استاندارد از پیش‌نیازها تا استیجینگ؛ کابل‌کشی، کانفیگ اولیه، ارتقای Firmware و هم‌ترازی با Best Practice هر برند. چک‌لیست تحویل، تست کارکرد و مستندسازی کامل.",
-    desc2: "در صورت نیاز مهاجرت بدون وقفه انجام می‌شود (Cutover برنامه‌ریزی‌شده) و در پایان، پذیرش فنی (UAT) و تحویل رسمی پروژه انجام می‌گردد." },
-  { title: "پایش",
-    desc1: "طراحی مانیتورینگ با آستانه‌های درست، داشبورد و هشدارهای عملیاتی. گزارش‌گیری دوره‌ای برای SLA، ظرفیت‌سنجی و تحلیل عملکرد.",
-    desc2: "بازبینی سلامت، ارزیابی ریسک و پیشنهادهای بهینه‌سازی منظم تا زیرساخت همیشه در نقطهٔ امن و پایدار باقی بماند." },
-  { title: "آموزش",
-    desc1: "انتقال دانش مبتنی بر سناریوهای واقعی: از اصول راهبری تا تِریبل‌شوتینگ. محتوای آموزشی اختصاصی برای تیم شما به همراه Lab/Runbook.",
-    desc2: "پس از دوره، پشتیبانی پرسش‌وپاسخ و به‌روزرسانی جزوات را داریم تا دانش در تیم پایدار بماند." },
-  { title: "مشاوره و طراحی",
-    desc1: "نیازسنجی دقیق، اندازه‌گذاری ظرفیت، High Availability و Disaster Recovery. انتخاب راهکار با توجه به هزینه کل مالکیت (TCO) و رشد آتی.",
-    desc2: "طرح نهایی شامل دیاگرام، BOM و نقشهٔ مهاجرت است؛ چند گزینهٔ فنی/مالی ارائه می‌شود تا تصمیم‌گیری شفاف باشد." },
-  { title: "راهبری",
-    desc1: "خدمت مدیریت‌شده (Managed Service): پچینگ، بکاپ‌وریفای، هاردنینگ، بررسی لاگ‌ها و رسیدگی به رخدادها طبق SLA.",
-    desc2: "گزارش ماهانه سلامت، ظرفیت و ریسک‌ها + نشست مرور تغییرات (CAB) برای برنامه‌ریزی مطمئن و قابل پیش‌بینی." },
+  { slug: "install",           title: "نصب و راه‌اندازی" },
+  { slug: "monitoring",        title: "پایش" },
+  { slug: "training",          title: "آموزش" },
+  { slug: "consulting-design", title: "مشاوره و طراحی" },
+  { slug: "operations",        title: "راهبری" },
 ];
 
+// ——— دکمه‌های هیرو (دوحالته مثل قبل)
 function useAlternatingBrandPair() {
-  const [primary, setPrimary] = useState(YELLOW);
-  const [secondary, setSecondary] = useState(TEAL);
+  const [primary, setPrimary] = useState(YELLOW);   // Filled
+  const [secondary, setSecondary] = useState(TEAL); // Outlined
   useEffect(() => {
     try {
       const lastIsTeal = localStorage.getItem("satrass_btn_pair") === "1";
@@ -75,8 +69,7 @@ function useAlternatingBrandPair() {
   return { primary, secondary, swap };
 }
 
-const LOGO_COLORS = [TEAL, YELLOW];
-
+// ——— کارت برند
 function BrandCard({ name, slug, href }) {
   const [border, setBorder] = useState("#e5e7eb");
   return (
@@ -98,6 +91,7 @@ function BrandCard({ name, slug, href }) {
   );
 }
 
+// ——— مودال شیشه‌ای خنثی (برای راهکارها)
 function GlassModal({ open, onClose, title, paragraphs }) {
   const [closing, setClosing] = useState(false);
   useEffect(() => {
@@ -144,27 +138,24 @@ function GlassModal({ open, onClose, title, paragraphs }) {
   );
 }
 
-function ServiceCard({ title, desc1, desc2 }) {
+// ——— کارت خدمت (الان لینک میره به صفحهٔ جدا)
+function ServiceCard({ slug, title }) {
   const [border, setBorder] = useState("#e5e7eb");
-  const [open, setOpen] = useState(false);
   return (
-    <>
-      <div
-        onMouseEnter={() => setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])}
-        onMouseLeave={() => setBorder("#e5e7eb")}
-        onClick={() => setOpen(true)}
-        className="flex flex-col items-center justify-center gap-3 p-5 bg-white border rounded-lg hover:shadow-md transition text-center w-full max-w-[520px] mx-auto h-[120px] cursor-pointer select-none"
-        style={{ borderColor: border }}
-        role="button" tabIndex={0} aria-haspopup="dialog" aria-expanded={open}
-      >
-        <span className="font-semibold text-gray-900">{title}</span>
-      </div>
-
-      <GlassModal open={open} onClose={() => setOpen(false)} title={title} paragraphs={[desc1, desc2]} />
-    </>
+    <Link
+      href={`/services/${slug}`}
+      onMouseEnter={() => setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])}
+      onMouseLeave={() => setBorder("#e5e7eb")}
+      className="flex flex-col items-center justify-center gap-2 p-5 bg-white border rounded-lg hover:shadow-md transition text-center w-full max-w-[520px] mx-auto h-[120px]"
+      style={{ borderColor: border }}
+    >
+      <span className="font-semibold text-gray-900">{title}</span>
+      <span className="text-xs text-gray-500">جزئیات، Specsheet و عکس</span>
+    </Link>
   );
 }
 
+// ——— کارت راهکار (مودال خنثی)
 function SolutionCard({ name, slug, p1, p2, p3 }) {
   const [border, setBorder] = useState("#e5e7eb");
   const [open, setOpen] = useState(false);
@@ -187,7 +178,12 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
         <div className="font-bold text-gray-900">{name}</div>
       </div>
 
-      <GlassModal open={open} onClose={() => setOpen(false)} title={`${name} — راهکارها`} paragraphs={[p1, p2, p3]} />
+      <GlassModal
+        open={open}
+        onClose={() => setOpen(false)}
+        title={`${name} — راهکارها`}
+        paragraphs={[p1, p2, p3]}
+      />
     </>
   );
 }
@@ -202,9 +198,12 @@ export default function Home() {
       <section className="bg-[linear-gradient(135deg,#000_0%,#0a0a0a_60%,#111_100%)] text-white">
         <div className="max-w-6xl mx-auto px-4 py-12 md:py-16 grid md:grid-cols-2 items-center gap-10">
           <div>
-            <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">زیرساخت هوشمند، با دقت مهندسی</h1>
+            <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">
+              زیرساخت هوشمند، با دقت مهندسی
+            </h1>
             <p className="mt-4 text-gray-300">از مشاوره تا پشتیبانی، کنار شماییم.</p>
             <div className="mt-6 flex gap-3">
+              {/* ارائه مشاوره — Filled */}
               <a
                 href="/contact"
                 onClick={swap}
@@ -213,6 +212,7 @@ export default function Home() {
               >
                 ارائه مشاوره
               </a>
+              {/* مشاهده ابزارها — Outlined */}
               <a
                 href="/tools"
                 onClick={swap}
@@ -226,8 +226,13 @@ export default function Home() {
             </div>
           </div>
 
+          {/* آواتار هِرو */}
           <div className="flex justify-center">
-            <img src="/satrass-hero.png" alt="آواتار ساتراس" className="w-[280px] md:w-[340px] lg:w-[400px] h-auto object-contain" />
+            <img
+              src="/satrass-hero.png"
+              alt="آواتار ساتراس"
+              className="w-[280px] md:w-[340px] lg:w-[400px] h-auto object-contain"
+            />
           </div>
         </div>
       </section>
@@ -253,8 +258,8 @@ export default function Home() {
 
         <h3 className="text-xl font-bold mb-4">خدمات</h3>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-          {SERVICES.map((s, i) => (
-            <ServiceCard key={i} {...s} />
+          {SERVICES.map((s) => (
+            <ServiceCard key={s.slug} {...s} />
           ))}
         </div>
       </section>

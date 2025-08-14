@@ -95,7 +95,7 @@ export default function ContactHero() {
                   <li>
                     ☎️ تلفن:{" "}
                     <a href="tel:+982188066022" className="text-amber-400 hover:underline" dir="ltr">
-                      +98(۲۱۸۸۰۶۶۰۲۲)
+                      +982188066022
                     </a>
                   </li>
 

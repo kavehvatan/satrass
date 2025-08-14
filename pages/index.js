@@ -6,19 +6,19 @@ const TEAL = "#14b8a6";
 const YELLOW = "#f4c21f";
 const LOGO_COLORS = [TEAL, YELLOW];
 
-// ——— تجهیزات
+// ——— تجهیزات (می‌رن به /products/<slug>)
 const EQUIPMENT = [
-  { name: "Dell EMC", slug: "dell", href: "/products/dell" },
-  { name: "Cisco", slug: "cisco", href: "/products/cisco" },
-  { name: "HPE", slug: "hpe", href: "/products/hpe" },
-  { name: "Lenovo", slug: "lenovo", href: "/products/lenovo" },
-  { name: "Quantum", slug: "quantum", href: "/products/quantum" },
-  { name: "Juniper", slug: "juniper", href: "/products/juniper" },
-  { name: "Oracle", slug: "oracle", href: "/products/oracle" },
-  { name: "Fujitsu", slug: "fujitsu", href: "/products/fujitsu" },
+  { name: "Dell EMC", slug: "dell" },
+  { name: "Cisco", slug: "cisco" },
+  { name: "HPE", slug: "hpe" },
+  { name: "Lenovo", slug: "lenovo" },
+  { name: "Quantum", slug: "quantum" },
+  { name: "Juniper", slug: "juniper" },
+  { name: "Oracle", slug: "oracle" },
+  { name: "Fujitsu", slug: "fujitsu" },
 ];
 
-// ——— راهکارها (مودال خنثی)
+// ——— راهکارها (مودال شیشه‌ای خنثی)
 const SOLUTIONS = [
   {
     name: "Commvault",
@@ -36,16 +36,51 @@ const SOLUTIONS = [
   },
 ];
 
-// ——— خدمات (با slug برای مسیر صفحهٔ جدا)
+// ——— خدمات (فقط مودال شیشه‌ای؛ بدون هیچ دکمه اضافی)
 const SERVICES = [
-  { slug: "install",           title: "نصب و راه‌اندازی" },
-  { slug: "monitoring",        title: "پایش" },
-  { slug: "training",          title: "آموزش" },
-  { slug: "consulting-design", title: "مشاوره و طراحی" },
-  { slug: "operations",        title: "راهبری" },
+  {
+    slug: "install",
+    title: "نصب و راه‌اندازی",
+    desc1:
+      "اجرای استاندارد از پیش‌نیازها تا استیجینگ؛ کابل‌کشی، کانفیگ اولیه، ارتقای Firmware و هم‌ترازی با Best Practice هر برند.",
+    desc2:
+      "در صورت نیاز مهاجرت بدون وقفه انجام می‌شود (Cutover برنامه‌ریزی‌شده) و در پایان، پذیرش فنی (UAT) و تحویل رسمی پروژه انجام می‌گردد.",
+  },
+  {
+    slug: "monitoring",
+    title: "پایش",
+    desc1:
+      "طراحی مانیتورینگ با آستانه‌های درست، داشبورد و هشدارهای عملیاتی. گزارش‌گیری دوره‌ای برای SLA، ظرفیت‌سنجی و تحلیل عملکرد.",
+    desc2:
+      "بازبینی سلامت، ارزیابی ریسک و پیشنهادهای بهینه‌سازی منظم تا زیرساخت همیشه در نقطهٔ امن و پایدار باقی بماند.",
+  },
+  {
+    slug: "training",
+    title: "آموزش",
+    desc1:
+      "انتقال دانش مبتنی بر سناریوهای واقعی: از اصول راهبری تا تِریبل‌شوتینگ. محتوای آموزشی اختصاصی + Lab/Runbook.",
+    desc2:
+      "پس از دوره، پشتیبانی پرسش‌وپاسخ و به‌روزرسانی جزوات را داریم تا دانش در تیم پایدار بماند.",
+  },
+  {
+    slug: "consulting-design",
+    title: "مشاوره و طراحی",
+    desc1:
+      "نیازسنجی دقیق، اندازه‌گذاری ظرفیت، High Availability و Disaster Recovery. انتخاب راهکار با توجه به هزینه کل مالکیت (TCO) و رشد آتی.",
+    desc2:
+      "طرح نهایی شامل دیاگرام، BOM و نقشهٔ مهاجرت است؛ چند گزینهٔ فنی/مالی ارائه می‌شود تا تصمیم‌گیری شفاف باشد.",
+  },
+  {
+    slug: "operations",
+    title: "راهبری",
+    desc1:
+      "خدمت مدیریت‌شده (Managed Service): پچینگ، بکاپ‌وریفای، هاردنینگ، بررسی لاگ‌ها و رسیدگی به رخدادها طبق SLA.",
+    desc2:
+      "گزارش ماهانه سلامت، ظرفیت و ریسک‌ها + نشست مرور تغییرات (CAB) برای برنامه‌ریزی مطمئن و قابل پیش‌بینی.",
+  },
 ];
 
-// ——— دکمه‌های هیرو (دوحالته مثل قبل)
+// ——— دکمه‌های هیرو (دوحالته)
 function useAlternatingBrandPair() {
   const [primary, setPrimary] = useState(YELLOW);   // Filled
   const [secondary, setSecondary] = useState(TEAL); // Outlined
@@ -69,12 +104,12 @@ function useAlternatingBrandPair() {
   return { primary, secondary, swap };
 }
 
-// ——— کارت برند
-function BrandCard({ name, slug, href }) {
+// ——— کارت برند (Equipment)
+function BrandCard({ name, slug }) {
   const [border, setBorder] = useState("#e5e7eb");
   return (
     <Link
-      href={href}
+      href={`/products/${slug}`}
       onMouseEnter={() => setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])}
       onMouseLeave={() => setBorder("#e5e7eb")}
       className="flex flex-col items-center justify-center gap-3 p-5 bg-white border rounded-lg hover:shadow-md transition text-center w-full max-w-[520px] mx-auto h-[120px]"
@@ -91,7 +126,7 @@ function BrandCard({ name, slug, href }) {
   );
 }
 
-// ——— مودال شیشه‌ای خنثی (برای راهکارها)
+// ——— مودال شیشه‌ای خنثی (برای خدمات و راهکارها)
 function GlassModal({ open, onClose, title, paragraphs }) {
   const [closing, setClosing] = useState(false);
   useEffect(() => {
@@ -138,20 +173,30 @@ function GlassModal({ open, onClose, title, paragraphs }) {
   );
 }
 
-// ——— کارت خدمت (الان لینک میره به صفحهٔ جدا)
-function ServiceCard({ slug, title }) {
+// ——— کارت خدمت (کلیک = باز شدن مودال؛ بدون هیچ لینک/دکمه‌ی اضافه)
+function ServiceCard({ title, desc1, desc2 }) {
   const [border, setBorder] = useState("#e5e7eb");
+  const [open, setOpen] = useState(false);
   return (
-    <Link
-      href={`/services/${slug}`}
-      onMouseEnter={() => setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])}
-      onMouseLeave={() => setBorder("#e5e7eb")}
-      className="flex flex-col items-center justify-center gap-2 p-5 bg-white border rounded-lg hover:shadow-md transition text-center w-full max-w-[520px] mx-auto h-[120px]"
-      style={{ borderColor: border }}
-    >
-      <span className="font-semibold text-gray-900">{title}</span>
-      <span className="text-xs text-gray-500">جزئیات، Specsheet و عکس</span>
-    </Link>
+    <>
+      <div
+        onMouseEnter={() => setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])}
+        onMouseLeave={() => setBorder("#e5e7eb")}
+        onClick={() => setOpen(true)}
+        className="flex flex-col items-center justify-center gap-3 p-5 bg-white border rounded-lg hover:shadow-md transition text-center w-full max-w-[520px] mx-auto h-[120px] cursor-pointer select-none"
+        style={{ borderColor: border }}
+        role="button" tabIndex={0} aria-haspopup="dialog" aria-expanded={open}
+      >
+        <span className="font-semibold text-gray-900">{title}</span>
+      </div>
+
+      <GlassModal
+        open={open}
+        onClose={() => setOpen(false)}
+        title={title}
+        paragraphs={[desc1, desc2]}
+      />
+    </>
   );
 }
 

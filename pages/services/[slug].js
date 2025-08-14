@@ -1,26 +1,23 @@
 // pages/services/[slug].js
 import Head from "next/head";
 import Link from "next/link";
-import path from "path";
 import fs from "fs";
+import path from "path";
 
 export async function getStaticPaths() {
   const file = path.join(process.cwd(), "data", "services.json");
-  const raw = fs.readFileSync(file, "utf8");
-  const data = JSON.parse(raw || "{}");
+  const data = JSON.parse(fs.readFileSync(file, "utf8"));
   const paths = Object.keys(data).map((slug) => ({ params: { slug } }));
-  return { paths, fallback: false };
+  return { paths, fallback: false }; // فقط همین اسلاگ‌هایی که تو JSON هستن
 }
 
 export async function getStaticProps({ params }) {
   const file = path.join(process.cwd(), "data", "services.json");
-  const raw = fs.readFileSync(file, "utf8");
-  const data = JSON.parse(raw || "{}");
-  const svc = data[params.slug] || null;
-  return { props: { slug: params.slug, svc } };
+  const data = JSON.parse(fs.readFileSync(file, "utf8"));
+  return { props: { svc: data[params.slug] || null } };
 }
 
-export default function ServicePage({ slug, svc }) {
+export default function ServicePage({ svc }) {
   if (!svc) return null;
   return (
     <>
@@ -41,11 +38,13 @@ export default function ServicePage({ slug, svc }) {
           </div>
         </section>
 
-        {/* لیست تجهیزات پیشنهادی + Specsheet */}
+        {/* کارت‌های تجهیزات/Specsheet */}
         <section className="max-w-6xl mx-auto px-4 py-10">
           {(!svc.items || svc.items.length === 0) ? (
             <div className="rounded-xl border p-6 text-gray-600">
-              هنوز آیتمی برای این خدمت ثبت نشده. از فایل <code className="bg-gray-100 px-1 rounded">data/services.json</code> اضافه‌اش کن.
+              هنوز آیتمی برای این خدمت ثبت نشده. از
+              <code className="bg-gray-100 px-1 mx-1 rounded">data/services.json</code>
+              اضافه‌اش کن.
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">

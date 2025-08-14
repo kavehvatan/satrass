@@ -13,7 +13,7 @@ const EQUIPMENT = [
   { name: "Lenovo", slug: "lenovo", href: "/products/lenovo" },
 ];
 
-// راهکارها با متن طولانی‌تر
+// راهکارها (مودال با متن طولانی‌تر)
 const SOLUTIONS = [
   {
     name: "Commvault",
@@ -31,7 +31,7 @@ const SOLUTIONS = [
   },
 ];
 
-// خدمات با ۲ پاراگراف
+// خدمات (۲ پاراگراف)
 const SERVICES = [
   {
     title: "نصب و راه‌اندازی",
@@ -74,7 +74,13 @@ const CARD_CLASS =
   "flex flex-col items-center justify-center gap-3 p-5 bg-white border rounded-lg hover:shadow-md " +
   "transition text-center w-full max-w-[520px] mx-auto h-[120px]";
 
-// ===== دکمه‌های هیرو: جابجایی نوبتی + کلیک (persist با localStorage)
+// ——— helper: انتخاب رنگ با شفافیت
+function tint(color, alpha) {
+  if (color === TEAL) return `rgba(20,184,166,${alpha})`;
+  return `rgba(244,194,31,${alpha})`;
+}
+
+// ——— دکمه‌های هیرو: جابجایی نوبتی + کلیک (persist با localStorage)
 function useAlternatingBrandPair() {
   const [primary, setPrimary] = useState(YELLOW);   // Filled
   const [secondary, setSecondary] = useState(TEAL); // Outlined
@@ -109,13 +115,7 @@ function useAlternatingBrandPair() {
   return { primary, secondary, swap };
 }
 
-function tint(color, alpha) {
-  // alpha: 0..1
-  if (color === TEAL) return `rgba(20,184,166,${alpha})`;
-  return `rgba(244,194,31,${alpha})`;
-}
-
-// ===== کارت برندها
+// ——— کارت برندها
 function BrandCard({ name, slug, href }) {
   const [border, setBorder] = useState("#e5e7eb");
   return (
@@ -139,7 +139,7 @@ function BrandCard({ name, slug, href }) {
   );
 }
 
-// ===== قفل اسکرول بدنه وقتی مودال بازه
+// ——— قفل اسکرول بدنه وقتی مودال بازه
 function useBodyScrollLock(locked) {
   useEffect(() => {
     const prev = document.body.style.overflow;
@@ -150,14 +150,16 @@ function useBodyScrollLock(locked) {
   }, [locked]);
 }
 
-// ===== مودال شیشه‌ای مرکز صفحه (One-color tint)
+// ——— مودال شیشه‌ای (یک‌رنگ، یکنواخت، وسط صفحه)
 function GlassModal({ open, onClose, title, paragraphs, accent }) {
   const [closing, setClosing] = useState(false);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e) => e.key === "Escape" && handleClose();
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const handleClose = () => {
@@ -169,14 +171,17 @@ function GlassModal({ open, onClose, title, paragraphs, accent }) {
   };
 
   useBodyScrollLock(open);
-
   if (!open) return null;
+
   return (
     <div
       className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity
                   ${closing ? "opacity-0" : "opacity-100"} duration-200`}
     >
+      {/* بک‌درُپ */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={handleClose} />
+
+      {/* پنجره */}
       <div
         className={`relative z-10 w-[min(92vw,760px)] mx-auto rounded-2xl overflow-hidden
                     transform transition-all duration-200
@@ -184,16 +189,10 @@ function GlassModal({ open, onClose, title, paragraphs, accent }) {
         role="dialog"
         aria-modal="true"
       >
-        {/* فقط یک رنگ، جون‌دارتر وسط شیشه */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background: `radial-gradient(80% 80% at 50% 40%, ${tint(accent,0.45)} 0%, ${tint(
-              accent,
-              0.16
-            )} 45%, transparent 85%)`,
-          }}
-        />
+        {/* ✅ تینت یکنواخت با یک رنگ برند (بدون گرادیان) */}
+        <div className="absolute inset-0" style={{ backgroundColor: tint(accent, 0.22) }} />
+
+        {/* شیشهٔ مات + متن خوانا */}
         <div className="relative rounded-2xl border border-white/15 bg-white/10 backdrop-blur-xl shadow-[0_20px_60px_-15px_rgba(0,0,0,.5)]">
           <div className="p-6 md:p-8">
             <div className="flex items-start justify-between gap-6">
@@ -208,16 +207,20 @@ function GlassModal({ open, onClose, title, paragraphs, accent }) {
                 ×
               </button>
             </div>
-            {paragraphs.map((tx, i) => (
-              <p
-                key={i}
-                className={`leading-8 mt-${i === 0 ? "4" : "3"} ${
-                  i === 0 ? "text-white/95" : "text-white/90"
-                } drop-shadow-[0_1px_1px_rgba(0,0,0,0.35)]`}
-              >
-                {tx}
-              </p>
-            ))}
+
+            {paragraphs.map((tx, i) => {
+              const cls =
+                (i === 0
+                  ? "text-white/95 mt-4"
+                  : "text-white/90 mt-3") +
+                " leading-8 drop-shadow-[0_1px_1px_rgba(0,0,0,0.35)]";
+              return (
+                <p key={i} className={cls}>
+                  {tx}
+                </p>
+              );
+            })}
+
             <div className="mt-6 flex justify-end gap-3">
               <button
                 onClick={handleClose}
@@ -233,7 +236,7 @@ function GlassModal({ open, onClose, title, paragraphs, accent }) {
   );
 }
 
-// ===== کارت خدمات + مودال
+// ——— کارت خدمات + مودال
 function ServiceCard({ title, desc1, desc2 }) {
   const [border, setBorder] = useState("#e5e7eb");
   const [open, setOpen] = useState(false);
@@ -271,7 +274,7 @@ function ServiceCard({ title, desc1, desc2 }) {
   );
 }
 
-// ===== کارت راهکار + مودالِ طولانی‌تر
+// ——— کارت راهکار + مودال طولانی‌تر
 function SolutionCard({ name, slug, p1, p2, p3 }) {
   const [border, setBorder] = useState("#e5e7eb");
   const [open, setOpen] = useState(false);
@@ -311,7 +314,6 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
         accent={accent}
         paragraphs={[p1, p2, p3]}
       />
-      {/* CTA زیر کارت برای دسترسی مستقیم هم می‌تونه اضافه بشه؛ داخل مودال هم می‌تونیم لینک بدهیم */}
     </>
   );
 }
@@ -382,7 +384,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* راهکارها (با مودال طولانی‌تر) */}
+      {/* راهکارها + خدمات */}
       <section id="solutions" className="max-w-6xl mx-auto px-4 pb-10">
         <h2 className="text-2xl font-bold mb-6">راهکارها</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center mb-10">
@@ -391,7 +393,6 @@ export default function Home() {
           ))}
         </div>
 
-        {/* خدمات */}
         <h3 className="text-xl font-bold mb-4">خدمات</h3>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
           {SERVICES.map((s, i) => (

@@ -7,18 +7,49 @@ import path from "path";
 const TEAL = "#14b8a6";
 const YELLOW = "#f4c21f";
 
+// ساده و محکم: تبدیل اسم به اسلاگِ لوِرکیس
+function slugify(x = "") {
+  return String(x)
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9\-]/g, "");
+}
+
 export async function getStaticPaths() {
   const file = path.join(process.cwd(), "data", "products.json");
-  const data = JSON.parse(fs.readFileSync(file, "utf8"));
-  const paths = Object.keys(data).map((vendor) => ({ params: { vendor } }));
+  const data = JSON.parse(fs.readFileSync(file, "utf8") || "{}");
+
+  // کلیدها را نرمال کنیم و تکراری‌ها را حذف
+  const unique = new Set();
+  const paths = [];
+  for (const key of Object.keys(data)) {
+    const s = slugify(key);
+    if (!unique.has(s)) {
+      unique.add(s);
+      paths.push({ params: { vendor: s } });
+    }
+  }
   return { paths, fallback: false };
 }
 
 export async function getStaticProps({ params }) {
   const file = path.join(process.cwd(), "data", "products.json");
-  const data = JSON.parse(fs.readFileSync(file, "utf8"));
-  const vendorData = data[params.vendor] || null;
-  return { props: { vendor: params.vendor, vendorData } };
+  const data = JSON.parse(fs.readFileSync(file, "utf8") || "{}");
+
+  // کلیدی را پیدا کن که اسلاگش با پارامتر برابر است (بدون حساسیت به حروف)
+  const matchKey =
+    Object.keys(data).find((k) => slugify(k) === params.vendor) ?? null;
+
+  const vendorData = matchKey ? data[matchKey] : null;
+
+  return {
+    props: {
+      vendor: params.vendor,
+      vendorTitle: matchKey || params.vendor.toUpperCase(),
+      vendorData: vendorData || { items: [] },
+    },
+  };
 }
 
 function ProductCard({ item }) {
@@ -32,8 +63,12 @@ function ProductCard({ item }) {
           onError={(e) => (e.currentTarget.style.display = "none")}
         />
       )}
-      <div className="text-sm text-gray-500">{item.vendor}</div>
-      <h3 className="text-lg font-bold text-gray-900">{item.model || item.name}</h3>
+      {item.vendor && (
+        <div className="text-sm text-gray-500">{item.vendor}</div>
+      )}
+      <h3 className="text-lg font-bold text-gray-900">
+        {item.model || item.name || "Product"}
+      </h3>
       {item.desc && <p className="mt-2 text-gray-700 leading-7">{item.desc}</p>}
       <div className="mt-4 flex gap-3">
         {item.specsheet && (
@@ -58,28 +93,33 @@ function ProductCard({ item }) {
   );
 }
 
-export default function VendorPage({ vendor, vendorData }) {
-  if (!vendorData) return null;
-  const title = vendorData.title || vendorData.name || vendor.toUpperCase();
+export default function VendorPage({ vendorTitle, vendorData }) {
+  const title = vendorData.title || vendorData.name || vendorTitle;
 
   return (
     <>
-      <Head><title>{title} — تجهیزات — ساتراس</title></Head>
+      <Head>
+        <title>{title} — تجهیزات — ساتراس</title>
+      </Head>
       <main className="min-h-screen">
         {/* Hero */}
         <section className="bg-[linear-gradient(135deg,#000_0%,#0a0a0a_60%,#111_100%)] text-white">
           <div className="max-w-6xl mx-auto px-4 py-10">
             <nav className="text-sm text-white/70 mb-3">
-              <Link href="/" className="hover:text-white/90">خانه</Link>
+              <Link href="/" className="hover:text-white/90">
+                خانه
+              </Link>
               <span className="mx-2">/</span>
-              <a href="/#products" className="hover:text-white/90">تجهیزات</a>
+              <a href="/#products" className="hover:text-white/90">
+                تجهیزات
+              </a>
               <span className="mx-2">/</span>
               <span className="text-white">{title}</span>
             </nav>
 
             <div className="flex items-center gap-4">
               <img
-                src={`/avatars/${vendor}.png`}
+                src={`/avatars/${slugify(vendorTitle)}.png`}
                 alt={title}
                 className="w-12 h-12 object-contain"
                 onError={(e) => (e.currentTarget.style.display = "none")}
@@ -88,7 +128,9 @@ export default function VendorPage({ vendor, vendorData }) {
             </div>
 
             {vendorData.intro && (
-              <p className="mt-3 text-gray-300 max-w-3xl leading-7">{vendorData.intro}</p>
+              <p className="mt-3 text-gray-300 max-w-3xl leading-7">
+                {vendorData.intro}
+              </p>
             )}
           </div>
         </section>
@@ -97,8 +139,10 @@ export default function VendorPage({ vendor, vendorData }) {
         <section className="max-w-6xl mx-auto px-4 py-10">
           {(!vendorData.items || vendorData.items.length === 0) ? (
             <div className="rounded-xl border p-6 text-gray-600">
-              هنوز محصولی برای این برند ثبت نشده. از فایل
-              <code className="bg-gray-100 px-1 mx-1 rounded">data/products.json</code>
+              هنوز محصولی برای این برند ثبت نشده. از فایل{" "}
+              <code className="bg-gray-100 px-1 mx-1 rounded">
+                data/products.json
+              </code>{" "}
               اضافه‌ش کن.
             </div>
           ) : (

@@ -1,58 +1,10 @@
 {
-  "dell": {
-    "title": "Dell EMC",
-    "intro": "استوریج و سرورهای Dell EMC برای بارکاری‌های سازمانی با تمرکز بر کارایی و سادگی مدیریت.",
-    "items": [
-      {
-        "vendor": "Dell EMC",
-        "model": "Unity XT 480",
-        "desc": "استوریج میان‌رده با Snapshot/Replication و Tiering برای بارکاری‌های ترکیبی.",
-        "image": "/products/dell/unity-xt480.png",
-        "specsheet": null
-      }
-    ]
-  },
-  "cisco": {
-    "title": "Cisco",
-    "intro": "سوییچ‌های SAN و شبکه دیتاسنتر با پایداری بالا و تأخیر کم.",
-    "items": [
-      {
-        "vendor": "Cisco",
-        "model": "MDS 9148S",
-        "desc": "سوییچ SAN برای محیط‌های متوسط با قابلیت‌های Zoning و امنیت.",
-        "image": "/products/cisco/mds-9148s.png",
-        "specsheet": null
-      }
-    ]
-  },
-  "hpe": {
-    "title": "HPE",
-    "intro": "حل‌مسائل ذخیره‌سازی و محاسبات با OneView/iLO و اکوسیستم غنی.",
-    "items": []
-  },
-  "lenovo": {
-    "title": "Lenovo",
-    "intro": "سری ThinkSystem برای کارایی پایدار و قیمت رقابتی.",
-    "items": []
-  },
-  "quantum": {
-    "title": "Quantum",
-    "intro": "آرشیو و بکاپ مبتنی بر نوار و استوریج آبجکت.",
-    "items": []
-  },
-  "juniper": {
-    "title": "Juniper",
-    "intro": "شبکه‌های دیتاسنتر و Core با تمرکز بر Automation.",
-    "items": []
-  },
-  "oracle": {
-    "title": "Oracle",
-    "intro": "راهکارهای یکپارچه برای دیتابیس و استوریجِ بهینه برای Oracle DB.",
-    "items": []
-  },
-  "fujitsu": {
-    "title": "Fujitsu",
-    "intro": "سرورها و استوریج قابل اعتماد برای محیط‌های سازمانی.",
-    "items": []
-  }
+  "dell": { "title": "Dell EMC", "intro": "...", "items": [] },
+  "cisco": { "title": "Cisco", "intro": "...", "items": [] },
+  "hpe":   { "title": "HPE",   "intro": "...", "items": [] },
+  "lenovo": { "title": "Lenovo", "intro": "...", "items": [] },
+  "quantum": { "title": "Quantum", "intro": "...", "items": [] },
+  "juniper": { "title": "Juniper", "intro": "...", "items": [] },
+  "oracle": { "title": "Oracle", "intro": "...", "items": [] },
+  "fujitsu": { "title": "Fujitsu", "intro": "...", "items": [] }
 }

@@ -20,10 +20,10 @@
       },
       {
         "vendor": "Dell EMC",
-        "model": "PowerEdge R750",
+        "model": "PowerEdge R570",
         "desc": "سرور 2U نسل جدید برای بارکاری‌های مجازی‌سازی، دیتابیس و VDI با پشتیبانی PCIe Gen4 و iDRAC.",
-        "image": "/products/dell/poweredge-r750.png",
-        "specsheet": "/specs/dell/poweredge-r750.pdf"
+        "image": "/products/dell/poweredge-r760.png",
+        "specsheet": "/specs/dell/poweredge-r760.pdf"
       }
     ]
   },

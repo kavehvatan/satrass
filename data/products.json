@@ -1,6 +1,19 @@
 {
-  "dell": { "title": "Dell EMC", "intro": "...", "items": [] },
-  "cisco": { "title": "Cisco", "intro": "...", "items": [] },
+{
+  "dell": {
+    "title": "Dell EMC",
+    "intro": "استوریج و سرورهای Dell EMC برای بارکاری‌های سازمانی با تمرکز بر کارایی و سادگی مدیریت.",
+    "items": [
+      {
+        "vendor": "Dell EMC",
+        "model": "Unity XT 480",
+        "desc": "استوریج میان‌رده با Snapshot/Replication و Tiering برای بارکاری‌های ترکیبی.",
+        "image": "/products/dell/unity-xt480.png",
+        "specsheet": "/specs/dell/unity-xt480-datasheet.pdf"
+      }
+    ]
+  }
+}  "cisco": { "title": "Cisco", "intro": "...", "items": [] },
   "hpe":   { "title": "HPE",   "intro": "...", "items": [] },
   "lenovo": { "title": "Lenovo", "intro": "...", "items": [] },
   "quantum": { "title": "Quantum", "intro": "...", "items": [] },

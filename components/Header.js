@@ -9,6 +9,7 @@ export default function Header() {
         <nav className="order-2 flex items-center gap-6 text-[15px] md:text-[17px] lg:text-[18px] font-semibold text-gray-900">
           <Link href="/" className="hover:text-black/70">خانه</Link>
           <Link href="/tools" className="hover:text-black/70">ابزارها</Link>
+	<Link href="/downloads" className="hover:text-brand-teal transition">دانلودها</Link>
           <Link href="/about" className="hover:text-black/70">درباره ما</Link>
           <Link href="/contact" className="hover:text-black/70">تماس با ما</Link>
         </nav>

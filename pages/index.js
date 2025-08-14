@@ -13,12 +13,25 @@ const EQUIPMENT = [
   { name: "Lenovo", slug: "lenovo", href: "/products/lenovo" },
 ];
 
+// راهکارها با متن طولانی‌تر
 const SOLUTIONS = [
-  { name: "Commvault", slug: "commvault", href: "/solutions/commvault" },
-  { name: "NetBackup", slug: "netbackup", href: "/solutions/netbackup" },
+  {
+    name: "Commvault",
+    slug: "commvault",
+    p1: "کام‌والت راهکار یکپارچهٔ حفاظت از داده است که پشتیبانی گسترده‌ای از بارکاری‌ها (VM، دیتابیس، فایل‌سرور، SaaS و کلود) دارد. Deduplication کارآمد، Policyهای انعطاف‌پذیر و Cloud Tiering باعث کاهش هزینهٔ ذخیره‌سازی و کوتاه‌شدن زمان بازیابی می‌شود.",
+    p2: "با Hyperscale X می‌توان حفاظت را به‌صورت Scale-out اجرا کرد و با Metallic سرویس‌های بکاپ را به‌صورت SaaS دریافت نمود. گزارش‌گیری جامع، خودکارسازی فرایندها، و رصد سلامت، تیم IT را از کارهای دستی رها می‌کند.",
+    p3: "سناریوهای متداول: محافظت سراسری Microsoft 365 و Endpointها، بکاپ ترکیبی On-prem/Cloud، و بازیابی سریع برای RTO/RPOهای سخت‌گیرانه.",
+  },
+  {
+    name: "NetBackup",
+    slug: "netbackup",
+    p1: "نت‌بکاپ از قدیمی‌ترین و قابل‌اعتمادترین پلتفرم‌های بکاپ سازمانی است. تمرکز آن روی کارایی، مقیاس‌پذیری و پوشش عمیق برای مجازی‌سازی و دیتابیس‌هاست. با Inline Dedup و شتاب‌دهی انتقال، پنجرهٔ بکاپ کوچک می‌شود.",
+    p2: "اپلاینس‌های سری 52xx و Flex زیرساخت آماده برای استقرار سریع ارائه می‌کنند؛ مدیریت متمرکز، نقش‌ها/مجوزها، و گزارش‌گیری دقیق، نگهداری روزمره را ساده می‌کند.",
+    p3: "سناریوهای متداول: حفاظت از VMware/Hyper-V، دیتابیس‌های Oracle/SQL، آرشیو بلندمدت روی نوار یا کلود، و بازیابی انتخابی در سطح فایل/آبجکت.",
+  },
 ];
 
-// توضیحات ۲ پاراگرافی خدمات
+// خدمات با ۲ پاراگراف
 const SERVICES = [
   {
     title: "نصب و راه‌اندازی",
@@ -61,7 +74,7 @@ const CARD_CLASS =
   "flex flex-col items-center justify-center gap-3 p-5 bg-white border rounded-lg hover:shadow-md " +
   "transition text-center w-full max-w-[520px] mx-auto h-[120px]";
 
-// ===== دکمه‌های هیرو: جابجایی نوبتی + با کلیک (persist با localStorage)
+// ===== دکمه‌های هیرو: جابجایی نوبتی + کلیک (persist با localStorage)
 function useAlternatingBrandPair() {
   const [primary, setPrimary] = useState(YELLOW);   // Filled
   const [secondary, setSecondary] = useState(TEAL); // Outlined
@@ -94,6 +107,12 @@ function useAlternatingBrandPair() {
   };
 
   return { primary, secondary, swap };
+}
+
+function tint(color, alpha) {
+  // alpha: 0..1
+  if (color === TEAL) return `rgba(20,184,166,${alpha})`;
+  return `rgba(244,194,31,${alpha})`;
 }
 
 // ===== کارت برندها
@@ -131,34 +150,94 @@ function useBodyScrollLock(locked) {
   }, [locked]);
 }
 
-// ===== کارت خدمات + مودال شیشه‌ای وسط صفحه با تینت ملایم
-function ServiceCard({ title, desc1, desc2 }) {
-  const [border, setBorder] = useState("#e5e7eb");
-  const [open, setOpen] = useState(false);
+// ===== مودال شیشه‌ای مرکز صفحه (One-color tint)
+function GlassModal({ open, onClose, title, paragraphs, accent }) {
   const [closing, setClosing] = useState(false);
-  const [accent, setAccent] = useState(TEAL);
-
-  const openModal = () => {
-    setAccent(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)]);
-    setOpen(true);
-  };
-  const closeModal = () => {
-    setClosing(true);
-    setTimeout(() => {
-      setOpen(false);
-      setClosing(false);
-    }, 220);
-  };
-
-  // ESC برای بستن
   useEffect(() => {
     if (!open) return;
-    const onKey = (e) => e.key === "Escape" && closeModal();
+    const onKey = (e) => e.key === "Escape" && handleClose();
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
+  const handleClose = () => {
+    setClosing(true);
+    setTimeout(() => {
+      setClosing(false);
+      onClose?.();
+    }, 220);
+  };
+
   useBodyScrollLock(open);
+
+  if (!open) return null;
+  return (
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity
+                  ${closing ? "opacity-0" : "opacity-100"} duration-200`}
+    >
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={handleClose} />
+      <div
+        className={`relative z-10 w-[min(92vw,760px)] mx-auto rounded-2xl overflow-hidden
+                    transform transition-all duration-200
+                    ${closing ? "opacity-0 scale-95" : "opacity-100 scale-100"}`}
+        role="dialog"
+        aria-modal="true"
+      >
+        {/* فقط یک رنگ، جون‌دارتر وسط شیشه */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `radial-gradient(80% 80% at 50% 40%, ${tint(accent,0.45)} 0%, ${tint(
+              accent,
+              0.16
+            )} 45%, transparent 85%)`,
+          }}
+        />
+        <div className="relative rounded-2xl border border-white/15 bg-white/10 backdrop-blur-xl shadow-[0_20px_60px_-15px_rgba(0,0,0,.5)]">
+          <div className="p-6 md:p-8">
+            <div className="flex items-start justify-between gap-6">
+              <h4 className="text-xl md:text-2xl font-extrabold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.45)]">
+                {title}
+              </h4>
+              <button
+                onClick={handleClose}
+                className="text-white/85 hover:text-white transition text-2xl leading-none"
+                aria-label="بستن"
+              >
+                ×
+              </button>
+            </div>
+            {paragraphs.map((tx, i) => (
+              <p
+                key={i}
+                className={`leading-8 mt-${i === 0 ? "4" : "3"} ${
+                  i === 0 ? "text-white/95" : "text-white/90"
+                } drop-shadow-[0_1px_1px_rgba(0,0,0,0.35)]`}
+              >
+                {tx}
+              </p>
+            ))}
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={handleClose}
+                className="px-4 py-2 rounded-lg bg-white/15 hover:bg-white/25 text-white transition"
+              >
+                بستن
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ===== کارت خدمات + مودال
+function ServiceCard({ title, desc1, desc2 }) {
+  const [border, setBorder] = useState("#e5e7eb");
+  const [open, setOpen] = useState(false);
+  const [accent, setAccent] = useState(TEAL);
 
   return (
     <>
@@ -167,7 +246,10 @@ function ServiceCard({ title, desc1, desc2 }) {
           setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
         }
         onMouseLeave={() => setBorder("#e5e7eb")}
-        onClick={openModal}
+        onClick={() => {
+          setAccent(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)]);
+          setOpen(true);
+        }}
         className={CARD_CLASS + " cursor-pointer select-none"}
         style={{ borderColor: border }}
         role="button"
@@ -178,70 +260,58 @@ function ServiceCard({ title, desc1, desc2 }) {
         <span className="font-semibold text-gray-900">{title}</span>
       </div>
 
-      {/* مودال شیشه‌ای مرکز صفحه */}
-      {open && (
-        <div
-          className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity
-                      ${closing ? "opacity-0" : "opacity-100"} duration-200`}
-        >
-          {/* بک‌درُپ تار */}
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={closeModal}
-          />
-          {/* جعبه شیشه‌ای مات (بدون لبه رنگی) */}
-          <div
-            className={`relative z-10 w-[min(92vw,720px)] mx-auto rounded-2xl overflow-hidden
-                        transform transition-all duration-200
-                        ${closing ? "opacity-0 scale-95" : "opacity-100 scale-100"}`}
-            role="dialog"
-            aria-modal="true"
-          >
-            {/* تینت رنگی خیلی ملایم روی خود شیشه */}
-            <div
-              className="absolute inset-0"
-              style={{
-                background: `linear-gradient(135deg, ${accent}2A 0%, ${
-                  accent === TEAL ? YELLOW : TEAL
-                }1F 100%)`,
-              }}
-            />
-            {/* بدنه مات و خوانا */}
-            <div className="relative rounded-2xl border border-white/15 bg-white/10 backdrop-blur-xl shadow-[0_20px_60px_-15px_rgba(0,0,0,.5)]">
-              <div className="p-6 md:p-8">
-                <div className="flex items-start justify-between gap-6">
-                  <h4 className="text-xl md:text-2xl font-extrabold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.45)]">
-                    {title}
-                  </h4>
-                  <button
-                    onClick={closeModal}
-                    className="text-white/85 hover:text-white transition text-2xl leading-none"
-                    aria-label="بستن"
-                  >
-                    ×
-                  </button>
-                </div>
+      <GlassModal
+        open={open}
+        onClose={() => setOpen(false)}
+        title={title}
+        accent={accent}
+        paragraphs={[desc1, desc2]}
+      />
+    </>
+  );
+}
 
-                <p className="text-white/95 leading-8 mt-4 drop-shadow-[0_1px_1px_rgba(0,0,0,0.35)]">
-                  {desc1}
-                </p>
-                <p className="text-white/90 leading-8 mt-3 drop-shadow-[0_1px_1px_rgba(0,0,0,0.35)]">
-                  {desc2}
-                </p>
+// ===== کارت راهکار + مودالِ طولانی‌تر
+function SolutionCard({ name, slug, p1, p2, p3 }) {
+  const [border, setBorder] = useState("#e5e7eb");
+  const [open, setOpen] = useState(false);
+  const [accent, setAccent] = useState(TEAL);
 
-                <div className="mt-6 flex justify-end">
-                  <button
-                    onClick={closeModal}
-                    className="px-4 py-2 rounded-lg bg-white/15 hover:bg-white/25 text-white transition"
-                  >
-                    بستن
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+  return (
+    <>
+      <div
+        onMouseEnter={() =>
+          setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
+        }
+        onMouseLeave={() => setBorder("#e5e7eb")}
+        onClick={() => {
+          setAccent(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)]);
+          setOpen(true);
+        }}
+        className={CARD_CLASS + " cursor-pointer select-none"}
+        style={{ borderColor: border }}
+        role="button"
+        tabIndex={0}
+        aria-haspopup="dialog"
+        aria-expanded={open}
+      >
+        <img
+          src={`/avatars/${slug}.png`}
+          alt={name}
+          className="w-12 h-12 object-contain"
+          onError={(e) => (e.currentTarget.src = "/avatars/default.png")}
+        />
+        <div className="font-bold text-gray-900">{name}</div>
+      </div>
+
+      <GlassModal
+        open={open}
+        onClose={() => setOpen(false)}
+        title={`${name} — راهکارها`}
+        accent={accent}
+        paragraphs={[p1, p2, p3]}
+      />
+      {/* CTA زیر کارت برای دسترسی مستقیم هم می‌تونه اضافه بشه؛ داخل مودال هم می‌تونیم لینک بدهیم */}
     </>
   );
 }
@@ -312,15 +382,16 @@ export default function Home() {
         </div>
       </section>
 
-      {/* راهکارها + خدمات */}
+      {/* راهکارها (با مودال طولانی‌تر) */}
       <section id="solutions" className="max-w-6xl mx-auto px-4 pb-10">
         <h2 className="text-2xl font-bold mb-6">راهکارها</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center mb-10">
-          {SOLUTIONS.map((b) => (
-            <BrandCard key={b.slug} name={b.name} slug={b.slug} href={b.href} />
+          {SOLUTIONS.map((s) => (
+            <SolutionCard key={s.slug} {...s} />
           ))}
         </div>
 
+        {/* خدمات */}
         <h3 className="text-xl font-bold mb-4">خدمات</h3>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
           {SERVICES.map((s, i) => (

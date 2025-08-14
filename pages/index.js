@@ -63,8 +63,8 @@ const CARD_CLASS =
 
 // ===== دکمه‌های هیرو: جابجایی نوبتی + با کلیک (persist با localStorage)
 function useAlternatingBrandPair() {
-  const [primary, setPrimary] = useState(YELLOW);   // پر (Filled)
-  const [secondary, setSecondary] = useState(TEAL); // خطی (Outlined)
+  const [primary, setPrimary] = useState(YELLOW);   // Filled
+  const [secondary, setSecondary] = useState(TEAL); // Outlined
 
   useEffect(() => {
     try {
@@ -120,7 +120,7 @@ function BrandCard({ name, slug, href }) {
   );
 }
 
-// ===== هلسپر قفل اسکرول بدنه وقتی مودال بازه
+// ===== قفل اسکرول بدنه وقتی مودال بازه
 function useBodyScrollLock(locked) {
   useEffect(() => {
     const prev = document.body.style.overflow;
@@ -131,25 +131,23 @@ function useBodyScrollLock(locked) {
   }, [locked]);
 }
 
-// ===== کارت خدمات + مودال شیشه‌ای وسط صفحه
+// ===== کارت خدمات + مودال شیشه‌ای وسط صفحه با تینت ملایم
 function ServiceCard({ title, desc1, desc2 }) {
   const [border, setBorder] = useState("#e5e7eb");
   const [open, setOpen] = useState(false);
   const [closing, setClosing] = useState(false);
   const [accent, setAccent] = useState(TEAL);
 
-  // باز کردن مودال با رنگ تصادفی
   const openModal = () => {
     setAccent(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)]);
     setOpen(true);
   };
-  // بستن با انیمیشن نرم‌تر
   const closeModal = () => {
     setClosing(true);
     setTimeout(() => {
       setOpen(false);
       setClosing(false);
-    }, 220); // کمی آهسته‌تر از باز شدن
+    }, 220);
   };
 
   // ESC برای بستن
@@ -199,36 +197,42 @@ function ServiceCard({ title, desc1, desc2 }) {
             role="dialog"
             aria-modal="true"
           >
-            {/* لایه هاله‌ی رنگی خیلی لطیف */}
+            {/* تینت رنگی خیلی ملایم روی خود شیشه */}
             <div
-              className="pointer-events-none absolute -inset-8 blur-3xl opacity-25"
+              className="absolute inset-0"
               style={{
-                background: `radial-gradient(60% 60% at 50% 40%, ${accent}55 0%, transparent 60%),
-                             radial-gradient(40% 40% at 70% 70%, ${
-                               accent === TEAL ? YELLOW : TEAL
-                             }44 0%, transparent 60%)`,
+                background: `linear-gradient(135deg, ${accent}2A 0%, ${
+                  accent === TEAL ? YELLOW : TEAL
+                }1F 100%)`,
               }}
             />
-            {/* بدنه مات */}
-            <div className="relative rounded-2xl border border-white/15 bg-white/15 backdrop-blur-xl shadow-[0_20px_60px_-15px_rgba(0,0,0,.5)]">
+            {/* بدنه مات و خوانا */}
+            <div className="relative rounded-2xl border border-white/15 bg-white/10 backdrop-blur-xl shadow-[0_20px_60px_-15px_rgba(0,0,0,.5)]">
               <div className="p-6 md:p-8">
                 <div className="flex items-start justify-between gap-6">
-                  <h4 className="text-xl md:text-2xl font-extrabold text-white">{title}</h4>
+                  <h4 className="text-xl md:text-2xl font-extrabold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.45)]">
+                    {title}
+                  </h4>
                   <button
                     onClick={closeModal}
-                    className="text-white/80 hover:text-white transition text-2xl leading-none"
+                    className="text-white/85 hover:text-white transition text-2xl leading-none"
                     aria-label="بستن"
                   >
                     ×
                   </button>
                 </div>
-                <p className="text-gray-100/90 leading-8 mt-4">{desc1}</p>
-                <p className="text-gray-100/80 leading-8 mt-3">{desc2}</p>
+
+                <p className="text-white/95 leading-8 mt-4 drop-shadow-[0_1px_1px_rgba(0,0,0,0.35)]">
+                  {desc1}
+                </p>
+                <p className="text-white/90 leading-8 mt-3 drop-shadow-[0_1px_1px_rgba(0,0,0,0.35)]">
+                  {desc2}
+                </p>
 
                 <div className="mt-6 flex justify-end">
                   <button
                     onClick={closeModal}
-                    className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition"
+                    className="px-4 py-2 rounded-lg bg-white/15 hover:bg-white/25 text-white transition"
                   >
                     بستن
                   </button>
@@ -244,7 +248,7 @@ function ServiceCard({ title, desc1, desc2 }) {
 
 export default function Home() {
   const { primary, secondary, swap } = useAlternatingBrandPair();
-  const primaryIsYellow = primary.toLowerCase() === YELLOW;
+  const primaryIsYellow = primary === YELLOW;
 
   return (
     <main className="min-h-screen font-sans">

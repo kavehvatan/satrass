@@ -7,9 +7,7 @@ async function readFirstExisting(paths) {
     try {
       const txt = await fs.readFile(p, "utf8");
       return { json: JSON.parse(txt), source: p };
-    } catch (e) {
-      // بی‌صدا رد شو و مسیر بعدی رو تست کن
-    }
+    } catch {}
   }
   return { json: { meta: {}, records: [] }, source: null };
 }
@@ -17,15 +15,16 @@ async function readFirstExisting(paths) {
 async function loadWarranty() {
   const cwd = process.cwd();
   const candidates = [
-    path.join(cwd, "public", "data", "warranty.json"),             // پیشنهاد اصلی
-    path.join(cwd, "data", "warranty.json"),                       // اگر قدیمی گذاشتی
-    path.join(cwd, ".next", "standalone", "public", "data", "warranty.json") // بعضی دیپلوی‌ها
+    path.join(cwd, "public", "data", "warranty.json"),
+    path.join(cwd, "data", "warranty.json"),
+    path.join(cwd, ".next", "standalone", "public", "data", "warranty.json"),
   ];
   return readFirstExisting(candidates);
 }
 
+// ⬅️ اینجا را عوض کردیم: هر چیزی به جز حروف و اعداد حذف می‌شود
 function norm(s = "") {
-  return String(s).replace(/[\s-]+/g, "").toUpperCase();
+  return String(s).toUpperCase().replace(/[^A-Z0-9]/g, "");
 }
 
 export default async function handler(req, res) {
@@ -34,8 +33,9 @@ export default async function handler(req, res) {
   const debug = bodyOrQuery.debug === "1" || bodyOrQuery.debug === "true";
 
   const { json, source } = await loadWarranty();
+
   const serials = q
-    .split(/[,\n\r]+/)
+    .split(/[,\n\r]+/)       // هر سریال در یک خط یا جدا با کاما
     .map((s) => s.trim())
     .filter(Boolean);
 
@@ -52,13 +52,13 @@ export default async function handler(req, res) {
       status: hit ? (hit.status || "registered") : "not_found",
       start: hit?.start || "-",
       end: hit?.end || "-",
-      notes: hit?.notes || "-"
+      notes: hit?.notes || "-",
     };
   });
 
   res.status(200).json({
     rows,
     meta: json.meta || {},
-    ...(debug ? { debug: { source, records: json.records?.length || 0 } } : {})
+    ...(debug ? { debug: { source, records: json.records?.length || 0 } } : {}),
   });
 }

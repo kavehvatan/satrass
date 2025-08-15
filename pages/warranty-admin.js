@@ -1,306 +1,321 @@
 // pages/warranty-admin.js
 import { useEffect, useMemo, useState } from "react";
-import Head from "next/head";
 
-const DASH_RE = /[-\u2010-\u2015\u2212\uFE58\uFE63\uFF0D]/g;
-const WS_RE = /[\s\u200c\u200f\u200e\u202a-\u202e\u2066-\u2069]/g;
-const normalize = (s = "") =>
-  s.toString().toUpperCase().replace(WS_RE, "").replace(DASH_RE, "");
-
-const VENDORS = ["HPE", "Dell EMC", "Cisco", "Lenovo", "Fujitsu", "Juniper", "Oracle", "Quantum"];
-const MODELS = {
-  "HPE": ["ProLiant DL380 Gen10", "ProLiant DL360 Gen10", "Alletra", "Primera"],
-  "Dell EMC": ["Unity XT", "PowerStore", "PowerEdge", "VxRail"],
-  "Cisco": ["UCS", "MDS", "Nexus"],
-  "Lenovo": ["ThinkSystem SR650", "ThinkSystem SR630"],
-  "Fujitsu": ["PRIMERGY RX2540", "ETERNUS"],
-  "Juniper": ["QFX", "MX", "SRX"],
-  "Oracle": ["Exadata", "ZFS"],
-  "Quantum": ["Scalar i3", "Scalar i6"],
-};
-const STATUSES = [
-  { value: "active", label: "active (فعال)" },
-  { value: "expired", label: "expired (منقضی)" },
+const VENDORS = [
+  "HPE", "Dell EMC", "Cisco", "Lenovo", "HPE Aruba", "Huawei",
+  "Oracle", "Fujitsu", "Juniper", "Quantum", "IBM"
 ];
-const NOTES = ["-", "3yr NBD support", "5yr ProSupport", "Renewal", "—"];
 
-function emptyRow() {
-  return {
-    serial: "",
-    vendor: VENDORS[0],
-    model: MODELS[VENDORS[0]][0],
-    status: "active",
-    expireAt: "",
-    notes: "-",
-  };
-}
+const STATUSES = [
+  { value: "active", label: "فعال" },
+  { value: "expired", label: "منقضی" },
+  { value: "registered", label: "ثبت‌شده" },
+  { value: "pending", label: "در انتظار" },
+];
+
+const YEAR_NOTES = Array.from({ length: 10 }, (_, i) => {
+  const n = i + 1;
+  // نمایش فارسی: «۱ سال»، «۲ سال» ...
+  const faDigits = n.toString().replace(/[0-9]/g, d => "۰۱۲۳۴۵۶۷۸۹"[+d]);
+  return `${faDigits} سال`;
+});
 
 export default function WarrantyAdmin() {
-  const [rows, setRows] = useState([emptyRow()]);
-  const [token, setToken] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState("");
+  const [tokenInput, setTokenInput] = useState("");
+  const [token, setToken] = useState("");          // توکن ذخیره‌شده
+  const [rows, setRows] = useState([]);
+  const [error, setError] = useState("");
+  const [ok, setOk] = useState("");
 
-  // token در مرورگر باقی بماند
+  // ردیف جدید
+  const [draft, setDraft] = useState({
+    serial: "",
+    vendor: VENDORS[0],
+    model: "",
+    status: STATUSES[0].value,
+    expireAt: "", // اجباری
+    notes: YEAR_NOTES[0], // پیش‌فرض «۱ سال»
+  });
+
   useEffect(() => {
-    const t = localStorage.getItem("ADMIN_TOKEN") || "";
-    if (t) setToken(t);
+    const t = localStorage.getItem("ADMIN_TOKEN");
+    if (t) {
+      setToken(t);
+      setTokenInput(t);
+    }
   }, []);
-  useEffect(() => {
-    if (token) localStorage.setItem("ADMIN_TOKEN", token);
-  }, [token]);
 
-  function updateRow(i, patch) {
-    setRows((prev) => {
-      const copy = [...prev];
-      copy[i] = { ...copy[i], ...patch };
-      // در تغییر vendor، مدل را به اولین مدل همان vendor ست کن
-      if (patch.vendor) {
-        const vendorModels = MODELS[patch.vendor] || ["-"];
-        if (!vendorModels.includes(copy[i].model)) {
-          copy[i].model = vendorModels[0];
-        }
-      }
-      return copy;
-    });
+  function saveToken() {
+    if (!tokenInput.trim()) return;
+    localStorage.setItem("ADMIN_TOKEN", tokenInput.trim());
+    setToken(tokenInput.trim());
+    setOk("توکن ذخیره شد.");
+    setTimeout(() => setOk(""), 1500);
   }
+
+  function clearToken() {
+    localStorage.removeItem("ADMIN_TOKEN");
+    setToken("");
+    setTokenInput("");
+    setOk("توکن پاک شد.");
+    setTimeout(() => setOk(""), 1500);
+  }
+
+  // اعتبارسنجی «الزامی بودن ExpireAt»
+  function validateRow(r) {
+    if (!r.serial.trim()) return "سریال الزامی است.";
+    if (!r.expireAt) return "تاریخ پایان (ExpireAt) الزامی است.";
+    return "";
+  }
+
   function addRow() {
-    setRows((prev) => [...prev, emptyRow()]);
-  }
-  function removeRow(i) {
-    setRows((prev) => prev.filter((_, idx) => idx !== i));
+    setError("");
+    const msg = validateRow(draft);
+    if (msg) {
+      setError(msg);
+      return;
+    }
+    setRows(prev => [...prev, { ...draft }]);
+    setDraft(prev => ({
+      ...prev,
+      serial: "",
+      // expireAt را خالی نکن تا اگر می‌خواهی پشت سر هم اضافه کنی تغییر ندهی؛
+      // اگر ترجیح می‌دهی خالی شود، خط بعد را فعال کن.
+      // expireAt: "",
+    }));
+    setOk("ردیف اضافه شد.");
+    setTimeout(() => setOk(""), 1200);
   }
 
-  const payloadRows = useMemo(() => {
-    // فقط ردیف‌هایی که سریال دارند
-    return rows
-      .map((r) => ({ ...r, serial: r.serial.trim() }))
-      .filter((r) => r.serial.length > 0)
-      .map((r) => ({
-        serial: r.serial,                // نسخه نمایش
-        brand: r.vendor,                 // با نام brand ذخیره می‌کنیم چون API خواندن هم brand دارد
-        model: r.model,
-        status: r.status,                // "active" | "expired"
-        end: r.expireAt || "-",          // فیلد end
-        notes: r.notes || "-",
-        // کلید مقایسه: سریال نرمال‌شده (بدون dash و uppercase)
-        _key: normalize(r.serial),
-      }));
-  }, [rows]);
+  function removeRow(idx) {
+    setRows(prev => prev.filter((_, i) => i !== idx));
+  }
 
-  async function submit() {
-    setMessage("");
+  async function submitAll() {
+    setError("");
+    setOk("");
+
+    // اعتبارسنجی همه ردیف‌ها
+    for (const r of rows) {
+      const msg = validateRow(r);
+      if (msg) {
+        setError(`خطا در یکی از ردیف‌ها: ${msg}`);
+        return;
+      }
+    }
+    if (!rows.length) {
+      setError("هیچ ردیفی برای ثبت وجود ندارد.");
+      return;
+    }
     if (!token) {
-      setMessage("لطفاً Admin Token را وارد کنید.");
+      setError("توکن ادمین تنظیم نشده است.");
       return;
     }
-    if (!payloadRows.length) {
-      setMessage("هیچ ردیفی با Serial وارد نشده است.");
-      return;
-    }
-    setBusy(true);
+
     try {
-      const resp = await fetch("/api/warranty-admin", {
+      const res = await fetch("/api/warranty-save", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          "x-admin-token": token,
         },
-        body: JSON.stringify({ rows: payloadRows }),
+        body: JSON.stringify({ rows }),
       });
-
-      const data = await resp.json().catch(() => ({}));
-
-      if (!resp.ok) {
-        // اگر سرور readonly بود، نسخه‌ی JSON برگردانده می‌شود تا دانلود کنیم
-        if (data?.readonly && data?.updatedJSON) {
-          setMessage(
-            "⚠️ فایل روی هاست قابل‌نوشتن نیست. فایل به‌روزشده را دانلود و جایگزین کنید."
-          );
-          // ساخت لینک دانلود
-          const blob = new Blob([data.updatedJSON], { type: "application/json" });
-          const a = document.createElement("a");
-          a.href = URL.createObjectURL(blob);
-          a.download = "warranty.json";
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-        } else {
-          setMessage(`خطا: ${data?.error || resp.statusText}`);
-        }
-        return;
+      if (!res.ok) {
+        const t = await res.text();
+        throw new Error(t || `HTTP ${res.status}`);
       }
-
-      setMessage("✅ بروزرسانی با موفقیت انجام شد.");
-      // گزینه: پاک‌کردن فرم
-      // setRows([emptyRow()]);
+      setOk("ثبت با موفقیت انجام شد.");
+      setRows([]);
     } catch (e) {
-      setMessage("خطای اتصال به سرور.");
-    } finally {
-      setBusy(false);
+      setError(`خطا در ثبت: ${e.message}`);
     }
   }
 
+  const canAdd = useMemo(() => {
+    return draft.serial.trim() && draft.expireAt;
+  }, [draft.serial, draft.expireAt]);
+
   return (
-    <>
-      <Head>
-        <title>Warranty Admin</title>
-      </Head>
+    <div className="container mx-auto max-w-5xl px-4 py-8">
+      <h1 className="text-2xl font-bold mb-6">مدیریت گارانتی</h1>
 
-      <div className="container mx-auto max-w-5xl px-4 py-6">
-        <h1 className="text-2xl font-bold mb-4">مدیریت گارانتی</h1>
+      {/* بخش توکن */}
+      <div className="mb-6 rounded-xl border p-4 flex flex-col gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="text-sm text-gray-600">Admin Token</label>
+          <input
+            dir="ltr"
+            className="input bg-white/60 focus:bg-white"
+            value={tokenInput}
+            onChange={(e) => setTokenInput(e.target.value)}
+            placeholder="توکن ادمین را وارد کنید"
+          />
+          <button onClick={saveToken} className="btn">ذخیره</button>
+          <button onClick={clearToken} className="btn-secondary">حذف</button>
+          {token && <span className="text-xs text-emerald-600">توکن فعال است</span>}
+        </div>
+        {ok && <div className="text-emerald-600 text-sm">{ok}</div>}
+        {error && <div className="text-rose-600 text-sm">{error}</div>}
+      </div>
 
-        {/* Admin Token */}
-        <div className="mb-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label className="block text-sm text-gray-600 mb-1">Admin Token</label>
+      {/* فرم ردیف جدید */}
+      <div className="rounded-xl border p-4 mb-6">
+        <h2 className="font-semibold mb-3">افزودن ردیف</h2>
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
+          {/* Serial */}
+          <div className="md:col-span-2">
+            <label className="label">Serial *</label>
             <input
-              type="password"
-              value={token}
-              onChange={(e) => setToken(e.target.value)}
-              className="w-full rounded-xl border border-gray-200 p-3"
-              placeholder="توکن ادمین را وارد کنید"
+              className="input"
+              value={draft.serial}
+              onChange={(e) => setDraft({ ...draft, serial: e.target.value })}
+              placeholder="مثال: HPE-9J1234"
             />
-            <p className="text-xs text-gray-500 mt-1">
-              برای امنیت، backend فقط درخواست‌های دارای این توکن را می‌پذیرد.
-            </p>
+          </div>
+
+          {/* Vendor */}
+          <div>
+            <label className="label">Vendor</label>
+            <select
+              className="input"
+              value={draft.vendor}
+              onChange={(e) => setDraft({ ...draft, vendor: e.target.value })}
+            >
+              {VENDORS.map(v => <option key={v} value={v}>{v}</option>)}
+            </select>
+          </div>
+
+          {/* Model */}
+          <div>
+            <label className="label">Model</label>
+            <input
+              className="input"
+              value={draft.model}
+              onChange={(e) => setDraft({ ...draft, model: e.target.value })}
+              placeholder="مثلاً: ProLiant DL380 Gen10"
+            />
+          </div>
+
+          {/* Status */}
+          <div>
+            <label className="label">Status</label>
+            <select
+              className="input"
+              value={draft.status}
+              onChange={(e) => setDraft({ ...draft, status: e.target.value })}
+            >
+              {STATUSES.map(s => (
+                <option key={s.value} value={s.value}>{s.label}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* ExpireAt – الزامی */}
+          <div>
+            <label className="label">ExpireAt *</label>
+            <input
+              type="date"
+              className="input"
+              value={draft.expireAt}
+              onChange={(e) => setDraft({ ...draft, expireAt: e.target.value })}
+              required
+            />
+          </div>
+
+          {/* Notes – ۱ تا ۱۰ سال */}
+          <div>
+            <label className="label">Notes</label>
+            <select
+              className="input"
+              value={draft.notes}
+              onChange={(e) => setDraft({ ...draft, notes: e.target.value })}
+            >
+              {YEAR_NOTES.map(n => (
+                <option key={n} value={n}>{n}</option>
+              ))}
+            </select>
           </div>
         </div>
 
-        {/* Rows Editor */}
-        <div className="space-y-3">
-          {rows.map((r, i) => {
-            const vendorModels = MODELS[r.vendor] || ["-"];
-            return (
-              <div
-                key={i}
-                className="grid grid-cols-1 lg:grid-cols-12 gap-3 rounded-2xl border border-gray-200 p-3"
-              >
-                {/* Serial */}
-                <div className="lg:col-span-3">
-                  <label className="block text-sm text-gray-600 mb-1">Serial</label>
-                  <input
-                    type="text"
-                    value={r.serial}
-                    onChange={(e) => updateRow(i, { serial: e.target.value })}
-                    className="w-full rounded-xl border border-gray-200 p-3"
-                    placeholder="مثال: HPE-9J1234"
-                  />
-                </div>
-
-                {/* Vendor */}
-                <div className="lg:col-span-2">
-                  <label className="block text-sm text-gray-600 mb-1">Vendor</label>
-                  <select
-                    value={r.vendor}
-                    onChange={(e) => updateRow(i, { vendor: e.target.value })}
-                    className="w-full rounded-xl border border-gray-200 p-3 bg-white"
-                  >
-                    {VENDORS.map((v) => (
-                      <option key={v} value={v}>
-                        {v}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Model */}
-                <div className="lg:col-span-3">
-                  <label className="block text-sm text-gray-600 mb-1">Model</label>
-                  <select
-                    value={r.model}
-                    onChange={(e) => updateRow(i, { model: e.target.value })}
-                    className="w-full rounded-xl border border-gray-200 p-3 bg-white"
-                  >
-                    {vendorModels.map((m) => (
-                      <option key={m} value={m}>
-                        {m}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Status */}
-                <div className="lg:col-span-2">
-                  <label className="block text-sm text-gray-600 mb-1">Status</label>
-                  <select
-                    value={r.status}
-                    onChange={(e) => updateRow(i, { status: e.target.value })}
-                    className="w-full rounded-xl border border-gray-200 p-3 bg-white"
-                  >
-                    {STATUSES.map((s) => (
-                      <option key={s.value} value={s.value}>
-                        {s.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* ExpireAt */}
-                <div className="lg:col-span-2">
-                  <label className="block text-sm text-gray-600 mb-1">ExpireAt</label>
-                  <input
-                    type="date"
-                    value={r.expireAt}
-                    onChange={(e) => updateRow(i, { expireAt: e.target.value })}
-                    className="w-full rounded-xl border border-gray-200 p-3 bg-white"
-                  />
-                </div>
-
-                {/* Notes */}
-                <div className="lg:col-span-3">
-                  <label className="block text-sm text-gray-600 mb-1">Notes</label>
-                  <select
-                    value={r.notes}
-                    onChange={(e) => updateRow(i, { notes: e.target.value })}
-                    className="w-full rounded-xl border border-gray-200 p-3 bg-white"
-                  >
-                    {NOTES.map((n) => (
-                      <option key={n} value={n}>
-                        {n}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Actions */}
-                <div className="lg:col-span-12 flex justify-end gap-2">
-                  {rows.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeRow(i)}
-                      className="px-4 py-2 rounded-xl border hover:bg-gray-50"
-                    >
-                      حذف ردیف
-                    </button>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="flex items-center gap-3 mt-4">
-          <button
-            type="button"
-            onClick={addRow}
-            className="px-5 py-3 rounded-xl border border-gray-300 hover:bg-gray-50"
-          >
-            + افزودن ردیف
+        <div className="mt-4 flex items-center gap-2">
+          <button onClick={addRow} className="btn" disabled={!canAdd}>
+            افزودن ردیف
           </button>
-
-          <button
-            type="button"
-            disabled={busy}
-            onClick={submit}
-            className="px-5 py-3 rounded-xl bg-black text-white hover:bg-zinc-800 disabled:opacity-60"
-          >
-            {busy ? "در حال ثبت…" : "ثبت / Import"}
-          </button>
+          {!canAdd && (
+            <span className="text-xs text-gray-500">
+              (وارد کردن «Serial» و «ExpireAt» الزامی است)
+            </span>
+          )}
         </div>
-
-        {!!message && <p className="mt-4 text-sm text-gray-700">{message}</p>}
       </div>
-    </>
+
+      {/* جدول ردیف‌ها */}
+      <div className="rounded-xl border p-3">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-semibold">ردیف‌های آماده ثبت</h3>
+          <button onClick={submitAll} className="btn" disabled={!rows.length}>
+            ثبت / Import
+          </button>
+        </div>
+
+        {!rows.length ? (
+          <div className="text-sm text-gray-500">ردیفی اضافه نشده است.</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="text-right text-gray-500">
+                  <th className="p-2">#</th>
+                  <th className="p-2">Serial</th>
+                  <th className="p-2">Vendor</th>
+                  <th className="p-2">Model</th>
+                  <th className="p-2">Status</th>
+                  <th className="p-2">ExpireAt</th>
+                  <th className="p-2">Notes</th>
+                  <th className="p-2"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r, i) => (
+                  <tr key={i} className="border-t">
+                    <td className="p-2">{i + 1}</td>
+                    <td className="p-2 font-mono">{r.serial}</td>
+                    <td className="p-2">{r.vendor}</td>
+                    <td className="p-2">{r.model || "-"}</td>
+                    <td className="p-2">
+                      {STATUSES.find(s => s.value === r.status)?.label || r.status}
+                    </td>
+                    <td className="p-2">{r.expireAt}</td>
+                    <td className="p-2">{r.notes || "-"}</td>
+                    <td className="p-2 text-left">
+                      <button
+                        className="btn-danger"
+                        onClick={() => removeRow(i)}
+                        title="حذف"
+                      >
+                        حذف
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {error && <div className="mt-3 text-rose-600 text-sm">{error}</div>}
+        {ok && <div className="mt-3 text-emerald-600 text-sm">{ok}</div>}
+      </div>
+
+      {/* استایل‌های کوچک Tailwind-مانند */}
+      <style jsx>{`
+        .label { @apply text-xs text-gray-500 block mb-1; }
+        .input { @apply w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-amber-400; }
+        .btn { @apply rounded-lg bg-black text-white px-4 py-2 hover:bg-gray-900 disabled:opacity-50; }
+        .btn-secondary { @apply rounded-lg border px-3 py-2 hover:bg-gray-50; }
+        .btn-danger { @apply rounded-lg bg-rose-600 text-white px-3 py-1 hover:bg-rose-700; }
+      `}</style>
+    </div>
   );
 }

@@ -1,7 +1,7 @@
 // pages/warranty-admin.js
 import { useEffect, useMemo, useState } from "react";
 
-/* --------------------------- Auth (نسخه ساده) --------------------------- */
+/* ======================= AUTH (ساده و سازگار) ======================= */
 const AUTH_KEY = "sat_admin_token";
 
 const getToken = () => {
@@ -9,177 +9,154 @@ const getToken = () => {
 };
 const setToken = (t) => { try { sessionStorage.setItem(AUTH_KEY, t); } catch {} };
 const clearToken = () => { try { sessionStorage.removeItem(AUTH_KEY); } catch {} };
+
 const isAuthed = () => !!getToken();
 
-// همه درخواست‌های ادمین از این تابع استفاده کنند تا هدر توکن ارسال شود
+async function tryAdminCheck(token) {
+  // اگر /api/admin-check موجود بود، با هر دو هدر تست می‌کنیم
+  try {
+    const r = await fetch("/api/admin-check", {
+      method: "GET",
+      headers: {
+        "x-admin-token": token,
+        authorization: `Bearer ${token}`,
+      },
+    });
+    return r.ok;
+  } catch {
+    // اگر مسیر وجود نداشت/خطا داد، اجازه می‌دهیم هنگام ذخیره بررسی شود
+    return true;
+  }
+}
+
+// همه درخواست‌های ادمین با این تابع می‌روند (هر دو هدر ارسال می‌شود)
 async function fetchAdmin(url, options = {}) {
+  const token = getToken();
   const headers = {
     ...(options.headers || {}),
     "Content-Type": "application/json",
-    "x-admin-token": getToken(),
+    "x-admin-token": token,
+    authorization: `Bearer ${token}`,
   };
   const resp = await fetch(url, { ...options, headers });
   if (resp.status === 401) {
     clearToken();
-    alert("دسترسی ادمین منقضی شد. دوباره وارد شوید.");
+    alert("دسترسی ادمین منقضی/نامعتبر شد. دوباره وارد شوید.");
     location.reload();
     throw new Error("Unauthorized");
   }
   return resp;
 }
 
-/* --------------------------- داده‌های ثابت --------------------------- */
-
-const VENDORS = [
-  "Dell EMC",
-  "HPE",
-  "Cisco",
-  "Lenovo",
-];
+/* ======================= داده‌های ثابت ======================= */
+const VENDORS = ["Dell EMC", "HPE", "Cisco", "Lenovo"];
 
 const MODELS_BY_VENDOR = {
   "Dell EMC": [
-    "Unity XT 380",
-    "Unity XT 480",
-    "Unity XT 680",
-    "Unity XT 880",
-    "Unity 300",
-    "Unity 400",
-    "Unity 500",
-    "Unity 600",
+    "Unity XT 380", "Unity XT 480", "Unity XT 680", "Unity XT 880",
+    "Unity 300", "Unity 400", "Unity 500", "Unity 600",
   ],
   "HPE": [
-    "ProLiant DL360 Gen10",
-    "ProLiant DL360 Gen11",
-    "ProLiant DL380 Gen10",
-    "ProLiant DL380 Gen11",
+    "ProLiant DL360 Gen10", "ProLiant DL360 Gen11",
+    "ProLiant DL380 Gen10", "ProLiant DL380 Gen11",
     "ProLiant ML350 Gen10",
   ],
-  "Cisco": [
-    "UCS C220 M5",
-    "UCS C220 M6",
-    "UCS C240 M5",
-    "UCS C240 M6",
-  ],
-  "Lenovo": [
-    "ThinkSystem SR650 V2",
-    "ThinkSystem SR630 V2",
-  ],
+  "Cisco": ["UCS C220 M5", "UCS C220 M6", "UCS C240 M5", "UCS C240 M6"],
+  "Lenovo": ["ThinkSystem SR650 V2", "ThinkSystem SR630 V2"],
 };
 
 const STATUS_LIST = ["فعال", "غیرفعال"];
 const NOTES_YEARS = Array.from({ length: 10 }, (_, i) => `${i + 1} سال`);
 
-/* --------------------------- کمکی‌ها --------------------------- */
-
+/* ======================= کمکی‌ها ======================= */
 function normalizeSerial(val) {
   if (!val) return "";
-  // UpperCase + حذف فاصله‌ها (خط تیره را نگه می‌داریم که قابل خواندن باشد)
+  // UpperCase + حذف فاصله‌ها (خط تیره اختیاری می‌ماند)
   return String(val).toUpperCase().replace(/\s+/g, "");
 }
 
-function todayPlusYears(years = 0) {
-  const d = new Date();
-  d.setFullYear(d.getFullYear() + years);
-  // to yyyy-mm-dd
-  return d.toISOString().slice(0, 10);
-}
-
-/* --------------------------- صفحه اصلی --------------------------- */
-
+/* ======================= صفحه مدیریت ======================= */
 export default function WarrantyAdminPage() {
   const [authed, setAuthed] = useState(false);
+  const [tokenInput, setTokenInput] = useState("");
 
-  // احراز هویت ساده: prompt + چک سرور + ذخیره sessionStorage
+  // امکان ورود از طریق ?token=... هم هست
   useEffect(() => {
-    (async () => {
-      if (isAuthed()) { setAuthed(true); return; }
-
-      while (true) {
-        const tok = window.prompt("Admin Token:", "");
-        if (tok === null) return; // کاربر کنسل کرد
-        const r = await fetch("/api/admin-check", {
-          headers: { "x-admin-token": tok.trim() },
-        });
-        if (r.ok) {
-          setToken(tok.trim());
-          setAuthed(true);
-          break;
-        } else {
-          alert("توکن صحیح نیست.");
-        }
-      }
-    })();
+    const url = new URL(window.location.href);
+    const t = url.searchParams.get("token");
+    if (t && !isAuthed()) {
+      setToken(t);
+      setTokenInput(t);
+      setAuthed(true);
+    } else {
+      setTokenInput(getToken());
+      setAuthed(isAuthed());
+    }
   }, []);
 
-  const logout = () => { clearToken(); location.reload(); };
+  const onLogin = async () => {
+    const t = tokenInput.trim();
+    if (!t) { alert("لطفاً توکن را وارد کنید."); return; }
+    const ok = await tryAdminCheck(t);
+    if (!ok) { alert("توکن صحیح نیست."); return; }
+    setToken(t);
+    setAuthed(true);
+  };
+
+  const onLogout = () => {
+    clearToken();
+    setAuthed(false);
+  };
 
   /* --------------------------- وضعیت فرم --------------------------- */
   const [vendor, setVendor] = useState(VENDORS[0]);
-  const [model, setModel] = useState(""); // اگر از لیست انتخاب شود، همین پر می‌شود
-  const [modelCustom, setModelCustom] = useState(""); // اگر گزینه «مدل دلخواه…» انتخاب شود
+  const modelOptions = useMemo(() => MODELS_BY_VENDOR[vendor] || [], [vendor]);
+
   const [useCustomModel, setUseCustomModel] = useState(false);
+  const [model, setModel] = useState("");
+  const [modelCustom, setModelCustom] = useState("");
 
   const [serial, setSerial] = useState("");
   const [expireAt, setExpireAt] = useState(""); // yyyy-mm-dd
   const [status, setStatus] = useState(STATUS_LIST[0]);
-  const [notes, setNotes] = useState(NOTES_YEARS[2]); // پیش‌فرض ۳ سال
-
-  // لیست مدل‌ها بر اساس Vendor
-  const modelOptions = useMemo(() => MODELS_BY_VENDOR[vendor] || [], [vendor]);
+  const [notes, setNotes] = useState(NOTES_YEARS[2]); // ۳ سال
 
   useEffect(() => {
-    // هر بار Vendor عوض شد، مدل از لیست پر شود و «دلخواه» ریست شود
     setUseCustomModel(false);
     setModel(modelOptions[0] || "");
     setModelCustom("");
   }, [vendor, modelOptions]);
 
-  /* --------------------------- ردیف‌های آماده ثبت --------------------------- */
+  /* --------------------------- ردیف‌ها --------------------------- */
   const [rows, setRows] = useState([]);
 
   const addRow = () => {
     const s = normalizeSerial(serial);
-    if (!s) {
-      alert("Serial را وارد کنید.");
-      return;
-    }
-    if (!expireAt) {
-      alert("ExpireAt اجباری است.");
-      return;
-    }
+    if (!s) { alert("Serial را وارد کنید."); return; }
+    if (!expireAt) { alert("ExpireAt اجباری است."); return; }
 
     const chosenModel = useCustomModel ? (modelCustom || "").trim() : (model || "").trim();
-    if (!chosenModel) {
-      alert("Model را وارد یا انتخاب کنید.");
-      return;
-    }
+    if (!chosenModel) { alert("Model را وارد یا انتخاب کنید."); return; }
 
     const row = {
       serial: s,
       brand: vendor,
       model: chosenModel,
       status: status,
-      expireAt: expireAt,   // API همین کلید را انتظار دارد
+      expireAt: expireAt,   // API همین کلید را می‌خواهد
       notes: notes || "-",
     };
-
     setRows((prev) => [...prev, row]);
 
-    // فرم را کمی تمیز کنیم (سریال و تاریخ را خالی؛ Vendor/Model بماند)
+    // فرم را سبک نگه می‌داریم
     setSerial("");
     setExpireAt("");
   };
 
-  const removeRow = (idx) => {
-    setRows((prev) => prev.filter((_, i) => i !== idx));
-  };
+  const removeRow = (idx) => setRows((prev) => prev.filter((_, i) => i !== idx));
 
   const saveAll = async () => {
-    if (!rows.length) {
-      alert("ردیفی برای ثبت وجود ندارد.");
-      return;
-    }
+    if (!rows.length) { alert("ردیفی برای ثبت وجود ندارد."); return; }
     try {
       const resp = await fetchAdmin("/api/warranty-save", {
         method: "POST",
@@ -190,9 +167,9 @@ export default function WarrantyAdminPage() {
         alert(`خطا در ثبت: ${t || resp.status}`);
         return;
       }
-      alert("ثبت شد.");
+      alert("ذخیره شد.");
       setRows([]);
-    } catch (e) {
+    } catch {
       alert("خطا در ارتباط با سرور.");
     }
   };
@@ -210,23 +187,45 @@ export default function WarrantyAdminPage() {
   /* --------------------------- UI --------------------------- */
   return (
     <div className="max-w-6xl mx-auto px-4 py-6">
-      {/* نوار بالایی احراز هویت ساده */}
-      {authed && (
-        <div className="flex items-center gap-3 mb-5">
-          <span className="px-3 py-1 rounded-full bg-green-100 text-green-800">
-            توکن فعال است
-          </span>
-          <button
-            onClick={logout}
-            className="px-3 py-1 rounded-full bg-gray-100 hover:bg-gray-200"
-          >
-            خروج
-          </button>
+      {/* نوار ساده‌ی ورود/خروج توکن */}
+      <div className="flex flex-col md:flex-row items-start md:items-center gap-3 mb-6">
+        <div className="flex items-center gap-2">
+          <input
+            type="password"
+            dir="ltr"
+            placeholder="Admin Token"
+            className="rounded-xl border border-gray-200 px-3 py-2 w-72"
+            value={tokenInput}
+            onChange={(e) => setTokenInput(e.target.value)}
+          />
+          {!authed ? (
+            <button
+              onClick={onLogin}
+              className="rounded-2xl bg-emerald-600 text-white px-4 py-2 hover:bg-emerald-500"
+            >
+              ورود
+            </button>
+          ) : (
+            <>
+              <span className="px-3 py-1 rounded-full bg-green-100 text-green-800">
+                توکن فعال است
+              </span>
+              <button
+                onClick={onLogout}
+                className="rounded-2xl bg-gray-100 hover:bg-gray-200 px-4 py-2"
+              >
+                خروج
+              </button>
+            </>
+          )}
         </div>
-      )}
+        <div className="text-xs text-gray-500">
+          اگر /api/admin-check روی سرور موجود نباشد، اعتبار توکن هنگام «ذخیره» بررسی می‌شود.
+        </div>
+      </div>
 
       {!authed ? (
-        <div className="text-center text-gray-500 py-10">در حال بررسی دسترسی…</div>
+        <div className="text-gray-500">برای ادامه، توکن را وارد و «ورود» را بزنید.</div>
       ) : (
         <>
           {/* فرم افزودن ردیف */}
@@ -244,9 +243,7 @@ export default function WarrantyAdminPage() {
                   value={vendor}
                   onChange={(e) => setVendor(e.target.value)}
                 >
-                  {VENDORS.map((v) => (
-                    <option key={v} value={v}>{v}</option>
-                  ))}
+                  {VENDORS.map((v) => <option key={v} value={v}>{v}</option>)}
                 </select>
               </div>
 
@@ -274,9 +271,7 @@ export default function WarrantyAdminPage() {
                       value={model}
                       onChange={(e) => setModel(e.target.value)}
                     >
-                      {modelOptions.map((m) => (
-                        <option key={m} value={m}>{m}</option>
-                      ))}
+                      {modelOptions.map((m) => <option key={m} value={m}>{m}</option>)}
                       <option value="__custom__">مدل دلخواه…</option>
                     </select>
                     {model === "__custom__" && (
@@ -329,9 +324,7 @@ export default function WarrantyAdminPage() {
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
                 >
-                  {STATUS_LIST.map((s) => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
+                  {STATUS_LIST.map((s) => <option key={s} value={s}>{s}</option>)}
                 </select>
               </div>
 
@@ -343,9 +336,7 @@ export default function WarrantyAdminPage() {
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                 >
-                  {NOTES_YEARS.map((n) => (
-                    <option key={n} value={n}>{n}</option>
-                  ))}
+                  {NOTES_YEARS.map((n) => <option key={n} value={n}>{n}</option>)}
                 </select>
               </div>
             </div>
@@ -357,7 +348,6 @@ export default function WarrantyAdminPage() {
               >
                 افزودن ردیف
               </button>
-
               <button
                 onClick={clearForm}
                 className="rounded-2xl border border-gray-200 px-5 py-2 hover:bg-gray-50 transition"
@@ -367,7 +357,7 @@ export default function WarrantyAdminPage() {
             </div>
           </div>
 
-          {/* جدول ردیف‌های آماده ثبت */}
+          {/* جدول ردیف‌ها */}
           <div className="rounded-2xl border border-gray-200 bg-white p-5">
             <div className="flex items-center justify-between pb-3">
               <h2 className="font-bold text-lg">ردیف‌های آماده‌ی ثبت</h2>

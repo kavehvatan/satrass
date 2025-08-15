@@ -1,135 +1,117 @@
 // pages/warranty.js
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import Head from "next/head";
 
-function Badge({ status }) {
-  const map = {
-    active: "bg-emerald-100 text-emerald-700",
-    expired: "bg-rose-100 text-rose-700",
-    unknown: "bg-gray-100 text-gray-700",
-    not_found: "bg-amber-100 text-amber-700",
-  };
-  const label =
-    { active: "فعال", expired: "منقضی", unknown: "نامشخص", not_found: "ثبت نشده" }[status] ||
-    "نامشخص";
-  return <span className={`px-2 py-1 rounded text-sm ${map[status] || map.unknown}`}>{label}</span>;
+function faToEnDigits(str = "") {
+  const map = { "۰":"0","۱":"1","۲":"2","۳":"3","۴":"4","۵":"5","۶":"6","۷":"7","۸":"8","۹":"9",
+                "٠":"0","١":"1","٢":"2","٣":"3","٤":"4","٥":"5","٦":"6","٧":"7","٨":"8","٩":"9" };
+  return str.replace(/[۰-۹٠-٩]/g, d => map[d] || d);
 }
 
 export default function Warranty() {
-  const [input, setInput] = useState("");
+  const [q, setQ] = useState("HPE-9J1234"); // نمونه‌ی آماده برای تست
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState("");
 
-  const submit = async (e) => {
-    e.preventDefault();
-    const serials = input
-      .split(/[\s,]+/)
-      .map((s) => s.trim())
-      .filter(Boolean)
-      .slice(0, 200);
-    if (!serials.length) return;
-
+  async function doQuery() {
     setLoading(true);
+    setErr("");
     try {
-      const r = await fetch("/api/warranty", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ serials }),
-      });
+      const qs = faToEnDigits(q || "");
+      const url = "/api/warranty?q=" + encodeURIComponent(qs);
+      const r = await fetch(url);
+      if (!r.ok) throw new Error("خطا در ارتباط با سرور");
       const data = await r.json();
-      setRows(data.items || []);
+      setRows(Array.isArray(data.rows) ? data.rows : []);
+    } catch (e) {
+      setErr(e.message || "خطای نامشخص");
+      setRows([]);
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  const dlCsv = () => {
-    const head = "Serial,Vendor,Model,Status,ExpireAt,Notes\n";
+  const csvHref = useMemo(() => {
+    if (!rows.length) return "";
+    const cols = ["serial","brand","model","status","start","end","notes"];
+    const head = cols.join(",");
     const body = rows
-      .map((r) =>
-        [r.serial, r.vendor || "", r.model || "", r.status || "", r.expireAt || "", r.notes || ""].join(",")
-      )
+      .map(r => cols.map(k => `"${(r[k] ?? "").toString().replace(/"/g,'""')}"`).join(","))
       .join("\n");
-    const blob = new Blob([head + body], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "warranty.csv";
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+    return "data:text/csv;charset=utf-8," + encodeURIComponent(head + "\n" + body);
+  }, [rows]);
 
   return (
-    <main className="min-h-screen font-sans">
-      <section className="max-w-6xl mx-auto px-4 py-10">
-        <h1 className="text-3xl md:text-4xl font-extrabold mb-2">استعلام گارانتی</h1>
+    <>
+      <Head><title>استعلام گارانتی | Satrass</title></Head>
+
+      <div className="container mx-auto px-4 py-10">
+        <h1 className="text-4xl font-extrabold mb-6">استعلام گارانتی</h1>
         <p className="text-gray-600 mb-6">
-          سریال‌ها را وارد کنید (هر خط یک سریال یا با کاما جدا کنید). داده‌ها از پایگاه داخلی ساتراس خوانده می‌شود.
+          سریال‌ها را وارد کنید (هر خط یک سریال یا با کاما جدا کنید).
+          داده‌ها از پایگاه داخلی ساتراس خوانده می‌شود.
         </p>
 
-        <form onSubmit={submit} className="flex flex-col md:flex-row gap-3 md:items-end">
+        <div className="flex items-start gap-3 mb-6">
           <textarea
-            className="w-full md:w-2/3 min-h-[140px] border rounded-lg p-3 font-mono"
-            placeholder="مثال: CN12345ABCD&#10;HPE-9J1234"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
+            className="w-full min-h-[160px] rounded-lg border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-brand-yellow/70"
+            value={q}
+            onChange={(e)=>setQ(faToEnDigits(e.target.value))}
+            dir="ltr"
+            placeholder='HPE-9J1234'
           />
-          <div className="flex gap-3">
-            <button className="rounded-lg px-4 py-2 bg-black text-white hover:bg-zinc-800 transition" disabled={loading}>
-              {loading ? "در حال استعلام…" : "استعلام"}
-            </button>
-            {rows.length > 0 && (
-              <button
-                type="button"
-                onClick={dlCsv}
-                className="rounded-lg px-4 py-2 border hover:bg-gray-50 transition"
-              >
-                خروجی CSV
-              </button>
-            )}
-          </div>
-        </form>
+          <button
+            onClick={doQuery}
+            disabled={loading}
+            className="whitespace-nowrap rounded-lg bg-black text-white px-5 py-3 hover:opacity-90 disabled:opacity-50"
+          >
+            {loading ? "در حال استعلام…" : "استعلام"}
+          </button>
+          <a
+            className={`whitespace-nowrap rounded-lg border px-5 py-3 ${rows.length ? "opacity-100" : "opacity-40 pointer-events-none"}`}
+            href={csvHref}
+            download="warranty.csv"
+          >
+            خروجی CSV
+          </a>
+        </div>
 
-        <div className="mt-8 overflow-x-auto">
-          <table className="min-w-full border rounded-lg overflow-hidden">
+        {err && <div className="text-red-600 mb-4">{err}</div>}
+
+        <div className="overflow-x-auto rounded-xl border border-gray-200">
+          <table className="min-w-full text-right">
             <thead className="bg-gray-50">
-              <tr className="[&>th]:p-3 [&>th]:text-right [&>th]:text-sm [&>th]:font-semibold">
-                <th>سریال</th>
-                <th>برند</th>
-                <th>مدل</th>
-                <th>وضعیت</th>
-                <th>تاریخ پایان</th>
-                <th>یادداشت</th>
+              <tr className="text-gray-600">
+                <th className="p-3">سریال</th>
+                <th className="p-3">برند</th>
+                <th className="p-3">مدل</th>
+                <th className="p-3">وضعیت</th>
+                <th className="p-3">تاریخ پایان</th>
+                <th className="p-3">یادداشت</th>
               </tr>
             </thead>
-            <tbody className="[&>tr>td]:p-3 [&>tr>td]:border-t">
-              {rows.map((r) => (
-                <tr key={r.serial}>
-                  <td className="font-mono">{r.serial}</td>
-                  <td>{r.vendor || "-"}</td>
-                  <td>{r.model || "-"}</td>
-                  <td>
-                    <Badge status={r.status} />
+            <tbody>
+              {rows.length === 0 ? (
+                <tr><td className="p-6 text-gray-500" colSpan={6}>نتیجه‌ای برای نمایش نیست.</td></tr>
+              ) : rows.map((r,i)=>(
+                <tr key={i} className="border-t">
+                  <td className="p-3 font-mono">{r.serial}</td>
+                  <td className="p-3">{r.brand}</td>
+                  <td className="p-3">{r.model}</td>
+                  <td className="p-3">
+                    {(r.status||"").toLowerCase().includes("active") || (r.status||"").toLowerCase().includes("registered")
+                      ? <span className="inline-block rounded bg-emerald-100 text-emerald-700 text-sm px-2 py-1">ثبت شده</span>
+                      : <span className="inline-block rounded bg-rose-100 text-rose-700 text-sm px-2 py-1">نامشخص</span>}
                   </td>
-                  <td>{r.expireAt || "-"}</td>
-                  <td>{r.notes || "-"}</td>
+                  <td className="p-3">{r.end || "-"}</td>
+                  <td className="p-3">{r.notes || "-"}</td>
                 </tr>
               ))}
-              {!rows.length && !loading && (
-                <tr>
-                  <td colSpan="6" className="p-6 text-center text-gray-500">
-                    نتیجه‌ای برای نمایش نیست.
-                  </td>
-                </tr>
-              )}
             </tbody>
           </table>
         </div>
-
-        <p className="mt-4 text-xs text-gray-500">
-          * منبع داده: <code className="px-1 bg-gray-100 rounded">data/warranty.json</code> — برای به‌روزرسانی، فایل را ادیت و
-          دیپلوی کنید.
-        </p>
-      </section>
-    </main>
+      </div>
+    </>
   );
 }

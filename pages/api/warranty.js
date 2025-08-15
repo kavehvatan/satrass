@@ -1,64 +1,64 @@
 // pages/api/warranty.js
-import fs from "fs/promises";
+import fs from "fs";
 import path from "path";
 
-async function readFirstExisting(paths) {
-  for (const p of paths) {
-    try {
-      const txt = await fs.readFile(p, "utf8");
-      return { json: JSON.parse(txt), source: p };
-    } catch {}
-  }
-  return { json: { meta: {}, records: [] }, source: null };
+function normalize(s = "") {
+  if (typeof s !== "string") s = String(s ?? "");
+  // اعداد فارسی/عربی -> انگلیسی
+  const map = { "۰":"0","۱":"1","۲":"2","۳":"3","۴":"4","۵":"5","۶":"6","۷":"7","۸":"8","۹":"9",
+                "٠":"0","١":"1","٢":"2","٣":"3","٤":"4","٥":"5","٦":"6","٧":"7","٨":"8","٩":"9" };
+  s = s.replace(/[۰-۹٠-٩]/g, d => map[d] || d);
+  // کوتیشن، فاصله‌های اضافه، CR/LF
+  s = s.replace(/["'“”‘’]/g, "").replace(/\r/g, "").trim();
+  return s;
 }
 
-async function loadWarranty() {
-  const cwd = process.cwd();
+function loadJson() {
+  // یکی از این مسیرها وجود دارد
   const candidates = [
-    path.join(cwd, "public", "data", "warranty.json"),
-    path.join(cwd, "data", "warranty.json"),
-    path.join(cwd, ".next", "standalone", "public", "data", "warranty.json"),
+    path.join(process.cwd(), "public", "data", "warranty.json"),
+    path.join(process.cwd(), "data", "warranty.json"),
   ];
-  return readFirstExisting(candidates);
+  for (const p of candidates) {
+    if (fs.existsSync(p)) {
+      const raw = fs.readFileSync(p, "utf-8");
+      const rows = JSON.parse(raw);
+      return { rows, source: p };
+    }
+  }
+  return { rows: [], source: null };
 }
 
-// ⬅️ اینجا را عوض کردیم: هر چیزی به جز حروف و اعداد حذف می‌شود
-function norm(s = "") {
-  return String(s).toUpperCase().replace(/[^A-Z0-9]/g, "");
-}
+export default function handler(req, res) {
+  try {
+    const { rows, source } = loadJson();
 
-export default async function handler(req, res) {
-  const bodyOrQuery = req.method === "POST" ? req.body : req.query;
-  const q = (bodyOrQuery.q || bodyOrQuery.serial || "").toString();
-  const debug = bodyOrQuery.debug === "1" || bodyOrQuery.debug === "true";
+    // q می‌تواند در GET یا POST بیاید
+    const qRaw = req.method === "POST" ? (req.body?.q ?? "") : (req.query?.q ?? "");
+    const qs = String(qRaw ?? "");
 
-  const { json, source } = await loadWarranty();
+    // چند سریال با خط جدید یا کاما
+    const tokens = qs
+      .split(/[\n,]+/)
+      .map(t => normalize(t))
+      .filter(Boolean);
 
-  const serials = q
-    .split(/[,\n\r]+/)       // هر سریال در یک خط یا جدا با کاما
-    .map((s) => s.trim())
-    .filter(Boolean);
+    let result = [];
+    if (tokens.length === 0) {
+      result = []; // اگر چیزی وارد نشد، خروجی خالی
+    } else {
+      const index = rows.map(r => ({ ...r, _serial: normalize(r.serial || "") }));
+      const set = new Set(tokens);
+      result = index.filter(r => set.has(r._serial));
+    }
 
-  const bySerial = new Map(
-    (json.records || []).map((r) => [norm(r.serial), r])
-  );
-
-  const rows = serials.map((s) => {
-    const hit = bySerial.get(norm(s));
-    return {
-      serial: s,
-      brand: hit?.brand || "-",
-      model: hit?.model || "-",
-      status: hit ? (hit.status || "registered") : "not_found",
-      start: hit?.start || "-",
-      end: hit?.end || "-",
-      notes: hit?.notes || "-",
-    };
-  });
-
-  res.status(200).json({
-    rows,
-    meta: json.meta || {},
-    ...(debug ? { debug: { source, records: json.records?.length || 0 } } : {}),
-  });
+    res.status(200).json({
+      rows: result,
+      meta: { updated: new Date().toISOString().slice(0,10) },
+      debug: process.env.NODE_ENV !== "production" ? { source, records: result.length } : undefined,
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "server_error" });
+  }
 }

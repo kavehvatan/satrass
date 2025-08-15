@@ -5,28 +5,49 @@ import Head from "next/head";
 function faToEnDigits(str = "") {
   const map = { "۰":"0","۱":"1","۲":"2","۳":"3","۴":"4","۵":"5","۶":"6","۷":"7","۸":"8","۹":"9",
                 "٠":"0","١":"1","٢":"2","٣":"3","٤":"4","٥":"5","٦":"6","٧":"7","٨":"8","٩":"9" };
-  return str.replace(/[۰-۹٠-٩]/g, d => map[d] || d);
+  return String(str).replace(/[۰-۹٠-٩]/g, d => map[d] || d);
+}
+function normalizeInput(raw = "") {
+  // حذف کوتیشن و فاصله‌های اضافی و نرمال‌سازی اعداد
+  return faToEnDigits(raw).replace(/["'“”‘’]/g, "").trim();
 }
 
 export default function Warranty() {
-  const [q, setQ] = useState("HPE-9J1234"); // نمونه‌ی آماده برای تست
+  const [q, setQ] = useState("HPE-9J1234");
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
 
+  async function fetchWarranty(nq) {
+    // 1) تلاش با GET
+    let r = await fetch("/api/warranty?q=" + encodeURIComponent(nq));
+    if (r.ok) return r.json();
+
+    // 2) اگر GET خطا بود، با POST تلاش کن (fallback)
+    r = await fetch("/api/warranty", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ q: nq }),
+    });
+    if (r.ok) return r.json();
+
+    // اگر هر دو خطا شدند، متن خطا را بخوان
+    const text = await r.text().catch(() => "");
+    const reason = `HTTP ${r.status} ${r.statusText}${text ? " – " + text : ""}`;
+    throw new Error(reason);
+  }
+
   async function doQuery() {
     setLoading(true);
     setErr("");
+    setRows([]);
     try {
-      const qs = faToEnDigits(q || "");
-      const url = "/api/warranty?q=" + encodeURIComponent(qs);
-      const r = await fetch(url);
-      if (!r.ok) throw new Error("خطا در ارتباط با سرور");
-      const data = await r.json();
-      setRows(Array.isArray(data.rows) ? data.rows : []);
+      const nq = normalizeInput(q);
+      const data = await fetchWarranty(nq);
+      setRows(Array.isArray(data?.rows) ? data.rows : []);
     } catch (e) {
-      setErr(e.message || "خطای نامشخص");
-      setRows([]);
+      console.error("Warranty error:", e);
+      setErr("خطا در ارتباط با سرور: " + (e.message || "نامشخص"));
     } finally {
       setLoading(false);
     }
@@ -34,10 +55,10 @@ export default function Warranty() {
 
   const csvHref = useMemo(() => {
     if (!rows.length) return "";
-    const cols = ["serial","brand","model","status","start","end","notes"];
+    const cols = ["serial", "brand", "model", "status", "start", "end", "notes"];
     const head = cols.join(",");
     const body = rows
-      .map(r => cols.map(k => `"${(r[k] ?? "").toString().replace(/"/g,'""')}"`).join(","))
+      .map(r => cols.map(k => `"${(r[k] ?? "").toString().replace(/"/g, '""')}"`).join(","))
       .join("\n");
     return "data:text/csv;charset=utf-8," + encodeURIComponent(head + "\n" + body);
   }, [rows]);
@@ -49,15 +70,15 @@ export default function Warranty() {
       <div className="container mx-auto px-4 py-10">
         <h1 className="text-4xl font-extrabold mb-6">استعلام گارانتی</h1>
         <p className="text-gray-600 mb-6">
-          سریال‌ها را وارد کنید (هر خط یک سریال یا با کاما جدا کنید).
-          داده‌ها از پایگاه داخلی ساتراس خوانده می‌شود.
+          سریال‌ها را وارد کنید (هر خط یک سریال یا با کاما جدا کنید). داده‌ها از پایگاه داخلی ساتراس خوانده می‌شود.
         </p>
 
         <div className="flex items-start gap-3 mb-6">
           <textarea
-            className="w-full min-h-[160px] rounded-lg border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-brand-yellow/70"
+            className="w-full min-h-[140px] rounded-lg border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-brand-yellow/70"
             value={q}
-            onChange={(e)=>setQ(faToEnDigits(e.target.value))}
+            onChange={(e)=>setQ(e.target.value)}
+            onBlur={(e)=>setQ(normalizeInput(e.target.value))}
             dir="ltr"
             placeholder='HPE-9J1234'
           />
@@ -97,8 +118,8 @@ export default function Warranty() {
               ) : rows.map((r,i)=>(
                 <tr key={i} className="border-t">
                   <td className="p-3 font-mono">{r.serial}</td>
-                  <td className="p-3">{r.brand}</td>
-                  <td className="p-3">{r.model}</td>
+                  <td className="p-3">{r.brand || "-"}</td>
+                  <td className="p-3">{r.model || "-"}</td>
                   <td className="p-3">
                     {(r.status||"").toLowerCase().includes("active") || (r.status||"").toLowerCase().includes("registered")
                       ? <span className="inline-block rounded bg-emerald-100 text-emerald-700 text-sm px-2 py-1">ثبت شده</span>
@@ -111,6 +132,10 @@ export default function Warranty() {
             </tbody>
           </table>
         </div>
+
+        <p className="mt-4 text-sm text-gray-500">
+          * منبع داده: <code className="px-1 py-0.5 rounded bg-gray-100">data/warranty.json</code>
+        </p>
       </div>
     </>
   );

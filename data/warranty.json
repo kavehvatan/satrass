@@ -1,0 +1,14 @@
+{
+  "meta": { "updated": "2025-08-14" },
+  "records": [
+    {
+      "serial": "HPE-9J1234",
+      "brand": "HPE",
+      "model": "ProLiant DL380 Gen10",
+      "status": "active",              // active | expired | registered
+      "start": "2024-09-01",
+      "end": "2027-09-01",
+      "notes": "3yr NBD support"
+    }
+  ]
+}

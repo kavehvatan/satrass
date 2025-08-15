@@ -1,241 +1,306 @@
 // pages/warranty-admin.js
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import Head from "next/head";
 
-/** 🔐 اختیاری: اگر ADMIN_KEY در env ست شده باشد، برای دیدن صفحه باید ?key=همان مقدار را به URL اضافه کنی */
-export async function getServerSideProps({ query }) {
-  const required = process.env.ADMIN_KEY;
-  if (required && query.key !== required) {
-    return { notFound: true };
-  }
-  return { props: {} };
-}
+const DASH_RE = /[-\u2010-\u2015\u2212\uFE58\uFE63\uFF0D]/g;
+const WS_RE = /[\s\u200c\u200f\u200e\u202a-\u202e\u2066-\u2069]/g;
+const normalize = (s = "") =>
+  s.toString().toUpperCase().replace(WS_RE, "").replace(DASH_RE, "");
 
-const SAMPLE = `Serial,Vendor,Model,Status,ExpireAt,Notes
-CN12345ABCD,Dell EMC,Unity 480F,active,2026-07-31,تحت قرارداد طلایی
-HPE-9J1234,HPE,ProLiant DL380 Gen10,expired,2024-03-01,`;
+const VENDORS = ["HPE", "Dell EMC", "Cisco", "Lenovo", "Fujitsu", "Juniper", "Oracle", "Quantum"];
+const MODELS = {
+  "HPE": ["ProLiant DL380 Gen10", "ProLiant DL360 Gen10", "Alletra", "Primera"],
+  "Dell EMC": ["Unity XT", "PowerStore", "PowerEdge", "VxRail"],
+  "Cisco": ["UCS", "MDS", "Nexus"],
+  "Lenovo": ["ThinkSystem SR650", "ThinkSystem SR630"],
+  "Fujitsu": ["PRIMERGY RX2540", "ETERNUS"],
+  "Juniper": ["QFX", "MX", "SRX"],
+  "Oracle": ["Exadata", "ZFS"],
+  "Quantum": ["Scalar i3", "Scalar i6"],
+};
+const STATUSES = [
+  { value: "active", label: "active (فعال)" },
+  { value: "expired", label: "expired (منقضی)" },
+];
+const NOTES = ["-", "3yr NBD support", "5yr ProSupport", "Renewal", "—"];
 
-const VALID_STATUS = new Set(["active", "expired", "unknown"]);
-
-function parseCSV(text) {
-  // ساده و کافی: برش سطر/ستون با کاما؛ کوتیشن‌های ساده را هم پاک می‌کنیم
-  const lines = text.split(/\r?\n/).filter((l) => l.trim() !== "");
-  if (!lines.length) return { head: [], rows: [] };
-  const head = lines[0].split(",").map((h) => h.trim());
-  const rows = lines.slice(1).map((line) => {
-    const cols = line
-      .split(",")
-      .map((c) => c.replace(/^"(.*)"$/, "$1").trim());
-    const rec = {};
-    head.forEach((h, i) => (rec[h] = (cols[i] || "").trim()));
-    return rec;
-  });
-  return { head, rows };
-}
-
-function toDB(rows) {
-  const db = {};
-  const errors = [];
-  const dups = new Set();
-  for (const r of rows) {
-    const serial = (r.Serial || "").trim();
-    if (!serial) {
-      errors.push({ serial: "", msg: "ستون Serial خالی است" });
-      continue;
-    }
-    if (db[serial]) dups.add(serial);
-    const status = (r.Status || "unknown").toLowerCase();
-    if (!VALID_STATUS.has(status)) {
-      errors.push({
-        serial,
-        msg: `Status نامعتبر: "${r.Status}" (مجاز: active|expired|unknown)`,
-      });
-    }
-    db[serial] = {
-      vendor: r.Vendor || "",
-      model: r.Model || "",
-      status,
-      expireAt: r.ExpireAt || "",
-      notes: r.Notes || "",
-    };
-  }
-  return { db, errors, dups: Array.from(dups) };
+function emptyRow() {
+  return {
+    serial: "",
+    vendor: VENDORS[0],
+    model: MODELS[VENDORS[0]][0],
+    status: "active",
+    expireAt: "",
+    notes: "-",
+  };
 }
 
 export default function WarrantyAdmin() {
-  const [mode, setMode] = useState("csv"); // csv | json
-  const [csvText, setCsvText] = useState(SAMPLE);
-  const [jsonText, setJsonText] = useState("{\n}\n");
+  const [rows, setRows] = useState([emptyRow()]);
+  const [token, setToken] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
 
-  // اگر کاربر JSON انتخاب کند، همان را پیش‌نمایش می‌کنیم
-  const parsed = useMemo(() => {
-    try {
-      if (mode === "json") {
-        const obj = JSON.parse(jsonText || "{}");
-        const rows = Object.entries(obj).map(([Serial, v]) => ({
-          Serial,
-          Vendor: v.vendor || "",
-          Model: v.model || "",
-          Status: v.status || "unknown",
-          ExpireAt: v.expireAt || "",
-          Notes: v.notes || "",
-        }));
-        return { head: ["Serial","Vendor","Model","Status","ExpireAt","Notes"], rows };
-      } else {
-        return parseCSV(csvText);
+  // token در مرورگر باقی بماند
+  useEffect(() => {
+    const t = localStorage.getItem("ADMIN_TOKEN") || "";
+    if (t) setToken(t);
+  }, []);
+  useEffect(() => {
+    if (token) localStorage.setItem("ADMIN_TOKEN", token);
+  }, [token]);
+
+  function updateRow(i, patch) {
+    setRows((prev) => {
+      const copy = [...prev];
+      copy[i] = { ...copy[i], ...patch };
+      // در تغییر vendor، مدل را به اولین مدل همان vendor ست کن
+      if (patch.vendor) {
+        const vendorModels = MODELS[patch.vendor] || ["-"];
+        if (!vendorModels.includes(copy[i].model)) {
+          copy[i].model = vendorModels[0];
+        }
       }
-    } catch (e) {
-      return { head: [], rows: [], error: e.message };
-    }
-  }, [mode, csvText, jsonText]);
-
-  const { db, errors, dups } = useMemo(() => {
-    if (!parsed.rows?.length) return { db: {}, errors: [], dups: [] };
-    return toDB(parsed.rows);
-  }, [parsed]);
-
-  const downloadJson = () => {
-    const blob = new Blob([JSON.stringify(db, null, 2)], {
-      type: "application/json",
+      return copy;
     });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "warranty.json";
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+  }
+  function addRow() {
+    setRows((prev) => [...prev, emptyRow()]);
+  }
+  function removeRow(i) {
+    setRows((prev) => prev.filter((_, idx) => idx !== i));
+  }
 
-  const importExistingJson = (e) => {
-    const f = e.target.files?.[0];
-    if (!f) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const obj = JSON.parse(String(reader.result || "{}"));
-        setMode("json");
-        setJsonText(JSON.stringify(obj, null, 2));
-      } catch {
-        alert("JSON نامعتبر است.");
+  const payloadRows = useMemo(() => {
+    // فقط ردیف‌هایی که سریال دارند
+    return rows
+      .map((r) => ({ ...r, serial: r.serial.trim() }))
+      .filter((r) => r.serial.length > 0)
+      .map((r) => ({
+        serial: r.serial,                // نسخه نمایش
+        brand: r.vendor,                 // با نام brand ذخیره می‌کنیم چون API خواندن هم brand دارد
+        model: r.model,
+        status: r.status,                // "active" | "expired"
+        end: r.expireAt || "-",          // فیلد end
+        notes: r.notes || "-",
+        // کلید مقایسه: سریال نرمال‌شده (بدون dash و uppercase)
+        _key: normalize(r.serial),
+      }));
+  }, [rows]);
+
+  async function submit() {
+    setMessage("");
+    if (!token) {
+      setMessage("لطفاً Admin Token را وارد کنید.");
+      return;
+    }
+    if (!payloadRows.length) {
+      setMessage("هیچ ردیفی با Serial وارد نشده است.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const resp = await fetch("/api/warranty-admin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ rows: payloadRows }),
+      });
+
+      const data = await resp.json().catch(() => ({}));
+
+      if (!resp.ok) {
+        // اگر سرور readonly بود، نسخه‌ی JSON برگردانده می‌شود تا دانلود کنیم
+        if (data?.readonly && data?.updatedJSON) {
+          setMessage(
+            "⚠️ فایل روی هاست قابل‌نوشتن نیست. فایل به‌روزشده را دانلود و جایگزین کنید."
+          );
+          // ساخت لینک دانلود
+          const blob = new Blob([data.updatedJSON], { type: "application/json" });
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = "warranty.json";
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+        } else {
+          setMessage(`خطا: ${data?.error || resp.statusText}`);
+        }
+        return;
       }
-    };
-    reader.readAsText(f);
-    e.target.value = "";
-  };
+
+      setMessage("✅ بروزرسانی با موفقیت انجام شد.");
+      // گزینه: پاک‌کردن فرم
+      // setRows([emptyRow()]);
+    } catch (e) {
+      setMessage("خطای اتصال به سرور.");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   return (
-    <main className="min-h-screen font-sans">
-      <section className="max-w-6xl mx-auto px-4 py-10">
-        <div className="flex items-center justify-between gap-3">
-          <h1 className="text-2xl md:text-3xl font-extrabold">ساخت دیتابیس گارانتی (JSON)</h1>
-          <label className="text-sm">
-            <input type="file" accept="application/json" onChange={importExistingJson} className="hidden" />
-            <span className="inline-block cursor-pointer rounded-lg border px-3 py-1.5 hover:bg-gray-50">بارگذاری JSON موجود</span>
-          </label>
-        </div>
+    <>
+      <Head>
+        <title>Warranty Admin</title>
+      </Head>
 
-        <p className="mt-2 text-gray-600">
-          ورودی بده، پیش‌نمایش بگیر، و با یک کلیک <code className="bg-gray-100 px-1 rounded">warranty.json</code> دانلود کن. بعدش فقط بذار داخل
-          <code className="bg-gray-100 mx-1 px-1 rounded">/data/warranty.json</code> و پوش بده.
-        </p>
+      <div className="container mx-auto max-w-5xl px-4 py-6">
+        <h1 className="text-2xl font-bold mb-4">مدیریت گارانتی</h1>
 
-        {/* انتخاب حالت ورودی */}
-        <div className="mt-4 flex gap-2">
-          <button
-            onClick={() => setMode("csv")}
-            className={`rounded-lg px-3 py-1.5 border ${mode==="csv" ? "bg-black text-white" : "hover:bg-gray-50"}`}
-          >
-            ورودی CSV/متن
-          </button>
-          <button
-            onClick={() => setMode("json")}
-            className={`rounded-lg px-3 py-1.5 border ${mode==="json" ? "bg-black text-white" : "hover:bg-gray-50"}`}
-          >
-            ورودی JSON
-          </button>
-        </div>
-
-        {/* ویرایشگر */}
-        <div className="mt-3">
-          {mode === "csv" ? (
-            <textarea
-              className="w-full min-h-[220px] border rounded-lg p-3 font-mono"
-              value={csvText}
-              onChange={(e) => setCsvText(e.target.value)}
-              placeholder="Serial,Vendor,Model,Status,ExpireAt,Notes"
+        {/* Admin Token */}
+        <div className="mb-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">Admin Token</label>
+            <input
+              type="password"
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+              className="w-full rounded-xl border border-gray-200 p-3"
+              placeholder="توکن ادمین را وارد کنید"
             />
-          ) : (
-            <textarea
-              className="w-full min-h-[220px] border rounded-lg p-3 font-mono"
-              value={jsonText}
-              onChange={(e) => setJsonText(e.target.value)}
-              placeholder='{"CN123": { "vendor": "...", "model":"...", "status":"active", "expireAt":"2026-01-01", "notes":"" }}'
-            />
-          )}
+            <p className="text-xs text-gray-500 mt-1">
+              برای امنیت، backend فقط درخواست‌های دارای این توکن را می‌پذیرد.
+            </p>
+          </div>
         </div>
 
-        {/* خطاها */}
-        {parsed.error && (
-          <div className="mt-3 rounded-lg bg-rose-50 text-rose-800 p-3 border border-rose-200">
-            خطای پارس: {parsed.error}
-          </div>
-        )}
+        {/* Rows Editor */}
+        <div className="space-y-3">
+          {rows.map((r, i) => {
+            const vendorModels = MODELS[r.vendor] || ["-"];
+            return (
+              <div
+                key={i}
+                className="grid grid-cols-1 lg:grid-cols-12 gap-3 rounded-2xl border border-gray-200 p-3"
+              >
+                {/* Serial */}
+                <div className="lg:col-span-3">
+                  <label className="block text-sm text-gray-600 mb-1">Serial</label>
+                  <input
+                    type="text"
+                    value={r.serial}
+                    onChange={(e) => updateRow(i, { serial: e.target.value })}
+                    className="w-full rounded-xl border border-gray-200 p-3"
+                    placeholder="مثال: HPE-9J1234"
+                  />
+                </div>
 
-        {(errors.length > 0 || dups.length > 0) && (
-          <div className="mt-3 rounded-lg bg-amber-50 text-amber-800 p-3 border border-amber-200">
-            {dups.length > 0 && <div>سریال تکراری: <b className="font-mono">{dups.join(", ")}</b></div>}
-            {errors.map((e, i) => (
-              <div key={i}>{e.serial ? <b className="font-mono">{e.serial}</b> : "رکورد"} — {e.msg}</div>
-            ))}
-          </div>
-        )}
+                {/* Vendor */}
+                <div className="lg:col-span-2">
+                  <label className="block text-sm text-gray-600 mb-1">Vendor</label>
+                  <select
+                    value={r.vendor}
+                    onChange={(e) => updateRow(i, { vendor: e.target.value })}
+                    className="w-full rounded-xl border border-gray-200 p-3 bg-white"
+                  >
+                    {VENDORS.map((v) => (
+                      <option key={v} value={v}>
+                        {v}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-        {/* پیش‌نمایش */}
-        <div className="mt-6 overflow-x-auto">
-          <table className="min-w-full border rounded-lg overflow-hidden text-sm">
-            <thead className="bg-gray-50">
-              <tr className="[&>th]:p-2 [&>th]:text-right">
-                <th>Serial</th><th>Vendor</th><th>Model</th><th>Status</th><th>ExpireAt</th><th>Notes</th>
-              </tr>
-            </thead>
-            <tbody className="[&>tr>td]:p-2 [&>tr>td]:border-t">
-              {Object.entries(db).map(([serial, v]) => (
-                <tr key={serial}>
-                  <td className="font-mono">{serial}</td>
-                  <td>{v.vendor}</td>
-                  <td>{v.model}</td>
-                  <td>
-                    <span className="px-2 py-0.5 rounded bg-gray-100">{v.status}</span>
-                  </td>
-                  <td>{v.expireAt}</td>
-                  <td>{v.notes}</td>
-                </tr>
-              ))}
-              {Object.keys(db).length === 0 && (
-                <tr>
-                  <td colSpan={6} className="p-6 text-center text-gray-500">داده‌ای برای پیش‌نمایش نیست.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                {/* Model */}
+                <div className="lg:col-span-3">
+                  <label className="block text-sm text-gray-600 mb-1">Model</label>
+                  <select
+                    value={r.model}
+                    onChange={(e) => updateRow(i, { model: e.target.value })}
+                    className="w-full rounded-xl border border-gray-200 p-3 bg-white"
+                  >
+                    {vendorModels.map((m) => (
+                      <option key={m} value={m}>
+                        {m}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Status */}
+                <div className="lg:col-span-2">
+                  <label className="block text-sm text-gray-600 mb-1">Status</label>
+                  <select
+                    value={r.status}
+                    onChange={(e) => updateRow(i, { status: e.target.value })}
+                    className="w-full rounded-xl border border-gray-200 p-3 bg-white"
+                  >
+                    {STATUSES.map((s) => (
+                      <option key={s.value} value={s.value}>
+                        {s.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* ExpireAt */}
+                <div className="lg:col-span-2">
+                  <label className="block text-sm text-gray-600 mb-1">ExpireAt</label>
+                  <input
+                    type="date"
+                    value={r.expireAt}
+                    onChange={(e) => updateRow(i, { expireAt: e.target.value })}
+                    className="w-full rounded-xl border border-gray-200 p-3 bg-white"
+                  />
+                </div>
+
+                {/* Notes */}
+                <div className="lg:col-span-3">
+                  <label className="block text-sm text-gray-600 mb-1">Notes</label>
+                  <select
+                    value={r.notes}
+                    onChange={(e) => updateRow(i, { notes: e.target.value })}
+                    className="w-full rounded-xl border border-gray-200 p-3 bg-white"
+                  >
+                    {NOTES.map((n) => (
+                      <option key={n} value={n}>
+                        {n}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Actions */}
+                <div className="lg:col-span-12 flex justify-end gap-2">
+                  {rows.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeRow(i)}
+                      className="px-4 py-2 rounded-xl border hover:bg-gray-50"
+                    >
+                      حذف ردیف
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
 
-        {/* خروجی */}
-        <div className="mt-4 flex gap-3">
+        <div className="flex items-center gap-3 mt-4">
           <button
-            onClick={downloadJson}
-            className="rounded-lg px-4 py-2 bg-black text-white hover:bg-zinc-800 transition disabled:opacity-60"
-            disabled={Object.keys(db).length === 0 || errors.length > 0}
-            title={errors.length ? "اول خطاها را برطرف کن" : ""}
+            type="button"
+            onClick={addRow}
+            className="px-5 py-3 rounded-xl border border-gray-300 hover:bg-gray-50"
           >
-            دانلود warranty.json
+            + افزودن ردیف
           </button>
-          <span className="text-sm text-gray-500">
-            وضعیت مجاز: <code className="bg-gray-100 px-1 rounded">active</code>,{" "}
-            <code className="bg-gray-100 px-1 rounded">expired</code>,{" "}
-            <code className="bg-gray-100 px-1 rounded">unknown</code>
-          </span>
+
+          <button
+            type="button"
+            disabled={busy}
+            onClick={submit}
+            className="px-5 py-3 rounded-xl bg-black text-white hover:bg-zinc-800 disabled:opacity-60"
+          >
+            {busy ? "در حال ثبت…" : "ثبت / Import"}
+          </button>
         </div>
-      </section>
-    </main>
+
+        {!!message && <p className="mt-4 text-sm text-gray-700">{message}</p>}
+      </div>
+    </>
   );
 }

@@ -78,13 +78,18 @@ export default function Warranty() {
 
         <div className="flex items-start gap-3 mb-6">
           <textarea
-            className="w-full min-h-[110px] rounded-lg border border-gray-300 p-3 bg-gray-50 placeholder-gray-400 text-black focus:outline-none focus:ring-2 focus:ring-brand-yellow/70 resize-y"
-            value={q}
-            onChange={(e)=>setQ(e.target.value)}
-            onBlur={(e)=>setQ(normalizeInput(e.target.value))}
-            dir="ltr"
-            placeholder="HPE-9J1234"
-          />
+  ref={inputRef}
+  rows={3}
+  className="
+    w-full rounded-2xl border border-gray-200 bg-gray-50/80
+    focus:bg-white outline-none focus:ring-2 focus:ring-brand-yellow/60 focus:border-brand-yellow/60
+    min-h-[110px] h-[110px] resize-y text-gray-800
+    placeholder:text-gray-400 placeholder:opacity-80
+  "
+  placeholder="مثال: HPE-9J1234 یا چند سریال با کاما: HPE-9J1234, DELL-XY1234"
+  value={query}
+  onChange={(e)=> setQuery(e.target.value)}
+/>
           <button
             onClick={doQuery}
             disabled={loading}

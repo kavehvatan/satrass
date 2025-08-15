@@ -2,13 +2,16 @@
 import { useState, useMemo } from "react";
 import Head from "next/head";
 
+// تبدیل اعداد فارسی/عربی به انگلیسی
 function faToEnDigits(str = "") {
-  const map = { "۰":"0","۱":"1","۲":"2","۳":"3","۴":"4","۵":"5","۶":"6","۷":"7","۸":"8","۹":"9",
-                "٠":"0","١":"1","٢":"2","٣":"3","٤":"4","٥":"5","٦":"6","٧":"7","٨":"8","٩":"9" };
+  const map = {
+    "۰":"0","۱":"1","۲":"2","۳":"3","۴":"4","۵":"5","۶":"6","۷":"7","۸":"8","۹":"9",
+    "٠":"0","١":"1","٢":"2","٣":"3","٤":"4","٥":"5","٦":"6","٧":"7","٨":"8","٩":"9"
+  };
   return String(str).replace(/[۰-۹٠-٩]/g, d => map[d] || d);
 }
 function normalizeInput(raw = "") {
-  // حذف کوتیشن و فاصله‌های اضافی و نرمال‌سازی اعداد
+  // حذف کوتیشن‌ها و فاصله اضافی + نرمال‌سازی اعداد
   return faToEnDigits(raw).replace(/["'“”‘’]/g, "").trim();
 }
 
@@ -19,11 +22,11 @@ export default function Warranty() {
   const [err, setErr] = useState("");
 
   async function fetchWarranty(nq) {
-    // 1) تلاش با GET
+    // تلاش اول با GET
     let r = await fetch("/api/warranty?q=" + encodeURIComponent(nq));
     if (r.ok) return r.json();
 
-    // 2) اگر GET خطا بود، با POST تلاش کن (fallback)
+    // تلاش دوم با POST
     r = await fetch("/api/warranty", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -31,7 +34,7 @@ export default function Warranty() {
     });
     if (r.ok) return r.json();
 
-    // اگر هر دو خطا شدند، متن خطا را بخوان
+    // اگر هر دو خطا شد
     const text = await r.text().catch(() => "");
     const reason = `HTTP ${r.status} ${r.statusText}${text ? " – " + text : ""}`;
     throw new Error(reason);
@@ -75,12 +78,12 @@ export default function Warranty() {
 
         <div className="flex items-start gap-3 mb-6">
           <textarea
-            className="w-full min-h-[140px] rounded-lg border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-brand-yellow/70"
+            className="w-full min-h-[110px] rounded-lg border border-gray-300 p-3 bg-gray-50 placeholder-gray-400 text-black focus:outline-none focus:ring-2 focus:ring-brand-yellow/70 resize-y"
             value={q}
             onChange={(e)=>setQ(e.target.value)}
             onBlur={(e)=>setQ(normalizeInput(e.target.value))}
             dir="ltr"
-            placeholder='HPE-9J1234'
+            placeholder="HPE-9J1234"
           />
           <button
             onClick={doQuery}

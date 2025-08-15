@@ -1,29 +1,119 @@
 // components/Header.js
 import Link from "next/link";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 
 export default function Header() {
-  return (
-    <header className="bg-white sticky top-0 z-50 shadow-sm">
-      <div className="max-w-6xl mx-auto px-4 h-20 flex items-center justify-between" dir="rtl">
-        {/* ناوبری (راست) */}
-        <nav className="order-2 flex items-center gap-6 text-[15px] md:text-[17px] lg:text-[18px] font-semibold text-gray-900">
-          <Link href="/" className="hover:text-black/70">خانه</Link>
-          <Link href="/tools" className="hover:text-black/70">ابزارها</Link>
-	<Link href="/downloads" className="hover:text-brand-teal transition">دانلودها</Link>
-	<Link href="/warranty" className="hover:text-black/70"> گارانتی</Link>
-          <Link href="/about" className="hover:text-black/70">درباره ما</Link>
-          <Link href="/contact" className="hover:text-black/70">تماس با ما</Link>
-        </nav>
+  const [open, setOpen] = useState(false);
+  const router = useRouter();
 
-        {/* لوگو (چپ) */}
-        <Link href="/" className="order-1 shrink-0" aria-label="Satrass">
-          <img
-            src="/logo-satrass.png?v=4"
-            alt="Satrass"
-            className="h-16 lg:h-20 w-auto object-contain"
-          />
-        </Link>
+  // قفل اسکرول صفحه وقتی منوی موبایل باز است
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    const onEsc = (e) => e.key === "Escape" && setOpen(false);
+    window.addEventListener("keydown", onEsc);
+    return () => window.removeEventListener("keydown", onEsc);
+  }, [open]);
+
+  const nav = [
+    { href: "/", label: "خانه" },
+    { href: "/tools", label: "ابزارها" },
+    { href: "/downloads", label: "دانلودها" },
+    { href: "/warranty", label: "گارانتی" },
+    { href: "/about", label: "درباره ما" },
+    { href: "/contact", label: "تماس با ما" },
+  ];
+
+  const isActive = (href) =>
+    href === "/"
+      ? router.pathname === "/"
+      : router.pathname.startsWith(href);
+
+  const itemClass =
+    "px-1 py-1 rounded-md hover:text-brand-600 hover:opacity-90 transition";
+  const activeClass =
+    "text-brand-600 font-bold";
+
+  return (
+    <header dir="rtl" className="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-black/5">
+      <div className="max-w-screen-xl mx-auto px-4">
+        <div className="h-16 flex items-center justify-between">
+
+          {/* لوگو */}
+          <div className="shrink-0 flex items-center">
+            <Link href="/" aria-label="Satrass">
+              <Image
+                src="/logo-satrass.png"
+                alt="Satrass"
+                width={132}
+                height={40}
+                priority
+              />
+            </Link>
+          </div>
+
+          {/* منوی دسکتاپ */}
+          <nav className="hidden md:flex items-center gap-7 text-slate-900">
+            {nav.map((n) => (
+              <Link
+                key={n.href}
+                href={n.href}
+                className={`${itemClass} ${isActive(n.href) ? activeClass : ""}`}
+                aria-current={isActive(n.href) ? "page" : undefined}
+              >
+                {n.label}
+              </Link>
+            ))}
+          </nav>
+
+          {/* دکمه همبرگری موبایل */}
+          <button
+            className="md:hidden inline-flex items-center justify-center w-11 h-11 rounded-xl border border-black/10 bg-white/70 hover:bg-white transition"
+            aria-label="باز کردن منو"
+            aria-expanded={open}
+            onClick={() => setOpen((v) => !v)}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+            </svg>
+          </button>
+        </div>
       </div>
+
+      {/* لایه و دراور موبایل */}
+      {open && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/35 backdrop-blur-sm md:hidden"
+            onClick={() => setOpen(false)}
+          />
+          <div className="fixed z-50 top-16 inset-x-3 md:hidden">
+            <div className="rounded-2xl border border-white/30 bg-white/95 shadow-2xl p-3 text-right">
+              <ul className="divide-y divide-black/5">
+                {nav.map((n) => (
+                  <li key={n.href}>
+                    <Link
+                      href={n.href}
+                      onClick={() => setOpen(false)}
+                      className={`block px-3 py-3 rounded-xl hover:bg-black/5 transition ${
+                        isActive(n.href) ? "text-brand-600 font-bold" : "text-slate-900"
+                      }`}
+                      aria-current={isActive(n.href) ? "page" : undefined}
+                    >
+                      {n.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </>
+      )}
     </header>
   );
 }

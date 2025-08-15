@@ -14,3 +14,15 @@ html, body {
   --logo-teal: #14b8a6;   /* teal-500 */
   --logo-yellow: #f4c21f; /* زرد لوگو */
 }
+
+/* جلوگیری از اسکرول افقی و کشیده‌شدن صفحه به راست/چپ */
+html, body, #__next {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* همه‌چی باکس‌باکسینگ درست */
+*, *::before, *::after { box-sizing: border-box; }
+
+/* مدیاها بیرون نزنن */
+img, video { max-width: 100%; height: auto; }

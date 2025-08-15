@@ -8,14 +8,28 @@ export default function Warranty() {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState(null);
 
-  const normalize = (s) =>
+  // نرمال‌سازی برای «نمایش/حروف بزرگ و حذف " در ابتدا/انتها»
+  const normalizeDisplay = (s) =>
     (s || "").toString().replace(/^"+|"+$/g, "").trim().toUpperCase();
+
+  // نرمال‌سازی برای «مقایسه» — فقط حروف و ارقام نگه می‌دارد (خط تیره، فاصله و … حذف می‌شوند)
+  const normalizeKey = (s) =>
+    (s || "").toString().toUpperCase().replace(/[^A-Z0-9]/g, "");
+
+  // تبدیل وضعیت انگلیسی به فارسی + تعیین رنگ برچسب
+  const faStatus = (v) => {
+    const key = (v || "").toString().toLowerCase();
+    if (key === "active") return { label: "فعال", className: "bg-emerald-50 text-emerald-700 ring-emerald-200" };
+    if (key === "expired") return { label: "منقضی", className: "bg-rose-50 text-rose-700 ring-rose-200" };
+    if (key === "pending") return { label: "در انتظار", className: "bg-amber-50 text-amber-700 ring-amber-200" };
+    return { label: v || "—", className: "bg-gray-50 text-gray-700 ring-gray-200" };
+  };
 
   const serialsFromTextarea = useMemo(() => {
     if (!q.trim()) return [];
     return q
       .split(/[\n,]+/g)
-      .map(normalize)
+      .map(normalizeKey)   // <- بدون خط تیره هم کار می‌کند
       .filter(Boolean);
   }, [q]);
 
@@ -38,8 +52,9 @@ export default function Warranty() {
       const got = Array.isArray(data?.rows) ? data.rows : [];
       setRows(got);
 
+      // مجموعه‌ی سریال‌های پیدا شده را بر اساس «کلید نرمال‌شده» می‌سازیم
       const foundSet = new Set(
-        got.map((r) => normalize(r.serial ?? r.SERIAL ?? r.s))
+        got.map((r) => normalizeKey(r.serial ?? r.SERIAL ?? r.s))
       );
       const missing = serialsFromTextarea.filter((s) => !foundSet.has(s));
       setNotFound(missing);
@@ -105,7 +120,7 @@ export default function Warranty() {
 
         {/* باکس ورودی (ستون راست) */}
         <textarea
-          dir="auto" /* placeholder فارسی → راست‌چین؛ سریال انگلیسی → خودکار چپ‌چین */
+          dir="auto"
           className="min-h-[110px] w-full resize-y rounded-xl border border-gray-200 bg-gray-50/70 px-4 py-3 text-[15px] leading-7 outline-none placeholder:text-right focus:border-gray-300 focus:bg-white"
           placeholder="مثال: HPE-9J1234 (یا چند سریال با خط جدید/کاما)"
           value={q}
@@ -113,10 +128,8 @@ export default function Warranty() {
         />
       </div>
 
-      {/* خطا */}
       {err && <div className="mt-3 text-sm font-medium text-red-600">{err}</div>}
 
-      {/* جدول نتایج */}
       <div className="mt-6 overflow-hidden rounded-2xl border border-gray-200">
         <table className="w-full text-right">
           <thead className="bg-gray-50/70 text-gray-600">
@@ -130,26 +143,27 @@ export default function Warranty() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 text-gray-800">
-            {rows.map((r, idx) => (
-              <tr key={`f-${idx}`} className="bg-white">
-                <td className="px-4 py-3 font-mono text-sm">
-                  {normalize(r.serial ?? r.SERIAL ?? r.s)}
-                </td>
-                <td className="px-4 py-3">{r.brand ?? "—"}</td>
-                <td className="px-4 py-3">{r.model ?? "—"}</td>
-                <td className="px-4 py-3">
-                  {r.status ? (
-                    <span className="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-[13px] font-semibold text-emerald-700 ring-1 ring-emerald-200">
-                      {r.status}
+            {rows.map((r, idx) => {
+              const status = faStatus(r.status);
+              return (
+                <tr key={`f-${idx}`} className="bg-white">
+                  <td className="px-4 py-3 font-mono text-sm">
+                    {normalizeDisplay(r.serial ?? r.SERIAL ?? r.s)}
+                  </td>
+                  <td className="px-4 py-3">{r.brand ?? "—"}</td>
+                  <td className="px-4 py-3">{r.model ?? "—"}</td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`inline-flex items-center rounded-full px-3 py-1 text-[13px] font-semibold ring-1 ${status.className}`}
+                    >
+                      {status.label}
                     </span>
-                  ) : (
-                    "—"
-                  )}
-                </td>
-                <td className="px-4 py-3">{r.end ?? "—"}</td>
-                <td className="px-4 py-3">{r.notes ?? "—"}</td>
-              </tr>
-            ))}
+                  </td>
+                  <td className="px-4 py-3">{r.end ?? "—"}</td>
+                  <td className="px-4 py-3">{r.notes ?? "—"}</td>
+                </tr>
+              );
+            })}
 
             {/* سریال‌هایی که پیدا نشدند */}
             {notFound.map((s, i) => (

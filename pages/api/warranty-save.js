@@ -2,92 +2,99 @@
 import fs from "fs/promises";
 import path from "path";
 
-const DASH_RE = /[-\u2010-\u2015\u2212\uFE58\uFE63\uFF0D]/g;
-const WS_RE = /[\s\u200c\u200f\u200e\u202a-\u202e\u2066-\u2069]/g;
-const normalize = (s = "") =>
-  s.toString().toUpperCase().replace(WS_RE, "").replace(DASH_RE, "");
+function titleCase(str = "") {
+  return String(str)
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
 
-const filePath = path.join(process.cwd(), "data", "warranty.json");
+function normalizeDate(input = "") {
+  const s = String(input).trim();
+  // YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  // MM/DD/YYYY یا MM-DD-YYYY
+  const m = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+  if (m) {
+    const [, mm, dd, yyyy] = m;
+    return `${yyyy}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}`;
+  }
+  // اگر ناشناخته بود همان را برگردان
+  return s;
+}
+
+function mapStatusToStored(s = "") {
+  const k = s.toString().toLowerCase();
+  if (k.includes("فعال") || k.includes("active")) return "active";
+  if (k.includes("منقضی") || k.includes("expired")) return "expired";
+  return "unknown";
+}
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method Not Allowed" });
+    return res.status(405).json({ error: "method not allowed" });
   }
 
-  // احراز هویت: توکن از هدر x-admin-token و متغیر محیطی ADMIN_TOKEN
-  const token = (req.headers["x-admin-token"] || "").toString();
-  if (!token || token !== process.env.ADMIN_TOKEN) {
-    return res.status(401).json({ error: "Unauthorized" });
+  const token = req.headers["x-admin-token"] || "";
+  if (!process.env.ADMIN_TOKEN || token !== process.env.ADMIN_TOKEN) {
+    return res.status(401).json({ error: "unauthorized" });
   }
 
-  // بدنهٔ درخواست
-  const body = req.body;
-  if (!body || !Array.isArray(body.rows)) {
-    return res.status(400).json({ error: "Invalid payload" });
-  }
-
-  // اعتبارسنجی: Serial و ExpireAt الزامی
-  for (const r of body.rows) {
-    if (!r.serial || !String(r.serial).trim()) {
-      return res.status(400).json({ error: "serial is required" });
-    }
-    if (!r.expireAt) {
-      return res.status(400).json({ error: "expireAt is required" });
-    }
-  }
-
-  // خواندن فایل فعلی (اگر نبود، از صفر شروع می‌کنیم)
-  let current = { rows: [], meta: {} };
+  let rows = [];
   try {
-    const raw = await fs.readFile(filePath, "utf-8");
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed)) current.rows = parsed;
-    else if (Array.isArray(parsed.rows)) current.rows = parsed.rows;
-    if (parsed.meta) current.meta = parsed.meta;
+    const body = req.body || {};
+    rows = Array.isArray(body.rows) ? body.rows : [];
   } catch {
-    // ignore
+    rows = [];
   }
 
-  // ایندکس روی سریالِ نرمال‌شده
-  const map = new Map(current.rows.map((r) => [normalize(r.serial), r]));
-  let changed = false;
-
-  // مرج/به‌روزرسانی
-  for (const r of body.rows) {
-    const key = normalize(r.serial);
-    const nextRow = {
-      serial: r.serial,                     // نمایش همون چیزی که وارد می‌کنی
-      brand: r.brand || r.vendor || "-",    // هم‌تراز با API خواندن
-      model: r.model || "-",
-      status: r.status || "active",
-      end: r.end || r.expireAt || "-",      // ذخیره در فیلد end
-      notes: r.notes || "-",
-    };
-
-    if (map.has(key)) {
-      const ex = map.get(key);
-      ex.brand = nextRow.brand;
-      ex.model = nextRow.model;
-      ex.status = nextRow.status;
-      ex.end = nextRow.end;
-      ex.notes = nextRow.notes;
-      changed = true;
-    } else {
-      current.rows.push(nextRow);
-      map.set(key, nextRow);
-      changed = true;
-    }
+  if (!rows.length) {
+    return res.status(200).json({ ok: true, saved: 0 });
   }
 
-  current.meta.updated = new Date().toISOString().slice(0, 10);
-  const pretty = JSON.stringify(current, null, 2);
+  const cleaned = [];
+  for (const r of rows) {
+    const serial = String(r.serial || "").toUpperCase().trim();
+    if (!serial) return res.status(400).json({ error: "serial is required" });
 
-  // تلاش برای نوشتن روی دیسک
+    const brand = String(r.brand || r.vendor || "").trim();
+    const model = titleCase(r.model || "-");
+    const notes = String(r.notes || "").trim();
+
+    // قبول هر دو نام: expireAt یا end
+    const rawEnd = r.end || r.expireAt || r.expire_at || "";
+    if (!rawEnd) return res.status(400).json({ error: "expireAt is required" });
+    const end = normalizeDate(rawEnd);
+
+    const status = mapStatusToStored(r.status || "");
+
+    cleaned.push({ serial, brand, model, status, end, notes });
+  }
+
+  const file = path.join(process.cwd(), "data", "warranty.json");
+  let db = { rows: [] };
   try {
-    await fs.writeFile(filePath, pretty, "utf-8");
-    return res.status(200).json({ ok: true });
+    const txt = await fs.readFile(file, "utf8");
+    db = JSON.parse(txt || "{}");
+    if (!Array.isArray(db.rows)) db.rows = [];
   } catch {
-    // اگر هاست read-only بود، JSON آپدیت‌شده را بده که دانلود/کمیت کنی
-    return res.status(200).json({ ok: false, readonly: true, updatedJSON: pretty });
+    db = { rows: [] };
   }
+
+  // ادغام بر اساس serial
+  const map = new Map(db.rows.map((x) => [String(x.serial).toUpperCase(), x]));
+  for (const c of cleaned) {
+    map.set(c.serial, c);
+  }
+
+  const out = {
+    rows: Array.from(map.values()),
+    meta: { updated: new Date().toISOString().slice(0, 10) },
+  };
+
+  await fs.mkdir(path.dirname(file), { recursive: true }).catch(() => {});
+  await fs.writeFile(file, JSON.stringify(out, null, 2), "utf8");
+
+  return res.status(200).json({ ok: true, saved: cleaned.length });
 }

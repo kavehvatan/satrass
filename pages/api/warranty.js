@@ -2,63 +2,58 @@
 import fs from "fs";
 import path from "path";
 
-function normalizeSerial(s = "") {
-  return String(s)
-    .replace(/[\"'“”‘’]/g, "")  // حذف کوتیشن‌های مختلف
-    .trim()
-    .toUpperCase();
-}
-
-function normalizeInput(raw = "") {
-  // چند سریال با خط جدید یا کاما/سیمی‌کالن
-  const enMap = { "۰":"0","۱":"1","۲":"2","۳":"3","۴":"4","۵":"5","۶":"6","۷":"7","۸":"8","۹":"9",
-                  "٠":"0","١":"1","٢":"2","٣":"3","٤":"4","٥":"5","٦":"6","٧":"7","٨":"8","٩":"9" };
-  const faToEn = (t) => String(t).replace(/[۰-۹٠-٩]/g, d => enMap[d] || d);
-
-  return faToEn(raw)
-    .split(/[\n,;]+/)
-    .map(s => normalizeSerial(s))
-    .filter(Boolean);
-}
+const normalize = (s) =>
+  (s || "")
+    .toString()
+    .toUpperCase()
+    .replace(/[\s\u200c\u200f\u200e\u202a-\u202e\u2066-\u2069]/g, "")
+    .replace(/[-\u2010-\u2015\u2212\uFE58\uFE63\uFF0D]/g, "");
 
 export default function handler(req, res) {
   try {
-    // محل فایل JSON
-    const src = path.join(process.cwd(), "data", "warranty.json");
-    const txt = fs.readFileSync(src, "utf8");
+    const file = path.join(process.cwd(), "data", "warranty.json");
+    const raw = fs.readFileSync(file, "utf8");
+    const json = JSON.parse(raw);
 
-    // پارس امن: هم آرایه‌ی مستقیم و هم آبجکتِ {rows:[], updated:"..."} را پشتیبانی کن
-    const data = JSON.parse(txt);
-    const allRows = Array.isArray(data) ? data : (Array.isArray(data.rows) ? data.rows : []);
+    // آرایه‌ی رکوردها از فایل
+    const records = Array.isArray(json)
+      ? json
+      : Array.isArray(json.rows)
+      ? json.rows
+      : [];
 
-    // ورودی از GET یا POST
-    const rawQ = req.method === "POST" ? (req.body?.q ?? "") : (req.query?.q ?? "");
-    const wanted = normalizeInput(rawQ);
-
-    // ایندکس سریال‌ها
-    const index = new Map(allRows.map(r => [normalizeSerial(r.serial), r]));
-
-    const out = wanted.length ? wanted.map(s => index.get(s)).filter(Boolean) : [];
-
-    const payload = {
-      rows: out,
-      meta: { updated: data?.updated ?? null }
-    };
-
-    // حالت دیباگ اختیاری
-    if (req.query?.debug) {
-      payload.debug = {
-        source: src,
-        q: wanted,
-        records: out.length
-      };
+    // مپ برای جستجوی سریع با سریال نرمال‌شده
+    const bySerial = new Map();
+    for (const r of records) {
+      const key = normalize(r?.serial);
+      if (key) bySerial.set(key, r);
     }
 
-    return res.status(200).json(payload);
+    const q = (req.query.q || "").toString();
+    const inputs = q
+      ? q.split(/[\n,]+/g).map((s) => s.trim()).filter(Boolean)
+      : [];
+
+    let out = [];
+    if (inputs.length) {
+      // فقط موارد درخواست‌شده را برگردان
+      for (const s of inputs) {
+        const found = bySerial.get(normalize(s));
+        if (found) out.push(found);
+      }
+    } else {
+      // اگر چیزی نخواستند، همه را برگردان
+      out = records;
+    }
+
+    res.status(200).json({
+      rows: out,
+      meta: { updated: json.updated || null },
+      ...(process.env.NODE_ENV !== "production"
+        ? { debug: { records: records.length } }
+        : {}),
+    });
   } catch (e) {
-    console.error("warranty api error:", e);
-    return res.status(500).json({ error: "server_error", detail: e.message });
+    res.status(500).json({ error: "server_error" });
   }
 }
-
-// (Body parser پیش‌فرض Next فعاله؛ نیازی به تنظیم خاصی نیست.)

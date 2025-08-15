@@ -4,21 +4,15 @@ import { useMemo, useState } from "react";
 export default function Warranty() {
   const [q, setQ] = useState("");
   const [rows, setRows] = useState([]);
-  const [notFound, setNotFound] = useState([]); // سریال‌هایی که در فایل نبود
+  const [notFound, setNotFound] = useState([]);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState(null);
 
-  // نرمال‌سازی سریال‌ها برای مقایسه (حذف کوتیشن، فاصله و حروف کوچک)
   const normalize = (s) =>
-    (s || "")
-      .toString()
-      .replace(/^"+|"+$/g, "")
-      .trim()
-      .toUpperCase();
+    (s || "").toString().replace(/^"+|"+$/g, "").trim().toUpperCase();
 
   const serialsFromTextarea = useMemo(() => {
     if (!q.trim()) return [];
-    // تفکیک بر اساس خط جدید یا کاما
     return q
       .split(/[\n,]+/g)
       .map(normalize)
@@ -31,10 +25,8 @@ export default function Warranty() {
     setRows([]);
     setNotFound([]);
     try {
-      const url = `/api/warranty?q=${encodeURIComponent(q)}`;
-      const res = await fetch(url);
+      const res = await fetch(`/api/warranty?q=${encodeURIComponent(q)}`);
       const data = await res.json().catch(() => ({}));
-
       if (!res.ok) {
         setErr(
           data?.error
@@ -43,17 +35,15 @@ export default function Warranty() {
         );
         return;
       }
-
       const got = Array.isArray(data?.rows) ? data.rows : [];
       setRows(got);
 
-      // محاسبه سریال‌های یافت‌نشده نسبت به ورودی
       const foundSet = new Set(
         got.map((r) => normalize(r.serial ?? r.SERIAL ?? r.s))
       );
       const missing = serialsFromTextarea.filter((s) => !foundSet.has(s));
       setNotFound(missing);
-    } catch (e) {
+    } catch {
       setErr("HTTP 500 – server_error");
     } finally {
       setLoading(false);
@@ -61,7 +51,6 @@ export default function Warranty() {
   }
 
   function exportCSV() {
-    // خروجی ساده‌ی نتایج موجود (فقط ردیف‌های پیدا شده)
     const headers = ["serial", "brand", "model", "status", "start", "end", "notes"];
     const lines = [
       headers.join(","),
@@ -90,43 +79,42 @@ export default function Warranty() {
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-10">
-      <h1 className="text-3xl font-extrabold mb-2">استعلام گارانتی</h1>
-      <p className="text-gray-600 mb-6">
-        سریال‌ها را وارد کنید (هر خط یک سریال یا با کاما جدا کنید). داده‌ها از
-        پایگاه داخلی ساتراس خوانده می‌شود.
+      <h1 className="mb-2 text-3xl font-extrabold">استعلام گارانتی</h1>
+      <p className="mb-6 text-gray-600">
+        سریال‌ها را وارد کنید (هر خط یک سریال یا با کاما جدا کنید). داده‌ها از پایگاه داخلی ساتراس خوانده می‌شود.
       </p>
 
-      {/* کنترل‌ها */}
-      <div className="flex items-start gap-3">
-        <button
-          onClick={exportCSV}
-          className="rounded-xl border border-gray-300 bg-white/80 px-4 py-2 text-gray-700 hover:bg-white"
-        >
-          خروجی CSV
-        </button>
+      {/* چیدمان: دکمه‌ها سمت چپ، باکس سمت راست */}
+      <div className="grid grid-cols-[auto,1fr] items-start gap-4">
+        {/* دکمه‌ها (ستون چپ) */}
+        <div className="flex w-[150px] flex-col gap-2">
+          <button
+            onClick={handleQuery}
+            disabled={loading}
+            className="min-w-[150px] rounded-xl bg-black px-4 py-2 text-center font-semibold text-white hover:bg-black/90 disabled:opacity-60"
+          >
+            {loading ? "در حال استعلام…" : "استعلام"}
+          </button>
+          <button
+            onClick={exportCSV}
+            className="min-w-[150px] rounded-xl border border-gray-300 bg-white/80 px-4 py-2 text-center text-gray-700 hover:bg-white"
+          >
+            خروجی CSV
+          </button>
+        </div>
 
-        <button
-          onClick={handleQuery}
-          disabled={loading}
-          className="rounded-xl bg-black px-5 py-2 font-semibold text-white hover:bg-black/90 disabled:opacity-60"
-        >
-          {loading ? "در حال استعلام…" : "استعلام"}
-        </button>
-
-        {/* باکس ورودی: کمی کوتاه‌تر + placeholder خاکستری */}
+        {/* باکس ورودی (ستون راست) */}
         <textarea
-          dir="ltr"
-          className="min-h-[110px] w-full resize-y rounded-xl border border-gray-200 bg-gray-50/70 px-4 py-3 text-[15px] leading-7 outline-none placeholder:text-gray-400 focus:border-gray-300 focus:bg-white"
-          placeholder='مثال: HPE-9J1234 یا چند سریال با خط جدید/کاما'
+          dir="auto" /* placeholder فارسی → راست‌چین؛ سریال انگلیسی → خودکار چپ‌چین */
+          className="min-h-[110px] w-full resize-y rounded-xl border border-gray-200 bg-gray-50/70 px-4 py-3 text-[15px] leading-7 outline-none placeholder:text-right focus:border-gray-300 focus:bg-white"
+          placeholder="مثال: HPE-9J1234 (یا چند سریال با خط جدید/کاما)"
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
       </div>
 
       {/* خطا */}
-      {err && (
-        <div className="mt-3 text-sm font-medium text-red-600">{err}</div>
-      )}
+      {err && <div className="mt-3 text-sm font-medium text-red-600">{err}</div>}
 
       {/* جدول نتایج */}
       <div className="mt-6 overflow-hidden rounded-2xl border border-gray-200">
@@ -142,7 +130,6 @@ export default function Warranty() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 text-gray-800">
-            {/* ردیف‌های پیدا شده */}
             {rows.map((r, idx) => (
               <tr key={`f-${idx}`} className="bg-white">
                 <td className="px-4 py-3 font-mono text-sm">
@@ -164,7 +151,7 @@ export default function Warranty() {
               </tr>
             ))}
 
-            {/* ردیف‌های ثبت‌نشده (Badge رنگی) */}
+            {/* سریال‌هایی که پیدا نشدند */}
             {notFound.map((s, i) => (
               <tr key={`nf-${i}`} className="bg-white">
                 <td className="px-4 py-3 font-mono text-sm">{s}</td>
@@ -180,13 +167,9 @@ export default function Warranty() {
               </tr>
             ))}
 
-            {/* اگر هیچ چیز برای نمایش نبود */}
             {!loading && rows.length === 0 && notFound.length === 0 && (
               <tr>
-                <td
-                  colSpan={6}
-                  className="px-4 py-6 text-center text-gray-500"
-                >
+                <td colSpan={6} className="px-4 py-6 text-center text-gray-500">
                   نتیجه‌ای برای نمایش نیست.
                 </td>
               </tr>

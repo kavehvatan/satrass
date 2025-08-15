@@ -2,63 +2,63 @@
 import fs from "fs";
 import path from "path";
 
-function normalize(s = "") {
-  if (typeof s !== "string") s = String(s ?? "");
-  // اعداد فارسی/عربی -> انگلیسی
-  const map = { "۰":"0","۱":"1","۲":"2","۳":"3","۴":"4","۵":"5","۶":"6","۷":"7","۸":"8","۹":"9",
-                "٠":"0","١":"1","٢":"2","٣":"3","٤":"4","٥":"5","٦":"6","٧":"7","٨":"8","٩":"9" };
-  s = s.replace(/[۰-۹٠-٩]/g, d => map[d] || d);
-  // کوتیشن، فاصله‌های اضافه، CR/LF
-  s = s.replace(/["'“”‘’]/g, "").replace(/\r/g, "").trim();
-  return s;
+function normalizeSerial(s = "") {
+  return String(s)
+    .replace(/[\"'“”‘’]/g, "")  // حذف کوتیشن‌های مختلف
+    .trim()
+    .toUpperCase();
 }
 
-function loadJson() {
-  // یکی از این مسیرها وجود دارد
-  const candidates = [
-    path.join(process.cwd(), "public", "data", "warranty.json"),
-    path.join(process.cwd(), "data", "warranty.json"),
-  ];
-  for (const p of candidates) {
-    if (fs.existsSync(p)) {
-      const raw = fs.readFileSync(p, "utf-8");
-      const rows = JSON.parse(raw);
-      return { rows, source: p };
-    }
-  }
-  return { rows: [], source: null };
+function normalizeInput(raw = "") {
+  // چند سریال با خط جدید یا کاما/سیمی‌کالن
+  const enMap = { "۰":"0","۱":"1","۲":"2","۳":"3","۴":"4","۵":"5","۶":"6","۷":"7","۸":"8","۹":"9",
+                  "٠":"0","١":"1","٢":"2","٣":"3","٤":"4","٥":"5","٦":"6","٧":"7","٨":"8","٩":"9" };
+  const faToEn = (t) => String(t).replace(/[۰-۹٠-٩]/g, d => enMap[d] || d);
+
+  return faToEn(raw)
+    .split(/[\n,;]+/)
+    .map(s => normalizeSerial(s))
+    .filter(Boolean);
 }
 
 export default function handler(req, res) {
   try {
-    const { rows, source } = loadJson();
+    // محل فایل JSON
+    const src = path.join(process.cwd(), "data", "warranty.json");
+    const txt = fs.readFileSync(src, "utf8");
 
-    // q می‌تواند در GET یا POST بیاید
-    const qRaw = req.method === "POST" ? (req.body?.q ?? "") : (req.query?.q ?? "");
-    const qs = String(qRaw ?? "");
+    // پارس امن: هم آرایه‌ی مستقیم و هم آبجکتِ {rows:[], updated:"..."} را پشتیبانی کن
+    const data = JSON.parse(txt);
+    const allRows = Array.isArray(data) ? data : (Array.isArray(data.rows) ? data.rows : []);
 
-    // چند سریال با خط جدید یا کاما
-    const tokens = qs
-      .split(/[\n,]+/)
-      .map(t => normalize(t))
-      .filter(Boolean);
+    // ورودی از GET یا POST
+    const rawQ = req.method === "POST" ? (req.body?.q ?? "") : (req.query?.q ?? "");
+    const wanted = normalizeInput(rawQ);
 
-    let result = [];
-    if (tokens.length === 0) {
-      result = []; // اگر چیزی وارد نشد، خروجی خالی
-    } else {
-      const index = rows.map(r => ({ ...r, _serial: normalize(r.serial || "") }));
-      const set = new Set(tokens);
-      result = index.filter(r => set.has(r._serial));
+    // ایندکس سریال‌ها
+    const index = new Map(allRows.map(r => [normalizeSerial(r.serial), r]));
+
+    const out = wanted.length ? wanted.map(s => index.get(s)).filter(Boolean) : [];
+
+    const payload = {
+      rows: out,
+      meta: { updated: data?.updated ?? null }
+    };
+
+    // حالت دیباگ اختیاری
+    if (req.query?.debug) {
+      payload.debug = {
+        source: src,
+        q: wanted,
+        records: out.length
+      };
     }
 
-    res.status(200).json({
-      rows: result,
-      meta: { updated: new Date().toISOString().slice(0,10) },
-      debug: process.env.NODE_ENV !== "production" ? { source, records: result.length } : undefined,
-    });
+    return res.status(200).json(payload);
   } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: "server_error" });
+    console.error("warranty api error:", e);
+    return res.status(500).json({ error: "server_error", detail: e.message });
   }
 }
+
+// (Body parser پیش‌فرض Next فعاله؛ نیازی به تنظیم خاصی نیست.)

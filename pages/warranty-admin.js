@@ -1,363 +1,310 @@
 // pages/warranty-admin.js
 import { useEffect, useMemo, useState } from "react";
 
-const VENDORS = [
-  "HPE",
-  "Dell",
-  "Cisco",
-  "Lenovo",
-  "Huawei",
-  "Juniper",
-  "Supermicro",
-  "Fujitsu",
-  "Oracle",
-  "Quantum",
-];
-
-const STATUS_OPTS = [
-  { value: "active", label: "فعال" },
-  { value: "expired", label: "منقضی" },
-  { value: "unknown", label: "نامشخص" },
-];
-
+const VENDORS = ["HPE", "Dell EMC", "Lenovo", "Cisco", "Huawei", "Fujitsu"];
+const STATUSES = ["فعال", "غیرفعال"];
 const NOTES_YEARS = Array.from({ length: 10 }, (_, i) => `${i + 1} سال`);
 
-const dashRE = /[-\u2010-\u2015\u2212\uFE58\uFE63\uFF0D]/g;
-const wsRE =
-  /[\s\u200c\u200f\u200e\u202a-\u202e\u2066-\u2069]/g; // اسپیس‌ها و کنترل‌های RTL
-
-const normalizeSerial = (s = "") =>
-  s.toString().toUpperCase().replace(wsRE, "").replace(dashRE, "");
+// چند مدل پرمصرف نمونه؛ در اجرا مدل‌های جدیدِ ثبت‌شده هم به این لیست اضافه می‌شوند
+const PRESET_MODELS = [
+  // Unity (نمونه)
+  "Unity XT 480", "Unity XT 380", "Unity XT 680", "Unity XT 880",
+  // HPE ProLiant (نمونه)
+  "ProLiant DL360 Gen10", "ProLiant DL380 Gen10", "ProLiant DL380 Gen11",
+  "ProLiant ML350 Gen10", "ProLiant DL325 Gen10 Plus",
+  // Dell EMC PowerEdge (نمونه)
+  "PowerEdge R740", "PowerEdge R650", "PowerEdge R750",
+  // Lenovo (نمونه)
+  "ThinkSystem SR650", "ThinkSystem SR630",
+  // Cisco (نمونه)
+  "UCS C220 M5", "UCS C240 M5",
+];
 
 export default function WarrantyAdmin() {
-  // token
-  const [token, setToken] = useState("");
-  const tokenOk = useMemo(() => !!token.trim(), [token]);
-
-  // form fields
-  const [serial, setSerial] = useState("");
-  const [vendor, setVendor] = useState(VENDORS[0]);
+  const [rows, setRows] = useState([]);
+  const [vendor, setVendor] = useState("HPE");
   const [model, setModel] = useState("");
-  const [status, setStatus] = useState(STATUS_OPTS[0].value);
+  const [status, setStatus] = useState("فعال");
   const [expireAt, setExpireAt] = useState("");
-  const [notes, setNotes] = useState("");
+  const [serial, setSerial] = useState("");
+  const [note, setNote] = useState("");
+  const [models, setModels] = useState(PRESET_MODELS);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState(null); // {type:'ok'|'err', text:string}
+  const [hasToken, setHasToken] = useState(false); // فقط وضعیت؛ خود توکن نمایش داده نمی‌شود
 
-  // queue
-  const [queue, setQueue] = useState([]);
-  const [saving, setSaving] = useState(false);
-  const [msg, setMsg] = useState("");
+  // وضعیت نمایش پیام
+  function toastOk(t) { setMessage({ type: "ok", text: t }); setTimeout(() => setMessage(null), 3000); }
+  function toastErr(t) { setMessage({ type: "err", text: t }); setTimeout(() => setMessage(null), 5000); }
 
-  // load token
+  // فقط وضعیت توکن را چک می‌کنیم؛ مقدارش نمایش داده نمی‌شود
   useEffect(() => {
-    const t = localStorage.getItem("SAT_ADMIN_TOKEN");
-    if (t) setToken(t);
+    const t = typeof window !== "undefined" ? window.localStorage.getItem("warranty_token") : "";
+    setHasToken(!!t);
   }, []);
 
-  // persist token
-  useEffect(() => {
-    localStorage.setItem("SAT_ADMIN_TOKEN", token || "");
-  }, [token]);
+  function handleAdminLogin() {
+    const val = window.prompt("توکن مدیریتی را وارد کنید:");
+    if (!val) return;
+    window.localStorage.setItem("warranty_token", val.trim());
+    setHasToken(true);
+    toastOk("توکن ذخیره شد.");
+  }
 
-  // today for date min
-  const todayStr = useMemo(() => {
-    const d = new Date();
-    const m = `${d.getMonth() + 1}`.padStart(2, "0");
-    const day = `${d.getDate()}`.padStart(2, "0");
-    return `${d.getFullYear()}-${m}-${day}`;
-  }, []);
+  function handleAdminLogout() {
+    window.localStorage.removeItem("warranty_token");
+    setHasToken(false);
+    toastOk("توکن پاک شد.");
+  }
 
-  const canAdd = serial.trim() && expireAt.trim();
+  // افزودن ردیف به بافر محلی (پایین صفحه)
+  function addRow() {
+    if (!serial.trim()) {
+      toastErr("فیلد سریال الزامی است.");
+      return;
+    }
+    if (!expireAt) {
+      toastErr("فیلد تاریخ پایان (ExpireAt) الزامی است.");
+      return;
+    }
 
-  const addRow = () => {
-    if (!canAdd) return;
-
-    const normalized = normalizeSerial(serial);
-    const row = {
-      serial: normalized, // ذخیرهٔ تمیز و یکنواخت
-      brand: vendor,
-      model: model?.trim() || "-",
-      status: status || "active",
-      expireAt, // به API می‌فرستیم؛ آن طرف در فیلد `end` ذخیره می‌شود
-      notes: notes || "-",
+    const normalized = {
+      serial: serial.trim(),
+      vendor: vendor.trim(),
+      model: model.trim(),
+      status: status === "فعال" ? "active" : "inactive",
+      expireAt,
+      notes: note || "",
     };
 
-    setQueue((q) => [...q, row]);
+    setRows((prev) => [...prev, normalized]);
 
-    // ریست معقول فرم
+    // اگر مدل جدیدی بود، به پیشنهادها اضافه شود
+    setModels((prev) => {
+      const next = new Set(prev.map((m) => m.trim()));
+      if (normalized.model) next.add(normalized.model);
+      return Array.from(next);
+    });
+
+    // پاک کردن فرم
     setSerial("");
-    // vendor/status را نگه می‌داریم که سریع بتوانی ردیف‌های مشابه ثبت کنی
-    setModel("");
     setExpireAt("");
-    setNotes("");
-  };
+    setNote("");
+    // model را نگه می‌داریم تا برای ردیف‌های بعدی سریع‌تر باشد
+  }
 
-  const removeRow = (idx) => {
-    setQueue((q) => q.filter((_, i) => i !== idx));
-  };
-
-  const saveAll = async () => {
-    setMsg("");
-    if (!queue.length) {
-      setMsg("ردیفی برای ذخیره وجود ندارد.");
+  // ارسال به API برای ذخیره در data/warranty.json
+  async function saveAll() {
+    if (!hasToken) {
+      toastErr("ابتدا با دکمه «ورود مدیر» توکن را وارد کنید.");
       return;
     }
-    if (!tokenOk) {
-      setMsg("توکن ادمین را وارد کنید.");
+    if (rows.length === 0) {
+      toastErr("ردیفی برای ذخیره وجود ندارد.");
       return;
     }
-    setSaving(true);
+    setBusy(true);
     try {
+      const token = window.localStorage.getItem("warranty_token") || "";
       const res = await fetch("/api/warranty-save", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-admin-token": token.trim(),
+          "x-admin-token": token, // فقط در هدر ارسال می‌شود
         },
-        body: JSON.stringify({ rows: queue }),
+        body: JSON.stringify({ rows }),
       });
-      const data = await res.json().catch(() => ({}));
-
       if (!res.ok) {
-        setMsg(
-          `خطا در ذخیره‌سازی: ${data?.error || res.status + " " + res.statusText}`
-        );
-      } else if (data?.readonly && data?.updatedJSON) {
-        setMsg(
-          "هاست اجازهٔ نوشتن روی دیسک ندارد. JSON به‌روزشده را دریافت کنید و دستی جایگزین کنید."
-        );
-        // ساخت یک دانلود روی کلاینت
-        const blob = new Blob([data.updatedJSON], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "warranty.json";
-        a.click();
-        URL.revokeObjectURL(url);
-        setQueue([]);
-      } else {
-        setMsg("ثبت شد.");
-        setQueue([]);
+        const j = await res.json().catch(() => ({}));
+        throw new Error(j.error || "خطای نامشخص از سرور");
       }
+      setRows([]);
+      toastOk("ذخیره شد.");
     } catch (e) {
-      setMsg("خطا در اتصال به سرور.");
+      toastErr(e.message);
     } finally {
-      setSaving(false);
+      setBusy(false);
     }
-  };
+  }
 
-  const inputClass =
-    "w-full rounded-xl border border-gray-300 bg-white/70 backdrop-blur px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-gray-800";
-  const selectClass =
-    "w-full rounded-xl border border-gray-300 bg-white/70 backdrop-blur px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-gray-800 cursor-pointer";
+  const statusBadge = useMemo(() => {
+    if (!hasToken) return (
+      <button onClick={handleAdminLogin} className="px-3 py-1 rounded-full bg-brand-yellow text-black text-sm">
+        ورود مدیر
+      </button>
+    );
+    return (
+      <div className="flex items-center gap-2">
+        <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-sm">توکن فعال است</span>
+        <button onClick={handleAdminLogout} className="px-3 py-1 rounded-full bg-gray-200 text-gray-800 text-sm">
+          خروج
+        </button>
+      </div>
+    );
+  }, [hasToken]);
 
   return (
-    <div className="container mx-auto px-4 py-10" dir="rtl">
-      {/* Header */}
-      <h1 className="text-3xl md:text-4xl font-extrabold mb-6 text-gray-900">
-        مدیریت گارنتی
-      </h1>
-
-      {/* Token */}
-      <div className="rounded-2xl border border-gray-200 bg-white/60 backdrop-blur p-4 mb-8">
-        <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
-          <input
-            className={`${inputClass} md:max-w-md`}
-            placeholder="Admin Token"
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-          />
-          <div
-            className={`text-sm ${
-              tokenOk ? "text-emerald-600" : "text-gray-400"
-            }`}
-          >
-            {tokenOk ? "توکن فعال است" : "توکن تنظیم نشده است"}
-          </div>
-        </div>
+    <div className="container mx-auto px-4 py-8">
+      {/* سربرگ بدون نمایش توکن */}
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">مدیریت گارنتی</h1>
+        {statusBadge}
       </div>
 
-      {/* Add Row Card */}
-      <div className="rounded-2xl border border-gray-200 bg-white/70 backdrop-blur p-6 mb-8">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-xl font-bold text-gray-800">افزودن ردیف</h2>
-        </div>
+      {/* فرم افزودن ردیف */}
+      <div className="rounded-2xl border p-4 md:p-6 bg-white mb-6">
+        <h2 className="font-semibold mb-4">افزودن ردیف</h2>
 
-        {/* Grid: row 1 */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          {/* Serial */}
           <div className="md:col-span-2">
-            <label className="block text-sm text-gray-600 mb-1">
-              * Serial
-            </label>
+            <label className="block text-sm text-gray-600 mb-1">* Serial (مثال: HPE-9J1234)</label>
             <input
-              className={inputClass}
-              placeholder="مثال: HPE-9J1234"
+              className="w-full rounded-xl border px-3 py-2"
+              placeholder="HPE-9J1234"
               value={serial}
               onChange={(e) => setSerial(e.target.value)}
-              onBlur={() => setSerial(normalizeSerial(serial))}
             />
           </div>
 
+          {/* Vendor */}
           <div>
             <label className="block text-sm text-gray-600 mb-1">Vendor</label>
             <select
-              className={selectClass}
+              className="w-full rounded-xl border px-3 py-2"
               value={vendor}
               onChange={(e) => setVendor(e.target.value)}
             >
               {VENDORS.map((v) => (
-                <option key={v} value={v}>
-                  {v}
-                </option>
+                <option key={v} value={v}>{v}</option>
               ))}
             </select>
           </div>
 
-          <div className="md:col-span-2">
+          {/* Model with datalist */}
+          <div>
             <label className="block text-sm text-gray-600 mb-1">Model</label>
             <input
-              className={inputClass}
+              className="w-full rounded-xl border px-3 py-2"
+              list="models-datalist"
               placeholder="مثلاً: ProLiant DL380 Gen10"
               value={model}
               onChange={(e) => setModel(e.target.value)}
             />
+            <datalist id="models-datalist">
+              {models.map((m) => (
+                <option key={m} value={m} />
+              ))}
+            </datalist>
           </div>
-        </div>
 
-        {/* Grid: row 2 */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <div className="md:col-span-2">
-            <label className="block text-sm text-gray-600 mb-1">
-              * ExpireAt
-            </label>
+          {/* Status */}
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">Status</label>
+            <select
+              className="w-full rounded-xl border px-3 py-2"
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+            >
+              {STATUSES.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* ExpireAt */}
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">* ExpireAt</label>
             <input
               type="date"
-              className={inputClass}
-              min={todayStr}
+              className="w-full rounded-xl border px-3 py-2"
               value={expireAt}
               onChange={(e) => setExpireAt(e.target.value)}
             />
           </div>
 
+          {/* Notes */}
           <div>
-            <label className="block text-sm text-gray-600 mb-1">Status</label>
-            <select
-              className={selectClass}
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-            >
-              {STATUS_OPTS.map((s) => (
-                <option key={s.value} value={s.value}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="md:col-span-2">
             <label className="block text-sm text-gray-600 mb-1">Notes</label>
             <select
-              className={selectClass}
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+              className="w-full rounded-xl border px-3 py-2"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
             >
               <option value="">—</option>
-              {NOTES_YEARS.map((y) => (
-                <option key={y} value={y}>
-                  {y}
-                </option>
+              {NOTES_YEARS.map((n) => (
+                <option key={n} value={n}>{n}</option>
               ))}
             </select>
           </div>
         </div>
 
-        {/* Help + Add */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 mt-4">
-          <div className="text-xs text-gray-500">
-            (وارد کردن «Serial» و «ExpireAt» الزامی است)
-          </div>
+        <div className="mt-4 flex gap-3">
           <button
-            className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
-              canAdd
-                ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                : "bg-gray-200 text-gray-500 cursor-not-allowed"
-            }`}
             onClick={addRow}
-            disabled={!canAdd}
+            className="px-4 py-2 rounded-2xl bg-brand-yellow text-black font-medium"
           >
             افزودن ردیف
           </button>
-        </div>
-      </div>
-
-      {/* Queue Card */}
-      <div className="rounded-2xl border border-gray-200 bg-white/70 backdrop-blur p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-gray-800">ردیف‌های آماده ثبت</h2>
           <button
             onClick={saveAll}
-            disabled={!queue.length || !tokenOk || saving}
-            className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
-              queue.length && tokenOk && !saving
-                ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                : "bg-gray-200 text-gray-500 cursor-not-allowed"
-            }`}
+            disabled={busy || rows.length === 0}
+            className="px-4 py-2 rounded-2xl bg-black text-white font-medium disabled:opacity-50"
           >
-            {saving ? "در حال ذخیره..." : "ذخیره"}
+            {busy ? "در حال ذخیره…" : "ذخیره"}
           </button>
         </div>
 
-        {!queue.length ? (
-          <div className="text-gray-500 text-sm">ردیفی اضافه نشده است.</div>
+        <p className="text-xs text-gray-500 mt-3">
+          (فیلدهای * «Serial» و «ExpireAt» اجباری هستند)
+        </p>
+      </div>
+
+      {/* ردیف‌های آماده ثبت */}
+      <div className="rounded-2xl border p-4 md:p-6 bg-white">
+        <h2 className="font-semibold mb-3">ردیف‌های آماده ثبت</h2>
+        {rows.length === 0 ? (
+          <p className="text-sm text-gray-500">ردیفی اضافه نشده است.</p>
         ) : (
-          <div className="overflow-auto">
-            <table className="min-w-full text-sm">
+          <div className="overflow-x-auto">
+            <table className="min-w-[800px] w-full">
               <thead>
-                <tr className="text-gray-500 border-b">
-                  <th className="py-2 text-right">Serial</th>
-                  <th className="py-2 text-right">Vendor</th>
-                  <th className="py-2 text-right">Model</th>
-                  <th className="py-2 text-right">Status</th>
-                  <th className="py-2 text-right">ExpireAt</th>
-                  <th className="py-2 text-right">Notes</th>
-                  <th />
+                <tr className="text-right text-sm text-gray-600">
+                  <th className="p-2">Serial</th>
+                  <th className="p-2">Vendor</th>
+                  <th className="p-2">Model</th>
+                  <th className="p-2">Status</th>
+                  <th className="p-2">ExpireAt</th>
+                  <th className="p-2">Notes</th>
                 </tr>
               </thead>
               <tbody>
-                {queue.map((r, i) => (
-                  <tr key={i} className="border-b last:border-0">
-                    <td className="py-2">{r.serial}</td>
-                    <td className="py-2">{r.brand}</td>
-                    <td className="py-2">{r.model}</td>
-                    <td className="py-2">
-                      {
-                        (STATUS_OPTS.find((s) => s.value === r.status) || {})
-                          .label
-                      }
-                    </td>
-                    <td className="py-2">{r.expireAt}</td>
-                    <td className="py-2">{r.notes}</td>
-                    <td className="py-2 text-left">
-                      <button
-                        className="text-red-600 hover:text-red-700 text-xs"
-                        onClick={() => removeRow(i)}
-                      >
-                        حذف
-                      </button>
-                    </td>
+                {rows.map((r, i) => (
+                  <tr key={i} className="border-t">
+                    <td className="p-2 font-mono">{r.serial}</td>
+                    <td className="p-2">{r.vendor}</td>
+                    <td className="p-2">{r.model}</td>
+                    <td className="p-2">{r.status === "active" ? "فعال" : "غیرفعال"}</td>
+                    <td className="p-2">{r.expireAt}</td>
+                    <td className="p-2">{r.notes || "—"}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         )}
-
-        {msg && (
-          <div className="mt-4 text-sm text-gray-700">
-            {/* پیام سرور */}
-            {msg}
-          </div>
-        )}
       </div>
+
+      {/* نوتیفیکیشن */}
+      {message && (
+        <div
+          className={`fixed bottom-4 left-4 rounded-xl px-4 py-2 text-sm shadow ${
+            message.type === "ok" ? "bg-emerald-600 text-white" : "bg-rose-600 text-white"
+          }`}
+        >
+          {message.text}
+        </div>
+      )}
     </div>
   );
 }

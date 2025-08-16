@@ -1,363 +1,411 @@
 // pages/warranty-admin.js
 import { useEffect, useMemo, useState } from "react";
 
-const VENDORS = [
-  "HPE",
-  "Dell",
-  "Cisco",
-  "Lenovo",
-  "Huawei",
-  "Juniper",
-  "Supermicro",
-  "Fujitsu",
-  "Oracle",
-  "Quantum",
-];
+/* ---- پیش‌فرض مدل‌ها برای هر Vendor (قابل گسترش) ---- */
+const DEFAULT_MODELS = {
+  "Dell EMC": [
+    // Unity XT
+    "Unity XT 380", "Unity XT 480", "Unity XT 680", "Unity XT 880",
+    "Unity 300", "Unity 400", "Unity 500", "Unity 600",
+  ],
+  HPE: [
+    // سرورها (Gen10/Gen11)
+    "ProLiant DL380 Gen10", "ProLiant DL380 Gen11",
+    "ProLiant DL360 Gen10", "ProLiant DL360 Gen11",
+    "ProLiant ML350 Gen10", "ProLiant ML350 Gen11",
+    "ProLiant DL385 Gen10", "ProLiant DL385 Gen11",
+    // استوریج‌های پرمصرف HPE (مثال)
+    "Alletra 5000", "Alletra 6000", "Nimble HF20", "Nimble AF20",
+  ],
+  Cisco: [
+    "UCS C220 M5", "UCS C240 M5", "UCS C220 M6", "UCS C240 M6",
+  ],
+  Lenovo: [
+    "ThinkSystem SR630 V2", "ThinkSystem SR650 V2",
+    "ThinkSystem SR630", "ThinkSystem SR650",
+  ],
+};
 
-const STATUS_OPTS = [
-  { value: "active", label: "فعال" },
-  { value: "expired", label: "منقضی" },
-  { value: "unknown", label: "نامشخص" },
-];
+const VENDORS = Object.keys(DEFAULT_MODELS);
 
-const NOTES_YEARS = Array.from({ length: 10 }, (_, i) => `${i + 1} سال`);
+const STATUS_OPTIONS = ["فعال", "منقضی", "نامشخص"];
+const NOTES_OPTIONS = Array.from({ length: 10 }, (_, i) => `${i + 1} سال`);
 
-const dashRE = /[-\u2010-\u2015\u2212\uFE58\uFE63\uFF0D]/g;
-const wsRE =
-  /[\s\u200c\u200f\u200e\u202a-\u202e\u2066-\u2069]/g; // اسپیس‌ها و کنترل‌های RTL
+const LS_KEY = "satrass-admin-model-lib"; // ذخیره مدل‌های سفارشی در localStorage
 
-const normalizeSerial = (s = "") =>
-  s.toString().toUpperCase().replace(wsRE, "").replace(dashRE, "");
+function titleCaseNormalize(s) {
+  // عنوان‌گذاری و حذف فاصله‌های اضافی
+  return (s || "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase()
+    .replace(/\b\w/g, (m) => m.toUpperCase());
+}
+
+function normalizeSerialInput(s) {
+  // Uppercase و حذف فاصله‌های اضافی؛ خط تیره را نگه می‌داریم
+  return (s || "").toUpperCase().replace(/\s+/g, "");
+}
 
 export default function WarrantyAdmin() {
-  // token
+  // احراز هویت با توکن
   const [token, setToken] = useState("");
-  const tokenOk = useMemo(() => !!token.trim(), [token]);
+  const [authed, setAuthed] = useState(false);
+  const [authMsg, setAuthMsg] = useState("");
 
-  // form fields
+  // فیلدهای فرم یک ردیف
   const [serial, setSerial] = useState("");
   const [vendor, setVendor] = useState(VENDORS[0]);
   const [model, setModel] = useState("");
-  const [status, setStatus] = useState(STATUS_OPTS[0].value);
-  const [expireAt, setExpireAt] = useState("");
-  const [notes, setNotes] = useState("");
+  const [status, setStatus] = useState(STATUS_OPTIONS[0]);
+  const [expireAt, setExpireAt] = useState(""); // yyyy-mm-dd
+  const [notes, setNotes] = useState(NOTES_OPTIONS[2]); // پیش‌فرض ۳ سال
 
-  // queue
-  const [queue, setQueue] = useState([]);
-  const [saving, setSaving] = useState(false);
-  const [msg, setMsg] = useState("");
+  // ردیف‌های آماده ثبت
+  const [rows, setRows] = useState([]);
 
-  // load token
+  // بانک مدل‌ها (پیش‌فرض + سفارشی)
+  const [modelLib, setModelLib] = useState(DEFAULT_MODELS);
+
+  // بارگذاری مدل‌های سفارشی از localStorage
   useEffect(() => {
-    const t = localStorage.getItem("SAT_ADMIN_TOKEN");
-    if (t) setToken(t);
+    try {
+      const raw = localStorage.getItem(LS_KEY);
+      if (raw) {
+        const extra = JSON.parse(raw);
+        // ادغام با پیش‌فرض‌ها
+        const merged = {};
+        for (const v of VENDORS) {
+          const base = new Set((DEFAULT_MODELS[v] || []).map(titleCaseNormalize));
+          const plus = new Set((extra[v] || []).map(titleCaseNormalize));
+          merged[v] = Array.from(new Set([...base, ...plus])).sort();
+        }
+        setModelLib(merged);
+      } else {
+        // فقط پیش‌فرض‌ها
+        const merged = {};
+        for (const v of VENDORS) {
+          merged[v] = (DEFAULT_MODELS[v] || []).map(titleCaseNormalize).sort();
+        }
+        setModelLib(merged);
+      }
+    } catch {
+      const merged = {};
+      for (const v of VENDORS) {
+        merged[v] = (DEFAULT_MODELS[v] || []).map(titleCaseNormalize).sort();
+      }
+      setModelLib(merged);
+    }
   }, []);
 
-  // persist token
+  // مدل‌های نمایش‌داده‌شده بر اساس vendor انتخابی
+  const modelsForVendor = useMemo(() => modelLib[vendor] || [], [modelLib, vendor]);
+
+  // اگر vendor عوض شد و مدل انتخابی دیگر وجود نداشت، پاکش کن
   useEffect(() => {
-    localStorage.setItem("SAT_ADMIN_TOKEN", token || "");
-  }, [token]);
-
-  // today for date min
-  const todayStr = useMemo(() => {
-    const d = new Date();
-    const m = `${d.getMonth() + 1}`.padStart(2, "0");
-    const day = `${d.getDate()}`.padStart(2, "0");
-    return `${d.getFullYear()}-${m}-${day}`;
-  }, []);
-
-  const canAdd = serial.trim() && expireAt.trim();
-
-  const addRow = () => {
-    if (!canAdd) return;
-
-    const normalized = normalizeSerial(serial);
-    const row = {
-      serial: normalized, // ذخیرهٔ تمیز و یکنواخت
-      brand: vendor,
-      model: model?.trim() || "-",
-      status: status || "active",
-      expireAt, // به API می‌فرستیم؛ آن طرف در فیلد `end` ذخیره می‌شود
-      notes: notes || "-",
-    };
-
-    setQueue((q) => [...q, row]);
-
-    // ریست معقول فرم
-    setSerial("");
-    // vendor/status را نگه می‌داریم که سریع بتوانی ردیف‌های مشابه ثبت کنی
-    setModel("");
-    setExpireAt("");
-    setNotes("");
-  };
-
-  const removeRow = (idx) => {
-    setQueue((q) => q.filter((_, i) => i !== idx));
-  };
-
-  const saveAll = async () => {
-    setMsg("");
-    if (!queue.length) {
-      setMsg("ردیفی برای ذخیره وجود ندارد.");
-      return;
+    if (model && !modelsForVendor.includes(titleCaseNormalize(model))) {
+      setModel("");
     }
-    if (!tokenOk) {
-      setMsg("توکن ادمین را وارد کنید.");
-      return;
-    }
-    setSaving(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vendor]);
+
+  // ورود با توکن – یک POST خالی برای چک کردن
+  async function handleLogin(e) {
+    e.preventDefault();
+    setAuthMsg("");
     try {
       const res = await fetch("/api/warranty-save", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-admin-token": token.trim(),
+          "x-admin-token": token || "",
         },
-        body: JSON.stringify({ rows: queue }),
+        body: JSON.stringify({ rows: [] }), // چیزی ثبت نمی‌شود، فقط تست توکن
       });
-      const data = await res.json().catch(() => ({}));
-
-      if (!res.ok) {
-        setMsg(
-          `خطا در ذخیره‌سازی: ${data?.error || res.status + " " + res.statusText}`
-        );
-      } else if (data?.readonly && data?.updatedJSON) {
-        setMsg(
-          "هاست اجازهٔ نوشتن روی دیسک ندارد. JSON به‌روزشده را دریافت کنید و دستی جایگزین کنید."
-        );
-        // ساخت یک دانلود روی کلاینت
-        const blob = new Blob([data.updatedJSON], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "warranty.json";
-        a.click();
-        URL.revokeObjectURL(url);
-        setQueue([]);
+      if (res.ok) {
+        setAuthed(true);
+        setAuthMsg("توکن فعال است");
       } else {
-        setMsg("ثبت شد.");
-        setQueue([]);
+        const data = await res.json().catch(() => ({}));
+        setAuthed(false);
+        setAuthMsg(data?.error || "توکن معتبر نیست");
       }
-    } catch (e) {
-      setMsg("خطا در اتصال به سرور.");
-    } finally {
-      setSaving(false);
+    } catch (err) {
+      setAuthed(false);
+      setAuthMsg("خطا در ارتباط با سرور");
     }
-  };
+  }
 
-  const inputClass =
-    "w-full rounded-xl border border-gray-300 bg-white/70 backdrop-blur px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-gray-800";
-  const selectClass =
-    "w-full rounded-xl border border-gray-300 bg-white/70 backdrop-blur px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-gray-800 cursor-pointer";
+  function resetForm() {
+    setSerial("");
+    setVendor(VENDORS[0]);
+    setModel("");
+    setStatus(STATUS_OPTIONS[0]);
+    setExpireAt("");
+    setNotes(NOTES_OPTIONS[2]);
+  }
+
+  function addRow() {
+    const s = normalizeSerialInput(serial);
+    if (!s) {
+      alert("سریال را وارد کنید.");
+      return;
+    }
+    if (!expireAt) {
+      alert("تاریخ ExpireAt اجباری است.");
+      return;
+    }
+
+    const normalizedModel = titleCaseNormalize(model);
+    // اگر مدلی جدید تایپ شده باشد، در کتابخانه‌ی لوکال ذخیره کن
+    if (normalizedModel) {
+      setModelLib((prev) => {
+        const next = { ...prev };
+        const list = new Set([...(prev[vendor] || []), normalizedModel]);
+        next[vendor] = Array.from(list).sort();
+        try {
+          const saveObj = {};
+          for (const v of VENDORS) {
+            // فقط سفارشی‌ها را نسبت به پیش‌فرض‌ها ذخیره کنیم
+            const base = new Set((DEFAULT_MODELS[v] || []).map(titleCaseNormalize));
+            const cur = new Set((next[v] || []).map(titleCaseNormalize));
+            const onlyExtra = Array.from(cur).filter((m) => !base.has(m));
+            saveObj[v] = onlyExtra;
+          }
+          localStorage.setItem(LS_KEY, JSON.stringify(saveObj));
+        } catch {}
+        return next;
+      });
+    }
+
+    const row = {
+      serial: s,
+      brand: vendor,              // vendor → brand
+      model: normalizedModel || "-", 
+      status,
+      end: expireAt,              // expireAt → end
+      notes,
+    };
+    setRows((r) => [...r, row]);
+    resetForm();
+  }
+
+  function removeRow(idx) {
+    setRows((r) => r.filter((_, i) => i !== idx));
+  }
+
+  async function saveAll() {
+    if (!rows.length) {
+      alert("ردیفی برای ثبت وجود ندارد.");
+      return;
+    }
+    try {
+      const res = await fetch("/api/warranty-save", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-token": token || "",
+        },
+        body: JSON.stringify({ rows }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        alert(data?.error || "خطا در ثبت");
+        return;
+      }
+      alert("ثبت شد.");
+      setRows([]);
+    } catch (e) {
+      alert("خطا در ارتباط با سرور");
+    }
+  }
 
   return (
-    <div className="container mx-auto px-4 py-10" dir="rtl">
-      {/* Header */}
-      <h1 className="text-3xl md:text-4xl font-extrabold mb-6 text-gray-900">
-        مدیریت گارنتی
-      </h1>
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <h1 className="text-3xl font-extrabold mb-6">مدیریت گارانتی</h1>
 
-      {/* Token */}
-      <div className="rounded-2xl border border-gray-200 bg-white/60 backdrop-blur p-4 mb-8">
-        <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
-          <input
-            className={`${inputClass} md:max-w-md`}
-            placeholder="Admin Token"
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-          />
-          <div
-            className={`text-sm ${
-              tokenOk ? "text-emerald-600" : "text-gray-400"
-            }`}
-          >
-            {tokenOk ? "توکن فعال است" : "توکن تنظیم نشده است"}
+      {/* ورود با توکن (نمایش مقدارِ خودِ توکن نداریم) */}
+      <form onSubmit={handleLogin} className="mb-6 flex items-center gap-3">
+        <input
+          type="password"
+          placeholder="Admin Token"
+          className="w-64 rounded-xl border px-3 py-2"
+          value={token}
+          onChange={(e) => setToken(e.target.value)}
+        />
+        <button
+          type="submit"
+          className="rounded-2xl px-5 py-2.5 font-semibold bg-brand-yellow text-black hover:opacity-90 transition"
+        >
+          ورود
+        </button>
+        <span className={authed ? "text-green-600" : "text-red-600"}>
+          {authMsg}
+        </span>
+      </form>
+
+      {!authed ? (
+        <p className="text-gray-500">برای دسترسی، توکن ادمین را وارد کنید.</p>
+      ) : (
+        <>
+          {/* فرم افزودن ردیف */}
+          <div className="rounded-2xl border p-4 mb-6">
+            <h2 className="font-bold text-lg mb-4">افزودن ردیف</h2>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="flex flex-col">
+                <label className="mb-1 text-sm">* Serial</label>
+                <input
+                  className="rounded-xl border px-3 py-2"
+                  placeholder="مثال: HPE-9J1234"
+                  value={serial}
+                  onChange={(e) => setSerial(normalizeSerialInput(e.target.value))}
+                />
+              </div>
+
+              <div className="flex flex-col">
+                <label className="mb-1 text-sm">Vendor</label>
+                <select
+                  className="rounded-xl border px-3 py-2"
+                  value={vendor}
+                  onChange={(e) => setVendor(e.target.value)}
+                >
+                  {VENDORS.map((v) => (
+                    <option key={v} value={v}>
+                      {v}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex flex-col">
+                <label className="mb-1 text-sm">Model</label>
+                {/* input + datalist برای پیشنهاد مدل‌ها */}
+                <input
+                  list="model-options"
+                  className="rounded-xl border px-3 py-2"
+                  placeholder={vendor === "Dell EMC" ? "مثال: Unity XT 480" : "مثال: ProLiant DL380 Gen10"}
+                  value={model}
+                  onChange={(e) => setModel(e.target.value)}
+                />
+                <datalist id="model-options">
+                  {modelsForVendor.map((m) => (
+                    <option key={m} value={m} />
+                  ))}
+                </datalist>
+              </div>
+
+              <div className="flex flex-col">
+                <label className="mb-1 text-sm">Status</label>
+                <select
+                  className="rounded-xl border px-3 py-2"
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                >
+                  {STATUS_OPTIONS.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex flex-col">
+                <label className="mb-1 text-sm">* ExpireAt</label>
+                <input
+                  type="date"
+                  className="rounded-xl border px-3 py-2"
+                  value={expireAt}
+                  onChange={(e) => setExpireAt(e.target.value)}
+                />
+              </div>
+
+              <div className="flex flex-col">
+                <label className="mb-1 text-sm">Notes</label>
+                <select
+                  className="rounded-xl border px-3 py-2"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                >
+                  {NOTES_OPTIONS.map((n) => (
+                    <option key={n} value={n}>
+                      {n}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="mt-4 flex items-center gap-3">
+              <button
+                onClick={addRow}
+                className="rounded-2xl px-5 py-2.5 font-semibold bg-brand-yellow text-black hover:opacity-90 transition"
+              >
+                افزودن ردیف
+              </button>
+              <button
+                onClick={resetForm}
+                className="rounded-2xl px-4 py-2 border"
+              >
+                پاک‌سازی فرم
+              </button>
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* Add Row Card */}
-      <div className="rounded-2xl border border-gray-200 bg-white/70 backdrop-blur p-6 mb-8">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-xl font-bold text-gray-800">افزودن ردیف</h2>
-        </div>
+          {/* ردیف‌های آماده ثبت */}
+          <div className="rounded-2xl border p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-bold text-lg">ردیف‌های آمادهٔ ثبت</h2>
+              <button
+                onClick={saveAll}
+                className="rounded-2xl px-5 py-2.5 font-semibold bg-brand-yellow text-black hover:opacity-90 transition"
+              >
+                ذخیره
+              </button>
+            </div>
 
-        {/* Grid: row 1 */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
-          <div className="md:col-span-2">
-            <label className="block text-sm text-gray-600 mb-1">
-              * Serial
-            </label>
-            <input
-              className={inputClass}
-              placeholder="مثال: HPE-9J1234"
-              value={serial}
-              onChange={(e) => setSerial(e.target.value)}
-              onBlur={() => setSerial(normalizeSerial(serial))}
-            />
+            {rows.length === 0 ? (
+              <p className="text-gray-500">ردیفی اضافه نشده است.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-right">
+                  <thead>
+                    <tr className="text-sm text-gray-500">
+                      <th className="py-2">سریال</th>
+                      <th className="py-2">برند</th>
+                      <th className="py-2">مدل</th>
+                      <th className="py-2">وضعیت</th>
+                      <th className="py-2">تاریخ پایان</th>
+                      <th className="py-2">یادداشت</th>
+                      <th />
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rows.map((r, i) => (
+                      <tr key={i} className="border-t">
+                        <td className="py-2">{r.serial}</td>
+                        <td className="py-2">{r.brand}</td>
+                        <td className="py-2">{r.model}</td>
+                        <td className="py-2">{r.status}</td>
+                        <td className="py-2">{r.end}</td>
+                        <td className="py-2">{r.notes || "-"}</td>
+                        <td className="py-2">
+                          <button
+                            onClick={() => removeRow(i)}
+                            className="text-red-600 hover:underline"
+                          >
+                            حذف
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
-
-          <div>
-            <label className="block text-sm text-gray-600 mb-1">Vendor</label>
-            <select
-              className={selectClass}
-              value={vendor}
-              onChange={(e) => setVendor(e.target.value)}
-            >
-              {VENDORS.map((v) => (
-                <option key={v} value={v}>
-                  {v}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="md:col-span-2">
-            <label className="block text-sm text-gray-600 mb-1">Model</label>
-            <input
-              className={inputClass}
-              placeholder="مثلاً: ProLiant DL380 Gen10"
-              value={model}
-              onChange={(e) => setModel(e.target.value)}
-            />
-          </div>
-        </div>
-
-        {/* Grid: row 2 */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <div className="md:col-span-2">
-            <label className="block text-sm text-gray-600 mb-1">
-              * ExpireAt
-            </label>
-            <input
-              type="date"
-              className={inputClass}
-              min={todayStr}
-              value={expireAt}
-              onChange={(e) => setExpireAt(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm text-gray-600 mb-1">Status</label>
-            <select
-              className={selectClass}
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-            >
-              {STATUS_OPTS.map((s) => (
-                <option key={s.value} value={s.value}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="md:col-span-2">
-            <label className="block text-sm text-gray-600 mb-1">Notes</label>
-            <select
-              className={selectClass}
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-            >
-              <option value="">—</option>
-              {NOTES_YEARS.map((y) => (
-                <option key={y} value={y}>
-                  {y}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Help + Add */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 mt-4">
-          <div className="text-xs text-gray-500">
-            (وارد کردن «Serial» و «ExpireAt» الزامی است)
-          </div>
-          <button
-            className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
-              canAdd
-                ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                : "bg-gray-200 text-gray-500 cursor-not-allowed"
-            }`}
-            onClick={addRow}
-            disabled={!canAdd}
-          >
-            افزودن ردیف
-          </button>
-        </div>
-      </div>
-
-      {/* Queue Card */}
-      <div className="rounded-2xl border border-gray-200 bg-white/70 backdrop-blur p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-gray-800">ردیف‌های آماده ثبت</h2>
-          <button
-            onClick={saveAll}
-            disabled={!queue.length || !tokenOk || saving}
-            className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
-              queue.length && tokenOk && !saving
-                ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                : "bg-gray-200 text-gray-500 cursor-not-allowed"
-            }`}
-          >
-            {saving ? "در حال ذخیره..." : "ذخیره"}
-          </button>
-        </div>
-
-        {!queue.length ? (
-          <div className="text-gray-500 text-sm">ردیفی اضافه نشده است.</div>
-        ) : (
-          <div className="overflow-auto">
-            <table className="min-w-full text-sm">
-              <thead>
-                <tr className="text-gray-500 border-b">
-                  <th className="py-2 text-right">Serial</th>
-                  <th className="py-2 text-right">Vendor</th>
-                  <th className="py-2 text-right">Model</th>
-                  <th className="py-2 text-right">Status</th>
-                  <th className="py-2 text-right">ExpireAt</th>
-                  <th className="py-2 text-right">Notes</th>
-                  <th />
-                </tr>
-              </thead>
-              <tbody>
-                {queue.map((r, i) => (
-                  <tr key={i} className="border-b last:border-0">
-                    <td className="py-2">{r.serial}</td>
-                    <td className="py-2">{r.brand}</td>
-                    <td className="py-2">{r.model}</td>
-                    <td className="py-2">
-                      {
-                        (STATUS_OPTS.find((s) => s.value === r.status) || {})
-                          .label
-                      }
-                    </td>
-                    <td className="py-2">{r.expireAt}</td>
-                    <td className="py-2">{r.notes}</td>
-                    <td className="py-2 text-left">
-                      <button
-                        className="text-red-600 hover:text-red-700 text-xs"
-                        onClick={() => removeRow(i)}
-                      >
-                        حذف
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {msg && (
-          <div className="mt-4 text-sm text-gray-700">
-            {/* پیام سرور */}
-            {msg}
-          </div>
-        )}
-      </div>
+        </>
+      )}
     </div>
   );
 }

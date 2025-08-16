@@ -5,21 +5,17 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 
-// اگر data/brands.js را داری، از همان استفاده می‌کنیم.
-// ساختار انتظار: export const BRAND_ALIASES = { dell: {title:"Dell EMC", vendorKey:"Dell EMC", logo:"dell"}, ... }
+// تلاش برای خواندن alias ها از data/brands.js (اختیاری)
 let BRAND_ALIASES = {};
 try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
   BRAND_ALIASES = require("../../data/brands").BRAND_ALIASES || {};
 } catch (_) {}
 
 const norm = (s = "") =>
   String(s).toLowerCase().trim().replace(/[\u200c\s\-_]+/g, "-");
 
-// لوگوها در public/avatars
 const logoSrc = (logoKey) => `/avatars/${logoKey}.png`;
 
-// خواندن محصولات از data/products.json
 function readProducts() {
   try {
     const file = path.join(process.cwd(), "data", "products.json");
@@ -40,7 +36,7 @@ export default function VendorPage({ vendorTitle, logoKey, products }) {
         <meta name="description" content={`محصولات و راهکارهای ${vendorTitle}`} />
       </Head>
 
-      {/* هدر: فقط لوگو، بدون نام برند کنار آن */}
+      {/* هدر: فقط لوگو */}
       <div className="relative overflow-hidden bg-gradient-to-b from-slate-900 to-slate-800 text-white">
         <div className="mx-auto max-w-6xl px-4 py-8 sm:py-10">
           <nav className="mb-5 text-sm text-slate-300">
@@ -49,7 +45,6 @@ export default function VendorPage({ vendorTitle, logoKey, products }) {
             <span className="text-slate-100">{vendorTitle}</span>
           </nav>
 
-          {/* فقط لوگو (وسط/متناظر با نمایی که دوست داری) */}
           <div className="flex items-center justify-center">
             {logoKey ? (
               <>
@@ -82,20 +77,14 @@ export default function VendorPage({ vendorTitle, logoKey, products }) {
         </div>
       </div>
 
-      {/* بدنه: شبکهٔ کارت‌ها (چیدمان استاندارد؛ متن‌های فنی انگلیسی چپ‌چین) */}
       <main className="mx-auto max-w-6xl px-4 py-10">
         {products.length === 0 ? (
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center text-slate-700">
             هنوز محصولی برای این برند ثبت نشده است. از فایل{" "}
-            <code className="rounded bg-white px-2 py-1 text-slate-800 shadow">
-              data/products.json
-            </code>{" "}
+            <code className="rounded bg-white px-2 py-1 text-slate-800 shadow">data/products.json</code>{" "}
             اضافه کن.
             <div className="mt-3">
-              <Link
-                href="/"
-                className="text-emerald-600 underline-offset-4 hover:underline"
-              >
+              <Link href="/" className="text-emerald-600 underline-offset-4 hover:underline">
                 بازگشت به خانه
               </Link>
             </div>
@@ -126,7 +115,7 @@ export default function VendorPage({ vendorTitle, logoKey, products }) {
                     {p.title || p.name}
                   </h3>
 
-                  {/* توضیحات فنی (اغلب انگلیسی) را چپ‌چین می‌کنیم */}
+                  {/* توضیحات فنی انگلیسی → چپ‌چین */}
                   <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-600 text-left" dir="ltr">
                     {p.excerpt || p.description || "—"}
                   </p>
@@ -166,33 +155,40 @@ export default function VendorPage({ vendorTitle, logoKey, products }) {
 
 export async function getStaticPaths() {
   const items = readProducts();
-  const vendorKeys = Array.from(
-    new Set(items.map((p) => p.vendor).filter(Boolean))
-  );
 
-  const aliasRoutes = Object.keys(BRAND_ALIASES);
-  const paths =
-    aliasRoutes.length > 0
-      ? aliasRoutes.map((v) => ({ params: { vendor: v } }))
-      : vendorKeys.map((v) => ({ params: { vendor: norm(v) } }));
+  // تمام vendor هایی که در products.json آمده‌اند
+  const vendorNormsFromData = new Set(items.map((p) => norm(p.vendor || "")));
 
-  return { paths, fallback: "blocking" };
+  // تمام route های alias تعریف‌شده (اختیاری)
+  const aliasRoutes = Object.keys(BRAND_ALIASES || {});
+
+  // جمعِ هر دو
+  const allRoutes = new Set([...aliasRoutes, ...vendorNormsFromData].filter(Boolean));
+
+  return {
+    paths: Array.from(allRoutes).map((v) => ({ params: { vendor: v } })),
+    fallback: "blocking",
+  };
 }
 
 export async function getStaticProps({ params }) {
   const route = String(params?.vendor || "").toLowerCase();
 
-  // نگاشت alias → vendorKey/logo
+  // اگر alias برای route داریم، کلیدهای معادل را کنار route اضافه کن
   const alias = BRAND_ALIASES[route] || null;
-  const vendorKey = alias?.vendorKey || route; // آنچه در products.json در فیلد vendor می‌آید
-  const vendorTitle = alias?.title || vendorKey;
-  const logoKey = alias?.logo || route;
+  const candidateKeys = new Set([route]);
+  if (alias?.vendorKey) candidateKeys.add(norm(alias.vendorKey));
+  if (alias?.title) candidateKeys.add(norm(alias.title));
+  // (می‌توانی کلیدهای دیگری هم اضافه کنی اگر نیاز است)
 
-  // فیلتر محصولات بر اساس vendorKey (با نرمال‌سازی)
-  const items = readProducts();
-  const products = items.filter(
-    (p) => norm(p.vendor || "") === norm(vendorKey)
-  );
+  const all = readProducts();
+
+  // فیلتر: هر محصولی که vendor نرمال‌شده‌اش داخل candidateKeys باشد
+  const products = all.filter((p) => candidateKeys.has(norm(p.vendor || "")));
+
+  // عنوان و لوگو
+  const vendorTitle = alias?.title || products[0]?.vendor || route;
+  const logoKey = alias?.logo || route;
 
   return {
     props: { vendorTitle, logoKey, products },

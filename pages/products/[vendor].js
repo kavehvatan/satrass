@@ -1,132 +1,158 @@
+// pages/products/[vendor].js
+import Head from "next/head";
+import Link from "next/link";
 import fs from "fs";
 import path from "path";
-import Head from "next/head";
-import Image from "next/image";
-import Link from "next/link";
 
-// خواندن JSON در build-time
-function readProducts() {
-  const p = path.join(process.cwd(), "data", "products.json");
-  const raw = fs.readFileSync(p, "utf-8");
-  return JSON.parse(raw);
+const TEAL = "#14b8a6";
+const YELLOW = "#f4c21f";
+
+// ساده و محکم: تبدیل اسم به اسلاگِ لوِرکیس
+function slugify(x = "") {
+  return String(x)
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9\-]/g, "");
 }
 
 export async function getStaticPaths() {
-  const data = readProducts();
-  const vendors = Object.keys(data || {});
-  return {
-    paths: vendors.map((v) => ({ params: { vendor: v } })), // مثل /products/dell
-    fallback: false,
-  };
+  const file = path.join(process.cwd(), "data", "products.json");
+  const data = JSON.parse(fs.readFileSync(file, "utf8") || "{}");
+
+  // کلیدها را نرمال کنیم و تکراری‌ها را حذف
+  const unique = new Set();
+  const paths = [];
+  for (const key of Object.keys(data)) {
+    const s = slugify(key);
+    if (!unique.has(s)) {
+      unique.add(s);
+      paths.push({ params: { vendor: s } });
+    }
+  }
+  return { paths, fallback: false };
 }
 
 export async function getStaticProps({ params }) {
-  const data = readProducts();
-  const slug = decodeURIComponent((params?.vendor || "").toLowerCase());
-  const vendorData = data[slug] || null;
+  const file = path.join(process.cwd(), "data", "products.json");
+  const data = JSON.parse(fs.readFileSync(file, "utf8") || "{}");
+
+  // کلیدی را پیدا کن که اسلاگش با پارامتر برابر است (بدون حساسیت به حروف)
+  const matchKey =
+    Object.keys(data).find((k) => slugify(k) === params.vendor) ?? null;
+
+  const vendorData = matchKey ? data[matchKey] : null;
 
   return {
     props: {
-      slug,
-      vendorData, // { title, intro?, items: [] }
+      vendor: params.vendor,
+      vendorTitle: matchKey || params.vendor.toUpperCase(),
+      vendorData: vendorData || { items: [] },
     },
   };
 }
 
-export default function VendorPage({ slug, vendorData }) {
-  const title = vendorData?.title || slug.toUpperCase();
-  const intro = vendorData?.intro || "";
-  const items = vendorData?.items || [];
+function ProductCard({ item }) {
+  return (
+    <article className="bg-white border rounded-2xl p-5 shadow-sm hover:shadow-md transition">
+      {item.image && (
+        <img
+          src={item.image}
+          alt={item.model || item.name}
+          className="w-full h-36 object-contain mb-3"
+          onError={(e) => (e.currentTarget.style.display = "none")}
+        />
+      )}
+      {item.vendor && (
+        <div className="text-sm text-gray-500">{item.vendor}</div>
+      )}
+      <h3 className="text-lg font-bold text-gray-900">
+        {item.model || item.name || "Product"}
+      </h3>
+      {item.desc && <p className="mt-2 text-gray-700 leading-7">{item.desc}</p>}
+      <div className="mt-4 flex gap-3">
+        {item.specsheet && (
+          <a
+            href={item.specsheet}
+            className="rounded-full px-4 py-2 text-sm font-semibold border border-[#14b8a6] text-[#14b8a6] hover:bg-[#14b8a6]/10 transition"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Specsheet
+          </a>
+        )}
+        <a
+          href="/contact"
+          className="rounded-full px-4 py-2 text-sm font-bold"
+          style={{ backgroundColor: YELLOW, color: "#000" }}
+        >
+          درخواست مشاوره
+        </a>
+      </div>
+    </article>
+  );
+}
+
+export default function VendorPage({ vendorTitle, vendorData }) {
+  const title = vendorData.title || vendorData.name || vendorTitle;
 
   return (
     <>
       <Head>
-        <title>{title} | تجهیزات</title>
-        <meta name="robots" content="index,follow" />
-        <meta name="description" content={`محصولات و تجهیزات ${title}`} />
+        <title>{title} — تجهیزات — ساتراس</title>
       </Head>
+      <main className="min-h-screen">
+        {/* Hero */}
+        <section className="bg-[linear-gradient(135deg,#000_0%,#0a0a0a_60%,#111_100%)] text-white">
+          <div className="max-w-6xl mx-auto px-4 py-10">
+            <nav className="text-sm text-white/70 mb-3">
+              <Link href="/" className="hover:text-white/90">
+                خانه
+              </Link>
+              <span className="mx-2">/</span>
+              <a href="/#products" className="hover:text-white/90">
+                تجهیزات
+              </a>
+              <span className="mx-2">/</span>
+              <span className="text-white">{title}</span>
+            </nav>
 
-      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6">
-          <Link
-            href="/"
-            className="text-sm text-gray-500 hover:text-gray-700 transition"
-          >
-            بازگشت به خانه
-          </Link>
-        </div>
+            <div className="flex items-center gap-4">
+              <img
+                src={`/avatars/${slugify(vendorTitle)}.png`}
+                alt={title}
+                className="w-12 h-12 object-contain"
+                onError={(e) => (e.currentTarget.style.display = "none")}
+              />
+              <h1 className="text-3xl md:text-4xl font-extrabold">{title}</h1>
+            </div>
 
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-          {title}
-        </h1>
-        {intro ? (
-          <p className="text-gray-600 mb-8">{intro}</p>
-        ) : (
-          <div className="mb-6" />
-        )}
-
-        {!items.length ? (
-          <div className="rounded-xl border border-gray-200 p-6 text-gray-600">
-            هنوز محصولی برای این برند ثبت نشده است.
+            {vendorData.intro && (
+              <p className="mt-3 text-gray-300 max-w-3xl leading-7">
+                {vendorData.intro}
+              </p>
+            )}
           </div>
-        ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {items.map((it, idx) => (
-              <article
-                key={`${slug}-${idx}`}
-                className="h-full rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 shadow-sm hover:shadow-md transition"
-              >
-                <div className="flex flex-col h-full">
-                  {/* تصویر */}
-                  {it.image && (
-                    <div className="relative w-full h-40 sm:h-44 rounded-lg overflow-hidden bg-gray-50 ring-1 ring-gray-100">
-                      <Image
-                        src={it.image}
-                        alt={it.model || ""}
-                        fill
-                        className="object-contain p-2"
-                        sizes="(max-width: 768px) 100vw, 33vw"
-                        priority={idx < 2}
-                      />
-                    </div>
-                  )}
+        </section>
 
-                  {/* متن */}
-                  <div className="mt-4">
-                    <div className="text-xs text-gray-500">{it.vendor}</div>
-                    <h3 className="mt-1 text-lg font-semibold text-gray-900">
-                      {it.model}
-                    </h3>
-                    <p className="mt-2 text-sm leading-7 text-gray-700">
-                      {it.desc}
-                    </p>
-                  </div>
-
-                  {/* دکمه‌ها – هم‌تراز در یک خط پایین کارت */}
-                  <div className="mt-auto flex items-center gap-3 pt-4">
-                    <Link
-                      href="/#contact"
-                      className="inline-flex items-center justify-center rounded-full bg-amber-500 px-4 py-2 text-sm font-medium text-black hover:bg-amber-400 active:scale-[.98] transition"
-                    >
-                      درخواست مشاوره
-                    </Link>
-
-                    {it.specsheet && (
-                      <Link
-                        href={it.specsheet}
-                        target="_blank"
-                        rel="noopener"
-                        className="inline-flex items-center justify-center rounded-full border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
-                      >
-                        Specsheet
-                      </Link>
-                    )}
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
+        {/* Grid محصولات */}
+        <section className="max-w-6xl mx-auto px-4 py-10">
+          {(!vendorData.items || vendorData.items.length === 0) ? (
+            <div className="rounded-xl border p-6 text-gray-600">
+              هنوز محصولی برای این برند ثبت نشده. از فایل{" "}
+              <code className="bg-gray-100 px-1 mx-1 rounded">
+                data/products.json
+              </code>{" "}
+              اضافه‌ش کن.
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {vendorData.items.map((it, idx) => (
+                <ProductCard key={idx} item={it} />
+              ))}
+            </div>
+          )}
+        </section>
       </main>
     </>
   );

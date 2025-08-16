@@ -36,10 +36,11 @@ const MODELS_BY_VENDOR = {
     "Unity XT 380",
     "Unity XT 480",
     "Unity XT 680",
-    "Unity 300",
-    "Unity 450",
+    "Unity XT 880",
     "PowerStore 500",
     "PowerStore 1200",
+    "PowerStore 5200",
+    "PowerStore 9200",
   ],
   HPE: [
     "ProLiant DL360 Gen10",

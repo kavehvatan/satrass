@@ -2,149 +2,141 @@
 import fs from "fs";
 import path from "path";
 import Head from "next/head";
-import Image from "next/image";
 import Link from "next/link";
 
-// تلاش برای خواندن alias ها از data/brands.js (اختیاری)
-let BRAND_ALIASES = {};
-try {
-  BRAND_ALIASES = require("../../data/brands").BRAND_ALIASES || {};
-} catch (_) {}
+// ---------- helpers ----------
+const PRODUCTS_PATH = path.join(process.cwd(), "data", "products.json");
 
-const norm = (s = "") =>
-  String(s).toLowerCase().trim().replace(/[\u200c\s\-_]+/g, "-");
+// «نرمالایز» برای تطبیق کلیدها
+const normalize = (s = "") =>
+  String(s).toLowerCase().replace(/[\s_-]+/g, "");
 
-const logoSrc = (logoKey) => `/avatars/${logoKey}.png`;
+// نگاشت نام‌های مرسوم به کلید JSON
+const ALIASES = {
+  dellemc: "dell",
+  "dell-emc": "dell",
+  dell: "dell",
+  hpe: "hpe",
+  hp: "hpe",
+  "hewlettpackard": "hpe",
+  lenovo: "lenovo",
+  cisco: "cisco",
+  juniper: "juniper",
+  oracle: "oracle",
+  fujitsu: "fujitsu",
+  quantum: "quantum",
+};
 
-function readProducts() {
-  try {
-    const file = path.join(process.cwd(), "data", "products.json");
-    if (!fs.existsSync(file)) return [];
-    const raw = fs.readFileSync(file, "utf-8");
-    const data = JSON.parse(raw);
-    return Array.isArray(data) ? data : [];
-  } catch {
-    return [];
-  }
+// پیدا کردن کلید معتبر در JSON
+function resolveKey(vendorSlug, keys) {
+  const n = normalize(vendorSlug);
+  // 1) اگر در ALIASES باشد
+  if (ALIASES[vendorSlug]) return ALIASES[vendorSlug];
+  if (ALIASES[n]) return ALIASES[n];
+
+  // 2) تطبیق مستقیم
+  let k = keys.find((k) => normalize(k) === n);
+  if (k) return k;
+
+  // 3) تطبیق حذف خط‌تیره/اسپیس
+  k = keys.find((k) => normalize(k) === n);
+  if (k) return k;
+
+  // 4) برگرداندن همان اسلاگ (اگر هیچ نبود)
+  return vendorSlug;
 }
 
-export default function VendorPage({ vendorTitle, logoKey, products }) {
+// ---------- page ----------
+export default function VendorPage({ title, logoKey, items }) {
+  const heroLogo = `/avatars/${logoKey}.png`;
+
   return (
     <>
       <Head>
-        <title>{vendorTitle} | تجهیزات</title>
-        <meta name="description" content={`محصولات و راهکارهای ${vendorTitle}`} />
+        <title>{title} | محصولات</title>
+        <meta
+          name="description"
+          content={`لیست محصولات و تجهیزات ${title} در ساتراس`}
+        />
       </Head>
 
-      {/* هدر: فقط لوگو */}
-      <div className="relative overflow-hidden bg-gradient-to-b from-slate-900 to-slate-800 text-white">
-        <div className="mx-auto max-w-6xl px-4 py-8 sm:py-10">
-          <nav className="mb-5 text-sm text-slate-300">
-            <Link href="/" className="hover:text-white">خانه</Link> /{" "}
-            <Link href="/products" className="hover:text-white">تجهیزات</Link> /{" "}
-            <span className="text-slate-100">{vendorTitle}</span>
-          </nav>
-
-          <div className="flex items-center justify-center">
-            {logoKey ? (
-              <>
-                <span className="sr-only">{vendorTitle}</span>
-                <Image
-                  src={logoSrc(logoKey)}
-                  alt={`${vendorTitle} logo`}
-                  width={220}
-                  height={60}
-                  className="h-[44px] w-auto object-contain sm:h-[56px]"
-                  priority
-                  unoptimized
-                  onError={(e) => {
-                    const el = e.currentTarget;
-                    const img = document.createElement("img");
-                    img.src = "/avatars/default.png";
-                    img.alt = `${vendorTitle} logo`;
-                    img.className = el.className;
-                    el.replaceWith(img);
-                  }}
-                />
-              </>
-            ) : null}
-          </div>
-
-          <p className="mt-4 max-w-3xl text-center mx-auto text-slate-300">
-            استوریج و سرورهای {vendorTitle} برای بارکاری سازمانی با تمرکز بر سادگی مدیریت،
-            کارایی و دسترس‌پذیری.
+      {/* HERO */}
+      <section className="relative bg-gradient-to-b from-slate-900 to-slate-800 text-white">
+        <div className="mx-auto max-w-6xl px-4 py-16 text-center">
+          {/* فقط لوگو (بدون متن کنار لوگو) */}
+          <img
+            src={heroLogo}
+            alt={`${title} logo`}
+            className="mx-auto h-12 w-auto object-contain"
+            loading="eager"
+            decoding="async"
+          />
+          <p className="mt-6 text-slate-300">
+            استوریج و سرورهای {title} برای بارکاری‌ سازمانی با تمرکز بر
+            کارایی، سادگی مدیریت و دسترس‌پذیری.
           </p>
         </div>
-      </div>
+      </section>
 
+      {/* PRODUCTS */}
       <main className="mx-auto max-w-6xl px-4 py-10">
-        {products.length === 0 ? (
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center text-slate-700">
+        {items.length === 0 ? (
+          <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-6 text-center text-slate-600">
             هنوز محصولی برای این برند ثبت نشده است. از فایل{" "}
-            <code className="rounded bg-white px-2 py-1 text-slate-800 shadow">data/products.json</code>{" "}
+            <code className="rounded bg-white px-2 py-0.5">data/products.json</code>{" "}
             اضافه کن.
             <div className="mt-3">
-              <Link href="/" className="text-emerald-600 underline-offset-4 hover:underline">
+              <Link href="/" className="text-emerald-600 hover:underline">
                 بازگشت به خانه
               </Link>
             </div>
           </div>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 justify-start">
-            {products.map((p, i) => (
-              <div
-                key={`${p.vendor}-${p.title || p.name}-${i}`}
-                className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition hover:shadow-md"
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {items.map((p, idx) => (
+              <article
+                key={idx}
+                className="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
               >
-                <div className="relative bg-slate-50">
-                  <Image
-                    src={p.image || "/products/images/placeholder.webp"}
-                    alt={p.title || p.name || "product"}
-                    width={1200}
-                    height={400}
-                    className="h-44 w-full object-contain p-6"
-                    unoptimized
+                <div className="p-4">
+                  <img
+                    src={p.image}
+                    alt={p.model}
+                    className="mx-auto h-36 w-auto object-contain"
+                    loading="lazy"
+                    decoding="async"
                   />
                 </div>
 
-                <div className="flex h-full flex-col p-5">
-                  {p.vendor ? (
-                    <div className="mb-1 text-xs text-slate-500">{p.vendor}</div>
-                  ) : null}
-                  <h3 className="text-lg font-semibold text-slate-800">
-                    {p.title || p.name}
+                <div className="px-6 pb-6">
+                  <div className="text-xs text-slate-500">{p.vendor}</div>
+                  <h3 className="mt-1 text-lg font-bold text-slate-900">
+                    {p.model}
                   </h3>
 
-                  {/* توضیحات فنی انگلیسی → چپ‌چین */}
-                  <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-600 text-left" dir="ltr">
-                    {p.excerpt || p.description || "—"}
+                  {/* توضیحات با ارتفاع ثابت تا دکمه‌ها هم‌راستا بمانند */}
+                  <p className="mt-3 min-h-[84px] text-sm leading-6 text-slate-600">
+                    {p.desc}
                   </p>
 
                   <div className="mt-4 flex items-center gap-3">
-                    {p.spec || p.specsheet || p.specSheet ? (
-                      <a
-                        href={p.spec || p.specsheet || p.specSheet}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
-                      >
-                        Specsheets
-                      </a>
-                    ) : (
-                      <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-400">
-                        Specsheets
-                      </span>
-                    )}
-
+                    <a
+                      href={p.specsheet}
+                      className="rounded-full border border-slate-300 px-4 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      Specsheet
+                    </a>
                     <Link
-                      href="/contact"
-                      className="ml-auto inline-flex items-center rounded-full bg-amber-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-amber-600"
+                      href="/#contact"
+                      className="rounded-full bg-amber-500 px-4 py-1.5 text-sm text-white hover:bg-amber-600"
                     >
                       درخواست مشاوره
                     </Link>
                   </div>
                 </div>
-              </div>
+              </article>
             ))}
           </div>
         )}
@@ -153,45 +145,40 @@ export default function VendorPage({ vendorTitle, logoKey, products }) {
   );
 }
 
+// ---------- SSG ----------
 export async function getStaticPaths() {
-  const items = readProducts();
+  const json = JSON.parse(fs.readFileSync(PRODUCTS_PATH, "utf8"));
+  const keys = Object.keys(json);
 
-  // تمام vendor هایی که در products.json آمده‌اند
-  const vendorNormsFromData = new Set(items.map((p) => norm(p.vendor || "")));
-
-  // تمام route های alias تعریف‌شده (اختیاری)
-  const aliasRoutes = Object.keys(BRAND_ALIASES || {});
-
-  // جمعِ هر دو
-  const allRoutes = new Set([...aliasRoutes, ...vendorNormsFromData].filter(Boolean));
+  // علاوه بر کلیدهای JSON، چند اسلاگ رایج را هم اضافه می‌کنیم
+  const extra = ["dell-emc"];
+  const all = Array.from(new Set([...keys, ...extra]));
 
   return {
-    paths: Array.from(allRoutes).map((v) => ({ params: { vendor: v } })),
-    fallback: "blocking",
+    paths: all.map((k) => ({ params: { vendor: k } })),
+    fallback: false,
   };
 }
 
 export async function getStaticProps({ params }) {
-  const route = String(params?.vendor || "").toLowerCase();
+  const data = JSON.parse(fs.readFileSync(PRODUCTS_PATH, "utf8"));
 
-  // اگر alias برای route داریم، کلیدهای معادل را کنار route اضافه کن
-  const alias = BRAND_ALIASES[route] || null;
-  const candidateKeys = new Set([route]);
-  if (alias?.vendorKey) candidateKeys.add(norm(alias.vendorKey));
-  if (alias?.title) candidateKeys.add(norm(alias.title));
-  // (می‌توانی کلیدهای دیگری هم اضافه کنی اگر نیاز است)
+  // تعیین کلید معتبر
+  const vendorSlug = params.vendor || "";
+  const keys = Object.keys(data);
+  const resolved = resolveKey(vendorSlug, keys);
 
-  const all = readProducts();
+  // بخش مربوط به برند
+  const section = data[resolved] || { title: resolved, items: [] };
 
-  // فیلتر: هر محصولی که vendor نرمال‌شده‌اش داخل candidateKeys باشد
-  const products = all.filter((p) => candidateKeys.has(norm(p.vendor || "")));
-
-  // عنوان و لوگو
-  const vendorTitle = alias?.title || products[0]?.vendor || route;
-  const logoKey = alias?.logo || route;
+  // کلید لوگو (برای public/avatars/<key>.png)
+  const logoKey = resolveKey(resolved, keys);
 
   return {
-    props: { vendorTitle, logoKey, products },
-    revalidate: 30,
+    props: {
+      title: section.title || resolved,
+      logoKey,
+      items: Array.isArray(section.items) ? section.items : [],
+    },
   };
 }

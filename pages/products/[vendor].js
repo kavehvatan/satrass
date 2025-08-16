@@ -1,121 +1,217 @@
 // pages/products/[vendor].js
+
 import fs from "fs";
 import path from "path";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 
-// --- خواندن JSON در زمان build
-function readProducts() {
-  const p = path.join(process.cwd(), "data", "products.json");
-  const raw = fs.readFileSync(p, "utf-8");
-  return JSON.parse(raw);
+/* ----------------------------- helpers ----------------------------- */
+
+// نرمال‌سازی اسلاگ برند (حروف کوچک، حذف فاصله/نشانه‌ها)
+function slugify(v = "") {
+  return String(v)
+    .toLowerCase()
+    .trim()
+    .replace(/[\u200c\s\-_]+/g, "-") // فاصله و نیم‌فاصله و '_' را با خط تیره جایگزین کن
+    .replace(/[^a-z0-9\-]/g, "") // بقیه نشانه‌ها حذف
+    .replace(/\-+/g, "-");
 }
 
-// لوگوهای موجود در public/products/avatars/
-// اگر برندی داخل این لیست نباشد، لوگو نشان داده نمی‌شود (یا می‌توانید default.png بگذارید)
-const LOGO_FILES = {
-  dell: "dell.png",
-  hpe: "hpe.png",
-  lenovo: "lenovo.png",
-  juniper: "juniper.png",
-  cisco: "cisco.png",
-  fujitsu: "fujitsu.png",
-  oracle: "oracle.png",
-  quantum: "quantum.png",
-  commvault: "commvault.png",
-  netbackup: "netbackup.png",
+// نام نمایشی برندها (اگر در products.json نباشد)
+const FRIENDLY_VENDOR_NAMES = {
+  dell: "Dell EMC",
+  hpe: "HPE",
+  cisco: "Cisco",
+  lenovo: "Lenovo",
+  juniper: "Juniper",
+  oracle: "Oracle",
+  fujitsu: "Fujitsu",
+  quantum: "Quantum",
+  netbackup: "Veritas NetBackup",
+  commvault: "Commvault",
 };
 
-export async function getStaticPaths() {
-  const data = readProducts();
-  const vendors = Object.keys(data || {});
-  return {
-    paths: vendors.map((v) => ({ params: { vendor: v } })),
-    fallback: false,
-  };
+// لوگوها از public/avatars
+const AVATAR_BASE = "/avatars";
+
+// ساخت مسیر لوگو؛ در صورت نبودن، default.png
+function buildLogoSrc(vendorSlug) {
+  const candidates = [
+    `${AVATAR_BASE}/${vendorSlug}.png`,
+    `${AVATAR_BASE}/${vendorSlug}.svg`,
+    `${AVATAR_BASE}/default.png`,
+  ];
+  return candidates[0]; // Next/Image به محض خطا، onError ما را اجرا می‌کند تا fallback بدهیم
 }
 
-export async function getStaticProps({ params }) {
-  const data = readProducts();
-  const slug = decodeURIComponent((params?.vendor || "").toLowerCase());
-  const vendorData = data[slug] || null;
-  return {
-    props: {
-      slug,
-      vendorData, // { title, intro?, items: [] }
-    },
-  };
+/* ------------------------ read data/products.json ------------------------ */
+
+function readProductsFile() {
+  try {
+    const file = path.join(process.cwd(), "data", "products.json");
+    if (!fs.existsSync(file)) return [];
+    const raw = fs.readFileSync(file, "utf-8");
+    const data = JSON.parse(raw);
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
 }
 
-export default function VendorPage({ slug, vendorData }) {
-  const title = vendorData?.title || slug.toUpperCase();
-  const intro =
-    vendorData?.intro ||
-    `استوریج و سرورهای ${title} برای بارکاری سازمانی با تمرکز بر کارایی، سادگی مدیریت و دسترس‌پذیری.`;
-  const items = vendorData?.items || [];
+/* ------------------------------ UI chunks ------------------------------ */
 
-  const logoFile = LOGO_FILES[slug] || null;
-  const logoSrc = logoFile ? `/products/avatars/${logoFile}` : null;
+function SectionHeading({ trail, title, logoSrc }) {
+  return (
+    <div className="relative overflow-hidden bg-gradient-to-b from-slate-900 to-slate-800 text-white">
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:py-10">
+        {/* breadcrumbs */}
+        <nav className="mb-4 text-sm text-slate-300">
+          <Link href="/" className="hover:text-white">
+            خانه
+          </Link>{" "}
+          /{" "}
+          <Link href="/products" className="hover:text-white">
+            تجهیزات
+          </Link>{" "}
+          / <span className="text-slate-100">{trail}</span>
+        </nav>
+
+        {/* heading + logo */}
+        <div className="flex items-center gap-4">
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+            {trail}
+          </h1>
+
+          {logoSrc ? (
+            <div className="relative h-7 w-auto">
+              <Image
+                src={logoSrc}
+                alt={`${trail} logo`}
+                width={100}
+                height={28}
+                className="h-7 w-auto object-contain"
+                priority
+                unoptimized
+                onError={(e) => {
+                  // fallback به default.png در صورت خطا
+                  const el = e.currentTarget;
+                  const img = document.createElement("img");
+                  img.src = `${AVATAR_BASE}/default.png`;
+                  img.alt = `${trail} logo`;
+                  img.className = el.className;
+                  el.replaceWith(img);
+                }}
+              />
+            </div>
+          ) : null}
+        </div>
+
+        <p className="mt-3 max-w-3xl text-slate-300">
+          استوریج و سرورهای {trail} برای بارکاری سازمانی با تمرکز بر سادگی مدیریت،
+          کارایی و دسترس‌پذیری.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function ProductCard({ p }) {
+  const imageSrc =
+    p.image ||
+    "/products/images/placeholder.webp"; // اگر تصویری در داده‌ها نیست، یک تصویر پیش‌فرض خودتان بگذارید
+  const specHref = p.spec || p.specsheet || p.specSheet || null;
+
+  return (
+    <div className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition hover:shadow-md">
+      {/* تصویر */}
+      <div className="relative bg-slate-50">
+        <Image
+          src={imageSrc}
+          alt={p.title || p.name || "product"}
+          width={1200}
+          height={400}
+          className="h-44 w-full object-contain p-6"
+          unoptimized
+        />
+      </div>
+
+      {/* متن + دکمه‌ها */}
+      <div className="flex h-full flex-col p-5">
+        {/* vendor label کوچک */}
+        {p.vendor ? (
+          <div className="mb-1 text-xs text-slate-500">
+            {FRIENDLY_VENDOR_NAMES[slugify(p.vendor)] || p.vendor}
+          </div>
+        ) : null}
+
+        <h3 className="text-lg font-semibold text-slate-800">
+          {p.title || p.name}
+        </h3>
+
+        <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-600">
+          {p.excerpt || p.description || "—"}
+        </p>
+
+        <div className="mt-4 flex items-center gap-3">
+          {specHref ? (
+            <a
+              href={specHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+            >
+              Specsheets
+            </a>
+          ) : (
+            <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-400">
+              Specsheets
+            </span>
+          )}
+
+          <Link
+            href="/contact"
+            className="ml-auto inline-flex items-center rounded-full bg-amber-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-amber-600"
+          >
+            درخواست مشاوره
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------ PAGE ------------------------------ */
+
+export default function VendorPage({ vendorSlug, vendorTitle, products }) {
+  const pageTitle = `${vendorTitle} | تجهیزات`;
+  const logoSrc = buildLogoSrc(vendorSlug);
 
   return (
     <>
       <Head>
-        <title>{title} | تجهیزات</title>
+        <title>{pageTitle}</title>
+        <meta
+          name="description"
+          content={`محصولات و راهکارهای ${vendorTitle}؛ تمرکز بر سادگی مدیریت، کارایی و دسترس‌پذیری.`}
+        />
         <meta name="robots" content="index,follow" />
-        <meta name="description" content={`محصولات و تجهیزات ${title}`} />
       </Head>
 
-      {/* هدر تیره با breadcrumb + تیتر و لوگو */}
-      <section className="bg-gradient-to-b from-slate-900 to-slate-800 text-white">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          <nav className="text-sm text-slate-300 mb-3">
-            <Link href="/" className="hover:text-white">
-              خانه
-            </Link>
-            <span className="mx-1.5">/</span>
-            <Link href="/products/dell" className="hover:text-white">
-              تجهیزات
-            </Link>
-            <span className="mx-1.5">/</span>
-            <span className="text-white">{title}</span>
-          </nav>
+      <SectionHeading trail={vendorTitle} logoSrc={logoSrc} />
 
-          <div className="flex items-center gap-4">
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-              {title}
-            </h1>
-            {logoSrc && (
-              <Image
-                src={logoSrc}
-                alt={`${title} logo`}
-                width={100}
-                height={32}
-                className="h-7 w-auto object-contain"
-                priority
-              />
-            )}
-          </div>
-
-          {intro && (
-            <p className="mt-3 text-slate-300 max-w-3xl leading-7">{intro}</p>
-          )}
-        </div>
-      </section>
-
-      {/* محتوای اصلی */}
-      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
-        {!items.length ? (
-          <div className="rounded-xl border border-gray-200 p-6 text-gray-600">
+      <main className="mx-auto max-w-6xl px-4 py-10">
+        {products.length === 0 ? (
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center text-slate-700">
             هنوز محصولی برای این برند ثبت نشده است. از فایل{" "}
-            <code className="rounded bg-gray-100 px-1 py-0.5 text-gray-800">
+            <code className="rounded bg-white px-2 py-1 text-slate-800 shadow">
               data/products.json
             </code>{" "}
             اضافه کن.
-            <div className="mt-4">
+            <div className="mt-3">
               <Link
                 href="/"
-                className="text-sm text-amber-600 hover:text-amber-700"
+                className="text-emerald-600 underline-offset-4 hover:underline"
               >
                 بازگشت به خانه
               </Link>
@@ -123,64 +219,58 @@ export default function VendorPage({ slug, vendorData }) {
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {items.map((it, idx) => (
-              <article
-                key={`${slug}-${idx}`}
-                className="h-full rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 shadow-sm hover:shadow-md transition"
-              >
-                <div className="flex h-full flex-col">
-                  {/* تصویر محصول */}
-                  {it.image && (
-                    <div className="relative w-full h-40 sm:h-44 rounded-lg overflow-hidden bg-gray-50 ring-1 ring-gray-100">
-                      <Image
-                        src={it.image}
-                        alt={it.model || ""}
-                        fill
-                        className="object-contain p-2"
-                        sizes="(max-width: 768px) 100vw, 33vw"
-                        priority={idx < 2}
-                      />
-                    </div>
-                  )}
-
-                  {/* متن */}
-                  <div className="mt-4">
-                    <div className="text-xs text-gray-500">{it.vendor}</div>
-                    <h3 className="mt-1 text-lg font-semibold text-gray-900">
-                      {it.model}
-                    </h3>
-                    {it.desc && (
-                      <p className="mt-2 text-sm leading-7 text-gray-700">
-                        {it.desc}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* دکمه‌ها: هم‌تراز پایین کارت */}
-                  <div className="mt-auto flex items-center gap-3 pt-4">
-                    <Link
-                      href="/#contact"
-                      className="inline-flex items-center justify-center rounded-full bg-amber-500 px-4 py-2 text-sm font-medium text-black hover:bg-amber-400 active:scale-[.98] transition"
-                    >
-                      درخواست مشاوره
-                    </Link>
-                    {it.specsheet && (
-                      <Link
-                        href={it.specsheet}
-                        target="_blank"
-                        rel="noopener"
-                        className="inline-flex items-center justify-center rounded-full border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
-                      >
-                        Specsheet
-                      </Link>
-                    )}
-                  </div>
-                </div>
-              </article>
+            {products.map((p) => (
+              <ProductCard key={`${p.vendor}-${p.title || p.name}`} p={p} />
             ))}
           </div>
         )}
       </main>
     </>
   );
+}
+
+/* -------------------------- data fetching (SSG) -------------------------- */
+
+export async function getStaticPaths() {
+  // مسیرها را از products.json می‌سازیم. اگر فایل نبود/خالی بود، هیچ مسیری برنمی‌گردانیم.
+  const products = readProductsFile();
+  const vendors = Array.from(
+    new Set(
+      products
+        .map((p) => (p.vendor ? slugify(p.vendor) : null))
+        .filter(Boolean)
+    )
+  );
+
+  // اجازه‌ی ساخت صفحه‌های جدید در زمان اجرا
+  return {
+    paths: vendors.map((v) => ({ params: { vendor: v } })),
+    fallback: "blocking",
+  };
+}
+
+export async function getStaticProps({ params }) {
+  const requested = slugify(params?.vendor || "");
+  const products = readProductsFile();
+
+  const filtered = products.filter(
+    (p) => slugify(p.vendor || "") === requested
+  );
+
+  // عنوان نمایشی
+  const vendorTitle =
+    FRIENDLY_VENDOR_NAMES[requested] ||
+    (filtered[0]?.vendor
+      ? filtered[0].vendor
+      : requested.toUpperCase());
+
+  return {
+    props: {
+      vendorSlug: requested,
+      vendorTitle,
+      products: filtered,
+    },
+    // اگر می‌خواهی صفحه‌ها پس از تغییر فایل به‌روز شوند:
+    revalidate: 30,
+  };
 }

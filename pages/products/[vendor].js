@@ -1,31 +1,25 @@
 // pages/products/[vendor].js
-
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import productsData from "../../data/products.json";
 
-// ---------- Helpers ----------
+// ---------- utils ----------
 const toSlug = (s = "") =>
   String(s).trim().toLowerCase().replace(/\s+/g, "-");
-
-const logoOf = (slug) => `/products/avatars/${slug}.png`;
 
 const titleCase = (s = "") =>
   s
     .toString()
     .split(" ")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : ""))
     .join(" ");
 
-/** محصولات را از هر ساختار JSON به یک آرایه تخت تبدیل می‌کند */
 const normalizeProducts = (raw) => {
   if (Array.isArray(raw)) return raw;
-
   if (raw && Array.isArray(raw.products)) return raw.products;
   if (raw && Array.isArray(raw.items)) return raw.items;
-
   if (raw && typeof raw === "object") {
     const arrs = Object.values(raw).filter(Array.isArray);
     if (arrs.length) return arrs.flat();
@@ -33,7 +27,21 @@ const normalizeProducts = (raw) => {
   return [];
 };
 
-// ---------- Brand meta / copy ----------
+const logoOf = (slug) => `/products/avatars/${slug}.png`;
+
+// نام‌های مرسوم/هم‌معنی برندها
+const vendorAliases = {
+  dell: ["dell", "dell-emc", "emc", "dellemc"],
+  hpe: ["hpe", "hewlett-packard", "hewlett-packard-enterprise", "hp"],
+  cisco: ["cisco"],
+  lenovo: ["lenovo", "ibm-lenovo"],
+  juniper: ["juniper"],
+  oracle: ["oracle", "sun", "sun-microsystems"],
+  fujitsu: ["fujitsu"],
+  quantum: ["quantum"],
+};
+
+// متن و لوگوی سربرگ
 const vendorExtras = {
   dell: {
     display: "Dell EMC",
@@ -78,9 +86,8 @@ const vendorExtras = {
   },
 };
 
-// ---------- Page component ----------
+// ---------- Page ----------
 export default function VendorPage({ vendorSlug, meta, items }) {
-  const pageTitle = `${meta.display} | تجهیزات`;
   const [logoSrc, setLogoSrc] = useState(
     meta.logo || "/products/avatars/default.png"
   );
@@ -88,12 +95,11 @@ export default function VendorPage({ vendorSlug, meta, items }) {
   return (
     <>
       <Head>
-        <title>{pageTitle}</title>
+        <title>{`${meta.display} | تجهیزات`}</title>
         <meta
           name="description"
           content={`محصولات و تجهیزات ${meta.display} — ساتراس`}
         />
-        <meta name="robots" content="index,follow" />
       </Head>
 
       {/* Hero */}
@@ -110,35 +116,30 @@ export default function VendorPage({ vendorSlug, meta, items }) {
             / <span className="text-white">{meta.display}</span>
           </div>
 
-          <div className="flex items-center justify-between gap-6">
-            <div>
-              <h1 className="flex items-center gap-3 text-3xl font-bold">
-                {meta.display}
-                <span className="inline-block">
-                  <Image
-                    src={logoSrc}
-                    width={96}
-                    height={30}
-                    alt={meta.display}
-                    className="object-contain"
-                    onError={() =>
-                      setLogoSrc("/products/avatars/default.png")
-                    }
-                    priority
-                  />
-                </span>
-              </h1>
-              {meta.heroNote && (
-                <p className="mt-4 max-w-3xl leading-8 text-slate-300">
-                  {meta.heroNote}
-                </p>
-              )}
-            </div>
+          <div className="flex items-center gap-4">
+            <h1 className="text-3xl font-bold">{meta.display}</h1>
+            <Image
+              src={logoSrc}
+              width={96}
+              height={30}
+              alt={`${meta.display} logo`}
+              className="object-contain"
+              onError={() =>
+                setLogoSrc("/products/avatars/default.png")
+              }
+              priority
+            />
           </div>
+
+          {meta.heroNote && (
+            <p className="mt-4 max-w-3xl leading-8 text-slate-300">
+              {meta.heroNote}
+            </p>
+          )}
         </div>
       </section>
 
-      {/* Products grid */}
+      {/* Grid */}
       <section className="mx-auto max-w-6xl px-4 py-12">
         {items.length === 0 ? (
           <div className="rounded-xl border border-slate-200 p-6 text-center text-slate-600">
@@ -163,7 +164,6 @@ export default function VendorPage({ vendorSlug, meta, items }) {
                 key={p.id || `${p.vendor}-${p.model}`}
                 className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md"
               >
-                {/* image */}
                 <div className="relative mb-4 w-full overflow-hidden rounded-xl">
                   <Image
                     src={
@@ -177,7 +177,9 @@ export default function VendorPage({ vendorSlug, meta, items }) {
                   />
                 </div>
 
-                <div className="text-xs text-slate-500">{meta.display}</div>
+                <div className="text-xs text-slate-500">
+                  {meta.display}
+                </div>
 
                 <h3 className="mt-1 text-lg font-semibold text-slate-900">
                   {p.title || p.model}
@@ -223,14 +225,24 @@ export default function VendorPage({ vendorSlug, meta, items }) {
 // ---------- SSG ----------
 export async function getStaticPaths() {
   const list = normalizeProducts(productsData);
-
-  const vendors = Array.from(
-    new Set(
-      list.map((p) => toSlug(p.vendor || "")).filter(Boolean)
-    )
+  // همه‌ی اسلاگ‌های ممکن محصولات
+  const allProductVendorSlugs = Array.from(
+    new Set(list.map((p) => toSlug(p.vendor || "")).filter(Boolean))
   );
 
-  const paths = vendors.map((v) => ({ params: { vendor: v } }));
+  // به اسلاگ‌های صفحه نگاشت می‌کنیم (مثلاً dell-emc -> dell)
+  const reverseMap = (slug) => {
+    const entry = Object.entries(vendorAliases).find(([, arr]) =>
+      arr.includes(slug)
+    );
+    return entry ? entry[0] : slug; // اگر پیدا نشد همان را برگردان
+  };
+
+  const pageVendorSlugs = Array.from(
+    new Set(allProductVendorSlugs.map(reverseMap))
+  );
+
+  const paths = pageVendorSlugs.map((v) => ({ params: { vendor: v } }));
   return { paths, fallback: "blocking" };
 }
 
@@ -240,8 +252,13 @@ export async function getStaticProps({ params }) {
 
   const list = normalizeProducts(productsData);
 
-  const items =
-    list.filter((p) => toSlug(p.vendor) === vendorSlug) || [];
+  // اسلاگ‌های قابل قبول برای این صفحه
+  const accepted = new Set(
+    (vendorAliases[vendorSlug] || [vendorSlug]).map(toSlug)
+  );
+
+  // فیلتر محصولات
+  const items = list.filter((p) => accepted.has(toSlug(p.vendor || "")));
 
   const known = vendorExtras[vendorSlug];
   const meta = known || {
@@ -251,11 +268,7 @@ export async function getStaticProps({ params }) {
   };
 
   return {
-    props: {
-      vendorSlug,
-      meta,
-      items,
-    },
+    props: { vendorSlug, meta, items },
     revalidate: 60,
   };
 }

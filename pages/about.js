@@ -65,12 +65,32 @@ export default function About() {
         <div className="bg-white border rounded-lg p-5">
           <h3 className="font-bold mb-2">دفتر ساتراس</h3>
           <p>ونک، ملاصدرا، شیراز جنوبی، خیابان وحدت، پلاک ۲، طبقه ۴</p>
-<p className="mt-2">
-  <span className="text-gray-600">تلفن:</span>{" "}
-  <bdi dir="ltr" className="inline-block font-mono tracking-wide">
-    +98 (21) 88066022
-  </bdi>
-</p>          <p className="mt-2">ایمیل: info@satrass.com</p>
+
+          {/* Phone (click-to-call) */}
+          <p className="mt-2">
+            <span className="text-gray-600">تلفن:</span>{" "}
+            <a
+              href="tel:+982188066022"
+              className="hover:underline"
+              aria-label="تماس با ساتراس"
+            >
+              <bdi dir="ltr" className="inline-block font-mono tracking-wide">
+                +98 (21) 88066022
+              </bdi>
+            </a>
+          </p>
+
+          {/* Email (click-to-email) */}
+          <p className="mt-2">
+            ایمیل:{" "}
+            <a
+              href="mailto:info@satrass.com"
+              className="hover:underline"
+              aria-label="ارسال ایمیل به ساتراس"
+            >
+              info@satrass.com
+            </a>
+          </p>
         </div>
       </section>
 

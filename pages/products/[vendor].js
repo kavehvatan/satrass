@@ -19,6 +19,20 @@ const titleCase = (s = "") =>
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(" ");
 
+/** محصولات را از هر ساختار JSON به یک آرایه تخت تبدیل می‌کند */
+const normalizeProducts = (raw) => {
+  if (Array.isArray(raw)) return raw;
+
+  if (raw && Array.isArray(raw.products)) return raw.products;
+  if (raw && Array.isArray(raw.items)) return raw.items;
+
+  if (raw && typeof raw === "object") {
+    const arrs = Object.values(raw).filter(Array.isArray);
+    if (arrs.length) return arrs.flat();
+  }
+  return [];
+};
+
 // ---------- Brand meta / copy ----------
 const vendorExtras = {
   dell: {
@@ -82,7 +96,7 @@ export default function VendorPage({ vendorSlug, meta, items }) {
         <meta name="robots" content="index,follow" />
       </Head>
 
-      {/* Hero / Header */}
+      {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-b from-slate-900 to-slate-800 text-white">
         <div className="mx-auto max-w-6xl px-4 py-16">
           <div className="mb-4 text-sm text-slate-300">
@@ -149,7 +163,7 @@ export default function VendorPage({ vendorSlug, meta, items }) {
                 key={p.id || `${p.vendor}-${p.model}`}
                 className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md"
               >
-                {/* product image */}
+                {/* image */}
                 <div className="relative mb-4 w-full overflow-hidden rounded-xl">
                   <Image
                     src={
@@ -163,22 +177,18 @@ export default function VendorPage({ vendorSlug, meta, items }) {
                   />
                 </div>
 
-                {/* brand small */}
                 <div className="text-xs text-slate-500">{meta.display}</div>
 
-                {/* title */}
                 <h3 className="mt-1 text-lg font-semibold text-slate-900">
                   {p.title || p.model}
                 </h3>
 
-                {/* description */}
                 {p.desc && (
                   <p className="mt-3 grow leading-7 text-slate-600">
                     {p.desc}
                   </p>
                 )}
 
-                {/* actions */}
                 <div className="mt-6 flex items-center gap-3">
                   <Link
                     href="#contact"
@@ -212,12 +222,11 @@ export default function VendorPage({ vendorSlug, meta, items }) {
 
 // ---------- SSG ----------
 export async function getStaticPaths() {
-  // استخراج vendor های موجود از فایل داده‌ها
+  const list = normalizeProducts(productsData);
+
   const vendors = Array.from(
     new Set(
-      (productsData || [])
-        .map((p) => toSlug(p.vendor || ""))
-        .filter(Boolean)
+      list.map((p) => toSlug(p.vendor || "")).filter(Boolean)
     )
   );
 
@@ -229,14 +238,13 @@ export async function getStaticProps({ params }) {
   const raw = params?.vendor || "";
   const vendorSlug = toSlug(raw);
 
-  // فهرست محصولات این vendor
-  const items =
-    (productsData || []).filter(
-      (p) => toSlug(p.vendor) === vendorSlug
-    ) || [];
+  const list = normalizeProducts(productsData);
 
-  // متای برند
-  const metaBase = vendorExtras[vendorSlug] || {
+  const items =
+    list.filter((p) => toSlug(p.vendor) === vendorSlug) || [];
+
+  const known = vendorExtras[vendorSlug];
+  const meta = known || {
     display: titleCase(vendorSlug),
     heroNote: "",
     logo: logoOf(vendorSlug),
@@ -245,9 +253,9 @@ export async function getStaticProps({ params }) {
   return {
     props: {
       vendorSlug,
-      meta: metaBase,
+      meta,
       items,
     },
-    revalidate: 60, // ISR: هر ۶۰ ثانیه ریجنریت
+    revalidate: 60,
   };
 }

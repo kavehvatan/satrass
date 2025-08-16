@@ -2,30 +2,31 @@
 import { readStore } from "../../lib/dataStore";
 
 const normalize = (s) =>
-  (s ?? "")
-    .toString()
+  String(s || "")
     .toUpperCase()
-    .replace(/[\s\-_/\\]+/g, ""); // فاصله و خط‌تیره حذف می‌شود
+    .replace(/[^\w]/g, "");
 
-export default function handler(req, res) {
-  try {
-    const { q = "", debug } = req.query;
-    const store = readStore();
-    const rows = Array.isArray(store.rows) ? store.rows : [];
+export default async function handler(req, res) {
+  const q = String(req.query.q || "").trim();
+  const dbg = req.query.debug !== undefined;
 
-    let result = rows;
-    const nq = normalize(q);
-    if (nq) {
-      result = rows.filter((r) => normalize(r.serial) === nq);
-    }
+  const store = await readStore();
+  const all = Array.isArray(store.rows) ? store.rows : [];
 
-    return res.status(200).json({
-      rows: result,
-      meta: { updated: store.updated || null },
-      ...(debug ? { debug: { source: "dataStore", records: rows.length } } : {}),
-    });
-  } catch (err) {
-    console.error("warranty api error:", err);
-    return res.status(500).json({ error: "server_error" });
+  let rows = all;
+  if (q) {
+    const key = normalize(q);
+    rows = all.filter((r) => normalize(r.serial) === key);
   }
+
+  const body = { rows };
+  if (dbg) {
+    body.meta = {
+      total: all.length,
+      updated: store.updated || null,
+      source: store.__source || "unknown",
+      queried: q || null,
+    };
+  }
+  res.json(body);
 }

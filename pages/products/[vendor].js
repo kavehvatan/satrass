@@ -1,159 +1,105 @@
 // pages/products/[vendor].js
 import Head from "next/head";
 import Link from "next/link";
-import fs from "fs";
-import path from "path";
+import { useRouter } from "next/router";
+import products from "../../data/products.json";
 
-const TEAL = "#14b8a6";
-const YELLOW = "#f4c21f";
-
-// ساده و محکم: تبدیل اسم به اسلاگِ لوِرکیس
-function slugify(x = "") {
-  return String(x)
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, "-")
-    .replace(/[^a-z0-9\-]/g, "");
+function prettyVendor(v) {
+  const k = String(v || "").toLowerCase();
+  const map = { dell: "DELL EMC", hpe: "HPE", lenovo: "Lenovo", cisco: "Cisco", fujitsu: "Fujitsu", juniper: "Juniper", oracle: "Oracle", quantum: "Quantum" };
+  return map[k] || k.toUpperCase();
 }
 
-export async function getStaticPaths() {
-  const file = path.join(process.cwd(), "data", "products.json");
-  const data = JSON.parse(fs.readFileSync(file, "utf8") || "{}");
-
-  // کلیدها را نرمال کنیم و تکراری‌ها را حذف
-  const unique = new Set();
-  const paths = [];
-  for (const key of Object.keys(data)) {
-    const s = slugify(key);
-    if (!unique.has(s)) {
-      unique.add(s);
-      paths.push({ params: { vendor: s } });
-    }
-  }
-  return { paths, fallback: false };
-}
-
-export async function getStaticProps({ params }) {
-  const file = path.join(process.cwd(), "data", "products.json");
-  const data = JSON.parse(fs.readFileSync(file, "utf8") || "{}");
-
-  // کلیدی را پیدا کن که اسلاگش با پارامتر برابر است (بدون حساسیت به حروف)
-  const matchKey =
-    Object.keys(data).find((k) => slugify(k) === params.vendor) ?? null;
-
-  const vendorData = matchKey ? data[matchKey] : null;
-
-  return {
-    props: {
-      vendor: params.vendor,
-      vendorTitle: matchKey || params.vendor.toUpperCase(),
-      vendorData: vendorData || { items: [] },
-    },
-  };
-}
-
-function ProductCard({ item }) {
+function ProductCard({ title, subtitle, img, excerpt, specUrl }) {
   return (
-    <article className="bg-white border rounded-2xl p-5 shadow-sm hover:shadow-md transition">
-      {item.image && (
-        <img
-          src={item.image}
-          alt={item.model || item.name}
-          className="w-full h-36 object-contain mb-3"
-          onError={(e) => (e.currentTarget.style.display = "none")}
-        />
-      )}
-      {item.vendor && (
-        <div className="text-sm text-gray-500">{item.vendor}</div>
-      )}
-      <h3 className="text-lg font-bold text-gray-900">
-        {item.model || item.name || "Product"}
-      </h3>
-      {item.desc && <p className="mt-2 text-gray-700 leading-7">{item.desc}</p>}
-      <div className="mt-4 flex gap-3">
-        {item.specsheet && (
+    <div className="flex flex-col h-full rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+      {/* تصویر */}
+      <div className="h-40 w-full overflow-hidden rounded-xl bg-gray-50 flex items-center justify-center">
+        {img ? (
+          <img
+            src={img}
+            alt={title || "محصول"}
+            className="h-full object-contain"
+            onError={(e) => (e.currentTarget.style.display = "none")}
+          />
+        ) : (
+          <div className="text-gray-400 text-sm">No Image</div>
+        )}
+      </div>
+
+      {/* عنوان و زیرعنوان */}
+      <div className="mt-4">
+        {subtitle && <div className="text-xs text-gray-500">{subtitle}</div>}
+        <h3 className="font-bold text-gray-900 text-lg mt-1">{title}</h3>
+      </div>
+
+      {/* توضیحات: ارتفاع یکنواخت */}
+      <p className="mt-3 text-sm leading-7 text-gray-700 min-h-[72px] md:min-h-[88px]">
+        {excerpt}
+      </p>
+
+      {/* نوار دکمه‌ها: همیشه پایین کارت */}
+      <div className="mt-auto pt-4 flex items-center gap-3">
+        <Link
+          href="/#contact"
+          className="inline-flex h-10 items-center rounded-full bg-amber-400 px-4 font-semibold text-black hover:bg-amber-300 transition"
+        >
+          ارائه مشاوره
+        </Link>
+
+        {specUrl && (
           <a
-            href={item.specsheet}
-            className="rounded-full px-4 py-2 text-sm font-semibold border border-[#14b8a6] text-[#14b8a6] hover:bg-[#14b8a6]/10 transition"
+            href={specUrl}
             target="_blank"
             rel="noopener noreferrer"
+            className="inline-flex h-10 items-center rounded-full border border-gray-300 px-4 text-gray-700 hover:bg-gray-50 transition"
           >
             Specsheet
           </a>
         )}
-        <a
-          href="/contact"
-          className="rounded-full px-4 py-2 text-sm font-bold"
-          style={{ backgroundColor: YELLOW, color: "#000" }}
-        >
-          درخواست مشاوره
-        </a>
       </div>
-    </article>
+    </div>
   );
 }
 
-export default function VendorPage({ vendorTitle, vendorData }) {
-  const title = vendorData.title || vendorData.name || vendorTitle;
+export default function VendorPage() {
+  const { query } = useRouter();
+  const vendor = (query.vendor || "").toString().toLowerCase();
+  const items = (products && products[vendor]) || [];
 
   return (
-    <>
+    <main className="min-h-screen" dir="rtl">
       <Head>
-        <title>{title} — تجهیزات — ساتراس</title>
+        <title>{prettyVendor(vendor)} | تجهیزات</title>
+        <meta name="description" content={`محصولات و تجهیزات ${prettyVendor(vendor)} در ساتراس`} />
+        <link rel="canonical" href={`https://satrass.onrender.com/products/${vendor}`} />
+        <meta property="og:title" content={`${prettyVendor(vendor)} | تجهیزات`} />
+        <meta property="og:description" content={`محصولات و تجهیزات ${prettyVendor(vendor)} در ساتراس`} />
       </Head>
-      <main className="min-h-screen">
-        {/* Hero */}
-        <section className="bg-[linear-gradient(135deg,#000_0%,#0a0a0a_60%,#111_100%)] text-white">
-          <div className="max-w-6xl mx-auto px-4 py-10">
-            <nav className="text-sm text-white/70 mb-3">
-              <Link href="/" className="hover:text-white/90">
-                خانه
-              </Link>
-              <span className="mx-2">/</span>
-              <a href="/#products" className="hover:text-white/90">
-                تجهیزات
-              </a>
-              <span className="mx-2">/</span>
-              <span className="text-white">{title}</span>
-            </nav>
 
-            <div className="flex items-center gap-4">
-              <img
-                src={`/avatars/${slugify(vendorTitle)}.png`}
-                alt={title}
-                className="w-12 h-12 object-contain"
-                onError={(e) => (e.currentTarget.style.display = "none")}
-              />
-              <h1 className="text-3xl md:text-4xl font-extrabold">{title}</h1>
-            </div>
+      <section className="max-w-6xl mx-auto px-4 py-10">
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="text-2xl font-extrabold">{prettyVendor(vendor)}</h1>
+          <Link href="/products" className="text-sm text-teal-600 hover:text-teal-700">
+            بازگشت
+          </Link>
+        </div>
 
-            {vendorData.intro && (
-              <p className="mt-3 text-gray-300 max-w-3xl leading-7">
-                {vendorData.intro}
-              </p>
-            )}
+        {/* گرید: همه سلول‌ها هم‌ارتفاع و کارت‌ها یکدست */}
+        <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 items-stretch [grid-auto-rows:1fr]">
+          {items.map((it, idx) => (
+            <ProductCard key={idx} {...it} />
+          ))}
+        </div>
+
+        {!items.length && (
+          <div className="mt-10 rounded-xl border border-dashed p-6 text-gray-500">
+            هنوز محصولی برای این برند ثبت نشده. از
+            <code className="mx-1 rounded bg-gray-100 px-2 py-1">data/products.json</code>
+            اضافه کن.
           </div>
-        </section>
-
-        {/* Grid محصولات */}
-        <section className="max-w-6xl mx-auto px-4 py-10">
-          {(!vendorData.items || vendorData.items.length === 0) ? (
-            <div className="rounded-xl border p-6 text-gray-600">
-              هنوز محصولی برای این برند ثبت نشده. از فایل{" "}
-              <code className="bg-gray-100 px-1 mx-1 rounded">
-                data/products.json
-              </code>{" "}
-              اضافه‌ش کن.
-            </div>
-          ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {vendorData.items.map((it, idx) => (
-                <ProductCard key={idx} item={it} />
-              ))}
-            </div>
-          )}
-        </section>
-      </main>
-    </>
+        )}
+      </section>
+    </main>
   );
 }

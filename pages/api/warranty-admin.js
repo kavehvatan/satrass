@@ -1,99 +1,64 @@
-// pages/api/warranty-admin.js
-import fs from "fs/promises";
-import path from "path";
+// pages/api/warranty-save.js
+import { readStore, writeStore } from "../../lib/dataStore";
 
-const DASH_RE = /[-\u2010-\u2015\u2212\uFE58\uFE63\uFF0D]/g;
-const WS_RE = /[\s\u200c\u200f\u200e\u202a-\u202e\u2066-\u2069]/g;
-const normalize = (s = "") =>
-  s.toString().toUpperCase().replace(WS_RE, "").replace(DASH_RE, "");
-
-const filePath = path.join(process.cwd(), "data", "warranty.json");
+const norm = (s) => String(s || "").replace(/[\s-]+/g, "").toUpperCase();
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method Not Allowed" });
-  }
+  if (req.method !== "POST") return res.status(405).end();
 
-  // احراز هویت ساده با Bearer
-  const auth = req.headers.authorization || "";
-  const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
-  if (!token || token !== process.env.ADMIN_TOKEN) {
-    return res.status(401).json({ error: "Unauthorized" });
+  // احراز هویت ادمین
+  const token = req.headers["x-admin-token"] || "";
+  if (!process.env.ADMIN_TOKEN || token !== process.env.ADMIN_TOKEN) {
+    return res.status(401).json({ error: "unauthorized" });
   }
 
   let body;
   try {
-    body = req.body;
-    if (!body || !Array.isArray(body.rows)) {
-      return res.status(400).json({ error: "Invalid payload" });
-    }
-  } catch (e) {
-    return res.status(400).json({ error: "Invalid JSON" });
-  }
-
-  // خواندن فایل موجود
-  let current = { rows: [], meta: {} };
-  try {
-    const raw = await fs.readFile(filePath, "utf-8");
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed?.rows)) current.rows = parsed.rows;
-    if (parsed?.meta) current.meta = parsed.meta;
+    body = req.body || {};
   } catch {
-    // اگر نبود، از صفر می‌سازیم
-    current = { rows: [], meta: {} };
+    return res.status(400).json({ error: "bad_json" });
   }
 
-  // اندیس سریال‌های موجود
-  const map = new Map(
-    current.rows.map((r) => [normalize(r.serial), r])
+  const rows = Array.isArray(body.rows) ? body.rows : [];
+  if (!rows.length) return res.status(400).json({ error: "no_rows" });
+
+  // اعتبارسنجی حداقلی
+  for (const r of rows) {
+    if (!r.serial || !String(r.serial).trim()) {
+      return res.status(400).json({ error: "serial is required" });
+    }
+    if (!r.expireAt || !String(r.expireAt).trim()) {
+      return res.status(400).json({ error: "expireAt is required" });
+    }
+  }
+
+  const store = readStore();
+  store.rows ||= [];
+
+  const indexBySerial = new Map(
+    store.rows.map((r, i) => [norm(r.serial), i])
   );
 
-  // مرج ردیف‌های ورودی
-  let changed = false;
-  for (const r of body.rows) {
-    const key = normalize(r.serial);
-    if (!key) continue;
-
-    const nextRow = {
-      serial: r.serial,         // نمایش با dash یا بدون؛ همان چیزی که ادمین وارد می‌کند
-      brand: r.brand || r.vendor || "-", // همخوان با API خواندن
-      model: r.model || "-",
+  for (const r of rows) {
+    const key = norm(r.serial);
+    const next = {
+      serial: String(r.serial).toUpperCase(),
+      vendor: r.vendor || "",
+      model: r.model || "",
       status: r.status || "active",
-      end: r.end || r.expireAt || "-",   // تاریخ پایان
-      notes: r.notes || "-",
+      expireAt: r.expireAt,
+      notes: r.notes || "",
     };
 
-    if (map.has(key)) {
-      // بروزرسانی
-      const existing = map.get(key);
-      existing.brand = nextRow.brand;
-      existing.model = nextRow.model;
-      existing.status = nextRow.status;
-      existing.end = nextRow.end;
-      existing.notes = nextRow.notes;
-      changed = true;
+    if (indexBySerial.has(key)) {
+      store.rows[indexBySerial.get(key)] = next;
     } else {
-      current.rows.push(nextRow);
-      map.set(key, nextRow);
-      changed = true;
+      store.rows.push(next);
     }
   }
 
-  current.meta.updated = new Date().toISOString().slice(0, 10);
+  store.updated = new Date().toISOString();
+  const targetPath = writeStore(store);
 
-  if (!changed) {
-    return res.status(200).json({ ok: true, message: "No changes" });
-  }
-
-  const pretty = JSON.stringify(current, null, 2);
-
-  try {
-    await fs.writeFile(filePath, pretty, "utf-8");
-    return res.status(200).json({ ok: true });
-  } catch (e) {
-    // هاست read-only: فایل را به‌صورت خروجی برگردان که دانلود شود
-    return res
-      .status(200)
-      .json({ ok: false, readonly: true, updatedJSON: pretty });
-  }
+  return res.json({ ok: true, count: rows.length, target: targetPath });
 }

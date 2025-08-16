@@ -176,10 +176,19 @@ export default function WarrantyPage() {
         </div>
 
         <p className="text-gray-500 text-sm mt-4">
-          * منبع داده: <code className="bg-gray-100 rounded px-2 py-1">data/warranty.json</code> — برای به‌روزرسانی، فایل را ادیت و دیپلوی کنید.
+          * منبع داده:{" "}
+          <code className="bg-gray-100 rounded px-2 py-1">data/warranty.json</code>{" "}
+          — برای به‌روزرسانی، فایل را ادیت و دیپلوی کنید.
         </p>
 
-      
+        <p className="mt-6 text-gray-700 text-sm leading-relaxed">
+          شرکت ساتراس برای تمامی تجهیزاتی که عرضه می‌کند،{" "}
+          <span className="font-semibold">گارانتی معتبر</span> و{" "}
+          <span className="font-semibold">خدمات پس از فروش</span> ارائه می‌کند. در
+          صورت بروز هرگونه مشکل، تیم پشتیبانی ما متعهد به رفع سریع ایراد و در صورت
+          نیاز <span className="font-semibold">جایگزینی تجهیز</span> خواهد بود تا
+          سرویس مشتریان بدون وقفه ادامه یابد.
+        </p>
       </div>
     </>
   );

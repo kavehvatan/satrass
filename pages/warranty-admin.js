@@ -1,168 +1,210 @@
 // pages/warranty-admin.js
 import { useEffect, useMemo, useState } from "react";
 
+const VENDORS = [
+  "HPE",
+  "Dell",
+  "Cisco",
+  "Lenovo",
+  "Huawei",
+  "Juniper",
+  "Supermicro",
+  "Fujitsu",
+  "Oracle",
+  "Quantum",
+];
+
+const STATUS_OPTS = [
+  { value: "active", label: "فعال" },
+  { value: "expired", label: "منقضی" },
+  { value: "unknown", label: "نامشخص" },
+];
+
+const NOTES_YEARS = Array.from({ length: 10 }, (_, i) => `${i + 1} سال`);
+
+const dashRE = /[-\u2010-\u2015\u2212\uFE58\uFE63\uFF0D]/g;
+const wsRE =
+  /[\s\u200c\u200f\u200e\u202a-\u202e\u2066-\u2069]/g; // اسپیس‌ها و کنترل‌های RTL
+
+const normalizeSerial = (s = "") =>
+  s.toString().toUpperCase().replace(wsRE, "").replace(dashRE, "");
+
 export default function WarrantyAdmin() {
-  const [authed, setAuthed] = useState(false);
-  const [checking, setChecking] = useState(true);
-  const [tokenInput, setTokenInput] = useState("");
+  // token
+  const [token, setToken] = useState("");
+  const tokenOk = useMemo(() => !!token.trim(), [token]);
 
-  // فرم ساده‌ی اضافه‌کردن ردیف (در صورت نیاز)
-  const [form, setForm] = useState({
-    vendor: "",
-    model: "",
-    serial: "",
-    expireAt: "",
-    status: "active",
-    notes: "",
-  });
+  // form fields
+  const [serial, setSerial] = useState("");
+  const [vendor, setVendor] = useState(VENDORS[0]);
+  const [model, setModel] = useState("");
+  const [status, setStatus] = useState(STATUS_OPTS[0].value);
+  const [expireAt, setExpireAt] = useState("");
+  const [notes, setNotes] = useState("");
 
-  // نقشه‌ی Vendor -> مدل‌ها (برای DropDown پویا)
-  const vendorOptions = useMemo(
-    () => [
-      "Dell EMC",
-      "HPE",
-      "Cisco",
-      "Lenovo",
-      "Huawei",
-      "Fujitsu",
-      "NetApp",
-      "Oracle",
-    ],
-    []
-  );
+  // queue
+  const [queue, setQueue] = useState([]);
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState("");
 
-  const modelMap = useMemo(
-    () => ({
-      "Dell EMC": [
-        "Unity XT 380",
-        "Unity XT 480",
-        "Unity XT 680",
-        "Unity XT 880",
-        "PowerStore 1200",
-        "PowerStore 3200",
-      ],
-      HPE: [
-        "ProLiant DL360 Gen10",
-        "ProLiant DL380 Gen10",
-        "ProLiant DL360 Gen11",
-        "ProLiant DL380 Gen11",
-        "Alletra 6000",
-        "Alletra 9000",
-      ],
-      Cisco: ["UCS C220 M5", "UCS C240 M5", "UCS C220 M6", "UCS C240 M6"],
-      Lenovo: ["ThinkSystem SR630 V2", "ThinkSystem SR650 V2"],
-      Huawei: ["OceanStor 5300", "OceanStor 5500"],
-      Fujitsu: ["PRIMERGY RX2540 M5", "PRIMERGY RX2540 M6"],
-      NetApp: ["AFF A250", "AFF A400", "FAS2750"],
-      Oracle: ["Oracle ZFS", "Oracle Exadata X9-2"],
-    }),
-    []
-  );
-
-  const notesOptions = useMemo(
-    () => ["1 سال", "2 سال", "3 سال", "4 سال", "5 سال", "6 سال", "7 سال", "8 سال", "9 سال", "10 سال"],
-    []
-  );
-
+  // load token
   useEffect(() => {
-    // بررسی خودکار کوکی لاگین
-    (async () => {
-      try {
-        const r = await fetch("/api/admin-check");
-        const j = await r.json();
-        setAuthed(Boolean(j.ok));
-      } catch (e) {
-        setAuthed(false);
-      } finally {
-        setChecking(false);
-      }
-    })();
+    const t = localStorage.getItem("SAT_ADMIN_TOKEN");
+    if (t) setToken(t);
   }, []);
 
-  // ورود
-  const doLogin = async () => {
-    if (!tokenInput.trim()) return alert("توکن را وارد کنید.");
-    const r = await fetch("/api/admin-login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token: tokenInput.trim() }),
-    });
-    const j = await r.json();
-    if (!j.ok) return alert("توکن صحیح نیست.");
-    setTokenInput("");
-    setAuthed(true);
-    alert("ورود انجام شد.");
+  // persist token
+  useEffect(() => {
+    localStorage.setItem("SAT_ADMIN_TOKEN", token || "");
+  }, [token]);
+
+  // today for date min
+  const todayStr = useMemo(() => {
+    const d = new Date();
+    const m = `${d.getMonth() + 1}`.padStart(2, "0");
+    const day = `${d.getDate()}`.padStart(2, "0");
+    return `${d.getFullYear()}-${m}-${day}`;
+  }, []);
+
+  const canAdd = serial.trim() && expireAt.trim();
+
+  const addRow = () => {
+    if (!canAdd) return;
+
+    const normalized = normalizeSerial(serial);
+    const row = {
+      serial: normalized, // ذخیرهٔ تمیز و یکنواخت
+      brand: vendor,
+      model: model?.trim() || "-",
+      status: status || "active",
+      expireAt, // به API می‌فرستیم؛ آن طرف در فیلد `end` ذخیره می‌شود
+      notes: notes || "-",
+    };
+
+    setQueue((q) => [...q, row]);
+
+    // ریست معقول فرم
+    setSerial("");
+    // vendor/status را نگه می‌داریم که سریع بتوانی ردیف‌های مشابه ثبت کنی
+    setModel("");
+    setExpireAt("");
+    setNotes("");
   };
 
-  // خروج
-  const doLogout = async () => {
-    await fetch("/api/admin-logout", { method: "POST" });
-    setAuthed(false);
-    alert("خارج شدید.");
+  const removeRow = (idx) => {
+    setQueue((q) => q.filter((_, i) => i !== idx));
   };
 
-  const handleChange = (key, val) => setForm((s) => ({ ...s, [key]: val }));
+  const saveAll = async () => {
+    setMsg("");
+    if (!queue.length) {
+      setMsg("ردیفی برای ذخیره وجود ندارد.");
+      return;
+    }
+    if (!tokenOk) {
+      setMsg("توکن ادمین را وارد کنید.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const res = await fetch("/api/warranty-save", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-token": token.trim(),
+        },
+        body: JSON.stringify({ rows: queue }),
+      });
+      const data = await res.json().catch(() => ({}));
 
-  const availableModels = useMemo(() => {
-    if (!form.vendor) return [];
-    return modelMap[form.vendor] || [];
-  }, [form.vendor, modelMap]);
+      if (!res.ok) {
+        setMsg(
+          `خطا در ذخیره‌سازی: ${data?.error || res.status + " " + res.statusText}`
+        );
+      } else if (data?.readonly && data?.updatedJSON) {
+        setMsg(
+          "هاست اجازهٔ نوشتن روی دیسک ندارد. JSON به‌روزشده را دریافت کنید و دستی جایگزین کنید."
+        );
+        // ساخت یک دانلود روی کلاینت
+        const blob = new Blob([data.updatedJSON], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "warranty.json";
+        a.click();
+        URL.revokeObjectURL(url);
+        setQueue([]);
+      } else {
+        setMsg("ثبت شد.");
+        setQueue([]);
+      }
+    } catch (e) {
+      setMsg("خطا در اتصال به سرور.");
+    } finally {
+      setSaving(false);
+    }
+  };
 
-  // نمای کمینه فرم (مثل قبل): وقتی وارد نیستیم، فرم قفل می‌شود
+  const inputClass =
+    "w-full rounded-xl border border-gray-300 bg-white/70 backdrop-blur px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-gray-800";
+  const selectClass =
+    "w-full rounded-xl border border-gray-300 bg-white/70 backdrop-blur px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-gray-800 cursor-pointer";
+
   return (
-    <div className="min-h-screen bg-neutral-50 text-right p-4 sm:p-6" dir="rtl">
-      {/* نوار ورود/خروج (نسخه‌ی اول) */}
-      <div className="mb-6 flex items-center gap-3">
-        {!authed ? (
-          <>
-            <input
-              type="password"
-              placeholder="توکن ادمین…"
-              value={tokenInput}
-              onChange={(e) => setTokenInput(e.target.value)}
-              className="w-full max-w-md rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            />
-            <button
-              onClick={doLogin}
-              className="rounded-full bg-emerald-700 px-5 py-2.5 text-white text-sm shadow hover:bg-emerald-800 transition"
-              disabled={checking}
-            >
-              ورود
-            </button>
-          </>
-        ) : (
-          <>
-            <span className="rounded-full bg-emerald-100 px-4 py-2 text-emerald-700 text-sm">
-              توکن فعال است
-            </span>
-            <button
-              onClick={doLogout}
-              className="rounded-full bg-neutral-100 px-5 py-2.5 text-neutral-800 text-sm hover:bg-neutral-200 transition"
-            >
-              خروج
-            </button>
-          </>
-        )}
+    <div className="container mx-auto px-4 py-10" dir="rtl">
+      {/* Header */}
+      <h1 className="text-3xl md:text-4xl font-extrabold mb-6 text-gray-900">
+        مدیریت گارنتی
+      </h1>
+
+      {/* Token */}
+      <div className="rounded-2xl border border-gray-200 bg-white/60 backdrop-blur p-4 mb-8">
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
+          <input
+            className={`${inputClass} md:max-w-md`}
+            placeholder="Admin Token"
+            value={token}
+            onChange={(e) => setToken(e.target.value)}
+          />
+          <div
+            className={`text-sm ${
+              tokenOk ? "text-emerald-600" : "text-gray-400"
+            }`}
+          >
+            {tokenOk ? "توکن فعال است" : "توکن تنظیم نشده است"}
+          </div>
+        </div>
       </div>
 
-      {/* فرم نمونه (اختیاری؛ اگر از قبل داری می‌تونی نگه داری) */}
-      <div
-        className={`rounded-2xl border bg-white p-4 sm:p-6 shadow-sm ${
-          !authed ? "opacity-50 pointer-events-none select-none" : ""
-        }`}
-      >
-        <h2 className="mb-4 text-lg font-semibold">افزودن ردیف</h2>
+      {/* Add Row Card */}
+      <div className="rounded-2xl border border-gray-200 bg-white/70 backdrop-blur p-6 mb-8">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-xl font-bold text-gray-800">افزودن ردیف</h2>
+        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Grid: row 1 */}
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
+          <div className="md:col-span-2">
+            <label className="block text-sm text-gray-600 mb-1">
+              * Serial
+            </label>
+            <input
+              className={inputClass}
+              placeholder="مثال: HPE-9J1234"
+              value={serial}
+              onChange={(e) => setSerial(e.target.value)}
+              onBlur={() => setSerial(normalizeSerial(serial))}
+            />
+          </div>
+
           <div>
-            <label className="mb-1 block text-xs text-neutral-500">Vendor</label>
+            <label className="block text-sm text-gray-600 mb-1">Vendor</label>
             <select
-              value={form.vendor}
-              onChange={(e) => handleChange("vendor", e.target.value)}
-              className="w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-300"
+              className={selectClass}
+              value={vendor}
+              onChange={(e) => setVendor(e.target.value)}
             >
-              <option value="">— انتخاب Vendor —</option>
-              {vendorOptions.map((v) => (
+              {VENDORS.map((v) => (
                 <option key={v} value={v}>
                   {v}
                 </option>
@@ -170,83 +212,151 @@ export default function WarrantyAdmin() {
             </select>
           </div>
 
-          <div>
-            <label className="mb-1 block text-xs text-neutral-500">Model</label>
-            <select
-              value={form.model}
-              onChange={(e) => handleChange("model", e.target.value)}
-              className="w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-300"
-            >
-              <option value="">— انتخاب مدل —</option>
-              {availableModels.map((m) => (
-                <option key={m} value={m}>
-                  {m}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="mb-1 block text-xs text-neutral-500">Serial *</label>
+          <div className="md:col-span-2">
+            <label className="block text-sm text-gray-600 mb-1">Model</label>
             <input
-              type="text"
-              placeholder="مثال: HPE-9J1234"
-              value={form.serial}
-              onChange={(e) => handleChange("serial", e.target.value)}
-              className="w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-300"
+              className={inputClass}
+              placeholder="مثلاً: ProLiant DL380 Gen10"
+              value={model}
+              onChange={(e) => setModel(e.target.value)}
             />
           </div>
+        </div>
 
-          <div>
-            <label className="mb-1 block text-xs text-neutral-500">ExpireAt *</label>
+        {/* Grid: row 2 */}
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div className="md:col-span-2">
+            <label className="block text-sm text-gray-600 mb-1">
+              * ExpireAt
+            </label>
             <input
               type="date"
-              value={form.expireAt}
-              onChange={(e) => handleChange("expireAt", e.target.value)}
-              className="w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-300"
+              className={inputClass}
+              min={todayStr}
+              value={expireAt}
+              onChange={(e) => setExpireAt(e.target.value)}
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-xs text-neutral-500">Status</label>
+            <label className="block text-sm text-gray-600 mb-1">Status</label>
             <select
-              value={form.status}
-              onChange={(e) => handleChange("status", e.target.value)}
-              className="w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-300"
+              className={selectClass}
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
             >
-              <option value="active">فعال</option>
-              <option value="inactive">غیرفعال</option>
-              <option value="expired">منقضی</option>
+              {STATUS_OPTS.map((s) => (
+                <option key={s.value} value={s.value}>
+                  {s.label}
+                </option>
+              ))}
             </select>
           </div>
 
-          <div>
-            <label className="mb-1 block text-xs text-neutral-500">Notes</label>
+          <div className="md:col-span-2">
+            <label className="block text-sm text-gray-600 mb-1">Notes</label>
             <select
-              value={form.notes}
-              onChange={(e) => handleChange("notes", e.target.value)}
-              className="w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-300"
+              className={selectClass}
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
             >
-              <option value="">— انتخاب —</option>
-              {notesOptions.map((n) => (
-                <option key={n} value={n}>
-                  {n}
+              <option value="">—</option>
+              {NOTES_YEARS.map((y) => (
+                <option key={y} value={y}>
+                  {y}
                 </option>
               ))}
             </select>
           </div>
         </div>
 
-        {/* اینجا اگر ذخیره سرور داری، دکمه‌اش رو بگذار؛ این بخش صرفاً نمایشی است */}
-        <div className="mt-4">
+        {/* Help + Add */}
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 mt-4">
+          <div className="text-xs text-gray-500">
+            (وارد کردن «Serial» و «ExpireAt» الزامی است)
+          </div>
           <button
-            type="button"
-            onClick={() => alert("این بخش ذخیره به API اختصاصی خودت وصل می‌شود.")}
-            className="rounded-full bg-amber-500 px-6 py-2.5 text-white text-sm shadow hover:bg-amber-600 transition"
+            className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
+              canAdd
+                ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                : "bg-gray-200 text-gray-500 cursor-not-allowed"
+            }`}
+            onClick={addRow}
+            disabled={!canAdd}
           >
-            ذخیره
+            افزودن ردیف
           </button>
         </div>
+      </div>
+
+      {/* Queue Card */}
+      <div className="rounded-2xl border border-gray-200 bg-white/70 backdrop-blur p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold text-gray-800">ردیف‌های آماده ثبت</h2>
+          <button
+            onClick={saveAll}
+            disabled={!queue.length || !tokenOk || saving}
+            className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
+              queue.length && tokenOk && !saving
+                ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                : "bg-gray-200 text-gray-500 cursor-not-allowed"
+            }`}
+          >
+            {saving ? "در حال ذخیره..." : "ذخیره"}
+          </button>
+        </div>
+
+        {!queue.length ? (
+          <div className="text-gray-500 text-sm">ردیفی اضافه نشده است.</div>
+        ) : (
+          <div className="overflow-auto">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="text-gray-500 border-b">
+                  <th className="py-2 text-right">Serial</th>
+                  <th className="py-2 text-right">Vendor</th>
+                  <th className="py-2 text-right">Model</th>
+                  <th className="py-2 text-right">Status</th>
+                  <th className="py-2 text-right">ExpireAt</th>
+                  <th className="py-2 text-right">Notes</th>
+                  <th />
+                </tr>
+              </thead>
+              <tbody>
+                {queue.map((r, i) => (
+                  <tr key={i} className="border-b last:border-0">
+                    <td className="py-2">{r.serial}</td>
+                    <td className="py-2">{r.brand}</td>
+                    <td className="py-2">{r.model}</td>
+                    <td className="py-2">
+                      {
+                        (STATUS_OPTS.find((s) => s.value === r.status) || {})
+                          .label
+                      }
+                    </td>
+                    <td className="py-2">{r.expireAt}</td>
+                    <td className="py-2">{r.notes}</td>
+                    <td className="py-2 text-left">
+                      <button
+                        className="text-red-600 hover:text-red-700 text-xs"
+                        onClick={() => removeRow(i)}
+                      >
+                        حذف
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {msg && (
+          <div className="mt-4 text-sm text-gray-700">
+            {/* پیام سرور */}
+            {msg}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -297,7 +297,7 @@ export default function Home() {
             <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">
               زیرساخت هوشمند، با دقت مهندسی
             </h1>
-            <p className="mt-4 text-gray-300">از مشاوره تا پشتیبانی،درکنارشما.</p>
+            <p className="mt-4 text-gray-300">از مشاوره تا پشتیبانی، درکنارشما.</p>
             <div className="mt-6 flex gap-3">
               {/* ارائه مشاوره — Filled */}
               <a

@@ -277,7 +277,8 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
       <GlassModal
         open={open}
         onClose={() => setOpen(false)}
-	+        title={name}        paragraphs={[p1, p2, p3]}
+-        title={`${name} — راهکارها`}
++        title={name}       paragraphs={[p1, p2, p3]}
       />
     </>
   );

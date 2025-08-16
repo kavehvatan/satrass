@@ -258,12 +258,17 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
   return (
     <>
       <div
-        onMouseEnter={() => setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])}
+        onMouseEnter={() =>
+          setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
+        }
         onMouseLeave={() => setBorder("#e5e7eb")}
         onClick={() => setOpen(true)}
         className="flex flex-col items-center justify-center gap-3 p-5 bg-white border rounded-lg hover:shadow-md transition text-center w-full max-w-[520px] mx-auto h-[120px] cursor-pointer select-none"
         style={{ borderColor: border }}
-        role="button" tabIndex={0} aria-haspopup="dialog" aria-expanded={open}
+        role="button"
+        tabIndex={0}
+        aria-haspopup="dialog"
+        aria-expanded={open}
       >
         <img
           src={`/avatars/${slug}.png`}
@@ -277,13 +282,12 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
       <GlassModal
         open={open}
         onClose={() => setOpen(false)}
--        title={`${name} — راهکارها`}
-+        title={name}       paragraphs={[p1, p2, p3]}
+        title={name}
+        paragraphs={[p1, p2, p3]}
       />
     </>
   );
 }
-
 export default function Home() {
   const { primary, secondary, swap } = useAlternatingBrandPair();
   const primaryIsYellow = primary === YELLOW;

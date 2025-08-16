@@ -179,14 +179,7 @@ export default function WarrantyPage() {
           * منبع داده: <code className="bg-gray-100 rounded px-2 py-1">data/warranty.json</code> — برای به‌روزرسانی، فایل را ادیت و دیپلوی کنید.
         </p>
 
-        <div className="mt-6">
-          <a
-            href="/"
-            className="text-gray-700 hover:text-black underline underline-offset-4"
-          >
-            بازگشت به خانه
-          </a>
-        </div>
+      
       </div>
     </>
   );

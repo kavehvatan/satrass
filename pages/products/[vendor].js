@@ -4,20 +4,16 @@ import path from "path";
 import Head from "next/head";
 import Link from "next/link";
 
-function classNames(...arr) {
-  return arr.filter(Boolean).join(" ");
-}
+/* small helper */
+const cx = (...a) => a.filter(Boolean).join(" ");
 
-// دکمه «درخواست مشاوره» — فقط named export
-export function ConsultBtn({ className = "" }) {
+/* دکمه «درخواست مشاوره» با استایل‌های سراسری */
+function ConsultBtn({ className = "" }) {
   return (
     <Link
       href="/contact#contact"
       prefetch={false}
-      className={classNames(
-        "rounded-2xl px-5 py-3 bg-amber-500 hover:bg-amber-600 text-white transition",
-        className
-      )}
+      className={cx("btn btn-primary", className)}
     >
       درخواست مشاوره
     </Link>
@@ -25,8 +21,8 @@ export function ConsultBtn({ className = "" }) {
 }
 
 export default function VendorPage({ vendor, title, intro, items }) {
-  const avatarSrc = `/avatars/${vendor}.png`;
   const pageTitle = title || vendor?.toUpperCase();
+  const avatarSrc = `/avatars/${vendor}.png`;
 
   return (
     <>
@@ -38,7 +34,7 @@ export default function VendorPage({ vendor, title, intro, items }) {
         />
       </Head>
 
-      {/* هدر/قهرمان */}
+      {/* Hero */}
       <header className="bg-gradient-to-b from-slate-900 to-slate-800 text-white">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-12">
           <nav className="mb-6 text-sm text-slate-300">
@@ -46,14 +42,13 @@ export default function VendorPage({ vendor, title, intro, items }) {
               خانه
             </Link>{" "}
             /{" "}
-            <Link href="/products/dell" className="hover:text-white">
+            <Link href={`/products/${vendor}`} className="hover:text-white">
               تجهیزات
             </Link>{" "}
             / <span className="text-slate-100">{pageTitle}</span>
           </nav>
 
           <div className="flex items-center gap-4">
-            {/* فقط لوگو */}
             <img
               src={avatarSrc}
               alt={`${pageTitle} logo`}
@@ -61,16 +56,13 @@ export default function VendorPage({ vendor, title, intro, items }) {
               height={40}
               className="h-10 w-auto object-contain"
               onError={(e) => {
-                // اگر لوگو نبود
                 e.currentTarget.src = "/avatars/default.png";
               }}
             />
           </div>
 
           {intro ? (
-            <p className="mt-6 max-w-3xl text-slate-300 leading-8">
-              {intro}
-            </p>
+            <p className="mt-6 max-w-3xl text-slate-300 leading-8">{intro}</p>
           ) : null}
         </div>
       </header>
@@ -78,14 +70,14 @@ export default function VendorPage({ vendor, title, intro, items }) {
       <main className="mx-auto max-w-6xl px-4 sm:px-6 py-10">
         {items && items.length > 0 ? (
           <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {items.map((p, idx) => (
+            {items.map((p, i) => (
               <article
-                key={`${vendor}-${idx}`}
-                className="rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition bg-white"
+                key={`${vendor}-${i}`}
+                className="rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition"
               >
                 <div className="p-6 flex flex-col h-full">
                   {/* تصویر */}
-                  {!!p.image && (
+                  {p.image ? (
                     <div className="mb-6 flex items-center justify-center">
                       <img
                         src={p.image}
@@ -94,40 +86,39 @@ export default function VendorPage({ vendor, title, intro, items }) {
                         loading="lazy"
                       />
                     </div>
-                  )}
+                  ) : null}
 
-                  {/* برند کوچک بالا (متن خاکستری) */}
-                  <div className="text-xs text-slate-400">{p.vendor || pageTitle}</div>
+                  {/* برند کوچک */}
+                  <div className="text-xs text-slate-400">
+                    {p.vendor || pageTitle}
+                  </div>
 
-                  {/* عنوان محصول */}
+                  {/* عنوان */}
                   <h3 className="mt-1 text-lg font-semibold text-slate-900">
                     {p.model}
                   </h3>
 
                   {/* توضیح */}
-                  {p.desc && (
-                    <p className="mt-3 text-slate-600 leading-7">
-                      {p.desc}
-                    </p>
-                  )}
+                  {p.desc ? (
+                    <p className="mt-3 text-slate-600 leading-7">{p.desc}</p>
+                  ) : null}
 
-                  {/* فاصله‌دهنده تا دکمه‌ها در انتهای کارت */}
+                  {/* فاصله‌دهنده تا دکمه‌ها */}
                   <div className="mt-auto" />
 
                   {/* دکمه‌ها */}
                   <div className="mt-6 flex items-center gap-3">
                     <ConsultBtn />
-
-                    {p.specsheet && (
+                    {p.specsheet ? (
                       <a
                         href={p.specsheet}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="rounded-2xl px-5 py-3 border border-slate-300 hover:bg-slate-50 text-slate-700 transition"
+                        className="btn btn-outline"
                       >
                         Specsheet
                       </a>
-                    )}
+                    ) : null}
                   </div>
                 </div>
               </article>
@@ -157,7 +148,7 @@ export default function VendorPage({ vendor, title, intro, items }) {
   );
 }
 
-/* ----------  Data layer (SSG) ---------- */
+/* ---------- SSG data layer ---------- */
 
 const PRODUCTS_PATH = path.join(process.cwd(), "data", "products.json");
 
@@ -165,8 +156,7 @@ function readProducts() {
   try {
     const raw = fs.readFileSync(PRODUCTS_PATH, "utf8");
     return JSON.parse(raw);
-  } catch (e) {
-    // اگر فایل نبود یا خطا داشت
+  } catch {
     return {};
   }
 }
@@ -179,14 +169,11 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps(ctx) {
-  const vendor = (ctx.params?.vendor || "").toLowerCase();
+  const vendor = String(ctx.params?.vendor || "").toLowerCase();
   const all = readProducts();
   const block = all[vendor] || {};
   const title = block.title || vendor.toUpperCase();
   const intro = block.intro || "";
   const items = Array.isArray(block.items) ? block.items : [];
-
-  return {
-    props: { vendor, title, intro, items },
-  };
+  return { props: { vendor, title, intro, items } };
 }

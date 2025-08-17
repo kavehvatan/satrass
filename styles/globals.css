@@ -1,28 +1,127 @@
+/* globals.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* فقط جهت و رندر بهتر فارسی؛ هیچ @font-face اینجا نیست */
+/* جهت‌دهی و آنتی‌الیاس فارسی */
 html, body {
   direction: rtl;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-:root{
-  /* رنگ‌های تقریبی لوگو؛ اگر کد دقیق‌تون چیز دیگه‌ایه جایگزین کن */
-  --logo-teal: #14b8a6;   /* teal-500 */
-  --logo-yellow: #f4c21f; /* زرد لوگو */
-}
-
-/* جلوگیری از اسکرول افقی و کشیده‌شدن صفحه به راست/چپ */
+/* جلوگیری از اسکرول افقی و گسترش ناخواسته */
 html, body, #__next {
   width: 100%;
   overflow-x: hidden;
 }
 
-/* همه‌چی باکس‌باکسینگ درست */
+/* رندر امن برای باکس‌ها و مدیا */
 *, *::before, *::after { box-sizing: border-box; }
-
-/* مدیاها بیرون نزنن */
 img, video { max-width: 100%; height: auto; }
+
+/* ——— رنگ‌های پایه (قابل override) ——— */
+/* اگر کد رنگ لوگو/برند متفاوت است، این‌ها را مطابق برند خودت عوض کن */
+:root{
+  /* رنگ‌های کلی پروژه */
+  --logo-teal:   #14b8a6;   /* teal-500 */
+  --logo-yellow: #f4c21f;   /* زرد لوگو */
+
+  /* رنگ برند پیش‌فرض (برای دکمه‌ها) — شبیه تم که در صفحه اول داشتی */
+  --brand:       #f59e0b;   /* amber-500 */
+  --brand-600:   #d97706;   /* amber-600 */
+  --brand-700:   #b45309;   /* amber-700 */
+  --brand-50:    #fffbeb;   /* amber-50 */
+
+  /* استایل دکمه‌ی Outline (Specsheet) */
+  --outline-bg:     #ffffff;
+  --outline-text:   #0f172a;           /* slate-900 */
+  --outline-border: rgba(2,6,23,.10);  /* مرز خیلی ظریف */
+}
+
+/* اگر بخواهی رنگ‌ برند را صفحه‌به‌صفحه عوض کنی:
+   کافیست روی ریشه‌ی همان صفحه کلاس زیر را بگذاری */
+/* .vendor--dell   { --brand:#f59e0b; --brand-600:#d97706; --brand-700:#b45309; --brand-50:#fffbeb; }
+   .vendor--hpe    { --brand:#22c55e; --brand-600:#16a34a; --brand-700:#15803d; --brand-50:#f0fdf4; }
+   .vendor--cisco  { --brand:#0ea5e9; --brand-600:#0284c7; --brand-700:#0369a1; --brand-50:#f0f9ff; }
+   .vendor--lenovo { --brand:#ef4444; --brand-600:#dc2626; --brand-700:#b91c1c; --brand-50:#fef2f2; }
+*/
+
+/* ——— دکمه‌های یکنواخت (بدون به‌هم‌زدن Tailwind) ——— */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  padding: .75rem 1.25rem;      /* معادل py-3 px-5 */
+  border-radius: 1rem;          /* ~ rounded-2xl */
+  font-weight: 600;             /* font-semibold */
+  line-height: 1;
+  border: 1px solid transparent;
+  transition:
+    background-color .2s ease,
+    color .2s ease,
+    border-color .2s ease,
+    box-shadow .2s ease,
+    transform .1s ease;
+  box-shadow: 0 1px 2px rgba(2,6,23,.05);
+}
+
+.btn:hover {
+  box-shadow: 0 4px 12px rgba(2,6,23,.08);
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(2,6,23,.05);
+}
+
+.btn:focus { outline: none; }
+.btn:focus-visible {
+  outline: none;
+  /* حلقه‌ی فوکوس نرم با رنگ برند */
+  box-shadow:
+    0 0 0 4px var(--brand-50),
+    0 0 0 2px var(--brand);
+}
+
+/* سایزهای اختیاری */
+.btn-sm { padding: .5rem .875rem; border-radius: .75rem; }
+.btn-lg { padding: .875rem 1.5rem; border-radius: 1.25rem; }
+
+/* دکمه پررنگ (برای «درخواست مشاوره») */
+.btn-primary {
+  background-color: var(--brand);
+  color: #fff;
+}
+.btn-primary:hover  { background-color: var(--brand-600); }
+.btn-primary:active { background-color: var(--brand-700); }
+
+/* دکمه حاشیه‌دار (برای «Specsheet») */
+.btn-outline {
+  background-color: var(--outline-bg);
+  color: var(--outline-text);
+  border-color: var(--outline-border);
+}
+.btn-outline:hover {
+  background-color: var(--brand-50);
+  color: var(--brand-700);
+  border-color: var(--brand);
+}
+
+/* حالت غیرفعال */
+.btn[disabled],
+.btn:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ——— کارت‌های شبکه محصول (اختیاری برای یکسان‌سازی ارتفاع) ——— */
+/* اگر پای کارت‌ها دکمه‌ها گاهی بالا/پایین بهم می‌خورند،
+   این دو کلاس را روی کانتینر و بدنه کارت بگذار: */
+.card-equal { display: grid; }
+.card-body-equal { display: flex; flex-direction: column; }
+.card-body-equal .card-actions { margin-top: auto; }

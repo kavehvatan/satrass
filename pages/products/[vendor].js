@@ -40,14 +40,9 @@ export default function VendorPage({ vendor, title, intro, items, theme }) {
       <header className="bg-gradient-to-b from-slate-900 to-slate-800 text-white">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-12">
           <nav className="mb-6 text-sm text-slate-300">
-            <Link href="/" className="hover:text-white">
-              خانه
-            </Link>{" "}
-            /{" "}
-            <Link href={`/products/${vendor}`} className="hover:text-white">
-              تجهیزات
-            </Link>{" "}
-            / <span className="text-slate-100">{pageTitle}</span>
+            <Link href="/" className="hover:text-white">خانه</Link> /{" "}
+            <Link href={`/products/${vendor}`} className="hover:text-white">تجهیزات</Link> /{" "}
+            <span className="text-slate-100">{pageTitle}</span>
           </nav>
 
           {/* فقط لوگو */}
@@ -106,7 +101,6 @@ export default function VendorPage({ vendor, title, intro, items, theme }) {
                     <p className="mt-3 text-slate-600 leading-7">{p.desc}</p>
                   ) : null}
 
-                  {/* فشاردهنده تا انتهای کارت */}
                   <div className="mt-auto" />
 
                   {/* دکمه‌ها */}

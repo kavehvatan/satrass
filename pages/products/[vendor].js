@@ -37,33 +37,29 @@ export default function VendorPage({ vendor, title, intro, items, theme }) {
       </Head>
 
       {/* Hero */}
-      <header className="bg-gradient-to-b from-slate-900 to-slate-800 text-white">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-12">
-          <nav className="mb-6 text-sm text-slate-300">
-            <Link href="/" className="hover:text-white">خانه</Link> /{" "}
-            <Link href={`/products/${vendor}`} className="hover:text-white">تجهیزات</Link> /{" "}
-            <span className="text-slate-100">{pageTitle}</span>
-          </nav>
+    <header className="bg-gradient-to-b from-slate-900 to-slate-800 text-white">
+  <div className="mx-auto max-w-6xl px-4 sm:px-6 py-12 text-center">
+    {/* ... breadcrumb همین بالا ... */}
 
-          {/* فقط لوگو */}
-          <div className="flex items-center gap-4">
-            <img
-              src={avatarSrc}
-              alt={`${pageTitle} logo`}
-              width={130}
-              height={40}
-              className="h-10 w-auto object-contain"
-              onError={(e) => {
-                e.currentTarget.src = "/avatars/default.png";
-              }}
-            />
-          </div>
+    {/* فقط لوگو - وسط‌چین */}
+    <div className="flex justify-center">
+      <img
+        src={avatarSrc}
+        alt={`${pageTitle} logo`}
+        width={130}
+        height={40}
+        className="h-10 w-auto object-contain"
+        onError={(e) => { e.currentTarget.src = "/avatars/default.png"; }}
+      />
+    </div>
 
-          {intro ? (
-            <p className="mt-6 max-w-3xl text-slate-300 leading-8">{intro}</p>
-          ) : null}
-        </div>
-      </header>
+    {intro ? (
+      <p className="mt-6 mx-auto max-w-3xl text-slate-300 leading-8">
+        {intro}
+      </p>
+    ) : null}
+  </div>
+</header>
 
       <main className="mx-auto max-w-6xl px-4 sm:px-6 py-10">
         {items && items.length > 0 ? (

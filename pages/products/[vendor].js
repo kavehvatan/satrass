@@ -4,140 +4,152 @@ import path from "path";
 import Head from "next/head";
 import Link from "next/link";
 
-// ---------- helpers ----------
-const PRODUCTS_PATH = path.join(process.cwd(), "data", "products.json");
-
-// «نرمالایز» برای تطبیق کلیدها
-const normalize = (s = "") =>
-  String(s).toLowerCase().replace(/[\s_-]+/g, "");
-
-// نگاشت نام‌های مرسوم به کلید JSON
-const ALIASES = {
-  dellemc: "dell",
-  "dell-emc": "dell",
-  dell: "dell",
-  hpe: "hpe",
-  hp: "hpe",
-  "hewlettpackard": "hpe",
-  lenovo: "lenovo",
-  cisco: "cisco",
-  juniper: "juniper",
-  oracle: "oracle",
-  fujitsu: "fujitsu",
-  quantum: "quantum",
-};
-
-// پیدا کردن کلید معتبر در JSON
-function resolveKey(vendorSlug, keys) {
-  const n = normalize(vendorSlug);
-  // 1) اگر در ALIASES باشد
-  if (ALIASES[vendorSlug]) return ALIASES[vendorSlug];
-  if (ALIASES[n]) return ALIASES[n];
-
-  // 2) تطبیق مستقیم
-  let k = keys.find((k) => normalize(k) === n);
-  if (k) return k;
-
-  // 3) تطبیق حذف خط‌تیره/اسپیس
-  k = keys.find((k) => normalize(k) === n);
-  if (k) return k;
-
-  // 4) برگرداندن همان اسلاگ (اگر هیچ نبود)
-  return vendorSlug;
+function classNames(...arr) {
+  return arr.filter(Boolean).join(" ");
 }
 
-// ---------- page ----------
-export default function VendorPage({ title, logoKey, items }) {
-  const heroLogo = `/avatars/${logoKey}.png`;
+// دکمه «درخواست مشاوره» — فقط named export
+export function ConsultBtn({ className = "" }) {
+  return (
+    <Link
+      href="/contact#contact"
+      prefetch={false}
+      className={classNames(
+        "rounded-2xl px-5 py-3 bg-amber-500 hover:bg-amber-600 text-white transition",
+        className
+      )}
+    >
+      درخواست مشاوره
+    </Link>
+  );
+}
+
+export default function VendorPage({ vendor, title, intro, items }) {
+  const avatarSrc = `/avatars/${vendor}.png`;
+  const pageTitle = title || vendor?.toUpperCase();
 
   return (
     <>
       <Head>
-        <title>{title} | محصولات</title>
+        <title>{pageTitle} | تجهیزات</title>
         <meta
           name="description"
-          content={`لیست محصولات و تجهیزات ${title} در ساتراس`}
+          content={intro || `محصولات ${pageTitle} در ساتراس`}
         />
       </Head>
 
-      {/* HERO */}
-      <section className="relative bg-gradient-to-b from-slate-900 to-slate-800 text-white">
-        <div className="mx-auto max-w-6xl px-4 py-16 text-center">
-          {/* فقط لوگو (بدون متن کنار لوگو) */}
-          <img
-            src={heroLogo}
-            alt={`${title} logo`}
-            className="mx-auto h-12 w-auto object-contain"
-            loading="eager"
-            decoding="async"
-          />
-          <p className="mt-6 text-slate-300">
-            استوریج و سرورهای {title} برای بارکاری‌ سازمانی با تمرکز بر
-            کارایی، سادگی مدیریت و دسترس‌پذیری.
-          </p>
-        </div>
-      </section>
+      {/* هدر/قهرمان */}
+      <header className="bg-gradient-to-b from-slate-900 to-slate-800 text-white">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-12">
+          <nav className="mb-6 text-sm text-slate-300">
+            <Link href="/" className="hover:text-white">
+              خانه
+            </Link>{" "}
+            /{" "}
+            <Link href="/products/dell" className="hover:text-white">
+              تجهیزات
+            </Link>{" "}
+            / <span className="text-slate-100">{pageTitle}</span>
+          </nav>
 
-      {/* PRODUCTS */}
-      <main className="mx-auto max-w-6xl px-4 py-10">
-        {items.length === 0 ? (
-          <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-6 text-center text-slate-600">
-            هنوز محصولی برای این برند ثبت نشده است. از فایل{" "}
-            <code className="rounded bg-white px-2 py-0.5">data/products.json</code>{" "}
-            اضافه کن.
-            <div className="mt-3">
-              <Link href="/" className="text-emerald-600 hover:underline">
-                بازگشت به خانه
-              </Link>
-            </div>
+          <div className="flex items-center gap-4">
+            {/* فقط لوگو */}
+            <img
+              src={avatarSrc}
+              alt={`${pageTitle} logo`}
+              width={130}
+              height={40}
+              className="h-10 w-auto object-contain"
+              onError={(e) => {
+                // اگر لوگو نبود
+                e.currentTarget.src = "/avatars/default.png";
+              }}
+            />
           </div>
-        ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+
+          {intro ? (
+            <p className="mt-6 max-w-3xl text-slate-300 leading-8">
+              {intro}
+            </p>
+          ) : null}
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-6xl px-4 sm:px-6 py-10">
+        {items && items.length > 0 ? (
+          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {items.map((p, idx) => (
               <article
-                key={idx}
-                className="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+                key={`${vendor}-${idx}`}
+                className="rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition bg-white"
               >
-                <div className="p-4">
-                  <img
-                    src={p.image}
-                    alt={p.model}
-                    className="mx-auto h-36 w-auto object-contain"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
+                <div className="p-6 flex flex-col h-full">
+                  {/* تصویر */}
+                  {!!p.image && (
+                    <div className="mb-6 flex items-center justify-center">
+                      <img
+                        src={p.image}
+                        alt={p.model || ""}
+                        className="h-28 w-auto object-contain"
+                        loading="lazy"
+                      />
+                    </div>
+                  )}
 
-                <div className="px-6 pb-6">
-                  <div className="text-xs text-slate-500">{p.vendor}</div>
-                  <h3 className="mt-1 text-lg font-bold text-slate-900">
+                  {/* برند کوچک بالا (متن خاکستری) */}
+                  <div className="text-xs text-slate-400">{p.vendor || pageTitle}</div>
+
+                  {/* عنوان محصول */}
+                  <h3 className="mt-1 text-lg font-semibold text-slate-900">
                     {p.model}
                   </h3>
 
-                  {/* توضیحات با ارتفاع ثابت تا دکمه‌ها هم‌راستا بمانند */}
-                  <p className="mt-3 min-h-[84px] text-sm leading-6 text-slate-600">
-                    {p.desc}
-                  </p>
+                  {/* توضیح */}
+                  {p.desc && (
+                    <p className="mt-3 text-slate-600 leading-7">
+                      {p.desc}
+                    </p>
+                  )}
 
-                  <div className="mt-4 flex items-center gap-3">
-                    <a
-                      href={p.specsheet}
-                      className="rounded-full border border-slate-300 px-4 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
-                      target="_blank"
-                      rel="noopener"
-                    >
-                      Specsheet
-                    </a>
-                    <Link
-                      href="/#contact"
-                      className="rounded-full bg-amber-500 px-4 py-1.5 text-sm text-white hover:bg-amber-600"
-                    >
-                      درخواست مشاوره
-                    </Link>
+                  {/* فاصله‌دهنده تا دکمه‌ها در انتهای کارت */}
+                  <div className="mt-auto" />
+
+                  {/* دکمه‌ها */}
+                  <div className="mt-6 flex items-center gap-3">
+                    <ConsultBtn />
+
+                    {p.specsheet && (
+                      <a
+                        href={p.specsheet}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="rounded-2xl px-5 py-3 border border-slate-300 hover:bg-slate-50 text-slate-700 transition"
+                      >
+                        Specsheet
+                      </a>
+                    )}
                   </div>
                 </div>
               </article>
             ))}
+          </section>
+        ) : (
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center">
+            <p className="text-slate-700">
+              هنوز محصولی برای این برند ثبت نشده است. از فایل{" "}
+              <code className="rounded bg-white px-2 py-1 text-slate-800">
+                data/products.json
+              </code>{" "}
+              اضافه کن.
+            </p>
+            <div className="mt-4">
+              <Link
+                href="/"
+                className="text-emerald-600 hover:text-emerald-700 font-medium"
+              >
+                بازگشت به خانه
+              </Link>
+            </div>
           </div>
         )}
       </main>
@@ -145,40 +157,36 @@ export default function VendorPage({ title, logoKey, items }) {
   );
 }
 
-// ---------- SSG ----------
-export async function getStaticPaths() {
-  const json = JSON.parse(fs.readFileSync(PRODUCTS_PATH, "utf8"));
-  const keys = Object.keys(json);
+/* ----------  Data layer (SSG) ---------- */
 
-  // علاوه بر کلیدهای JSON، چند اسلاگ رایج را هم اضافه می‌کنیم
-  const extra = ["dell-emc"];
-  const all = Array.from(new Set([...keys, ...extra]));
+const PRODUCTS_PATH = path.join(process.cwd(), "data", "products.json");
 
-  return {
-    paths: all.map((k) => ({ params: { vendor: k } })),
-    fallback: false,
-  };
+function readProducts() {
+  try {
+    const raw = fs.readFileSync(PRODUCTS_PATH, "utf8");
+    return JSON.parse(raw);
+  } catch (e) {
+    // اگر فایل نبود یا خطا داشت
+    return {};
+  }
 }
 
-export async function getStaticProps({ params }) {
-  const data = JSON.parse(fs.readFileSync(PRODUCTS_PATH, "utf8"));
+export async function getStaticPaths() {
+  const all = readProducts();
+  const vendors = Object.keys(all || {});
+  const paths = vendors.map((v) => ({ params: { vendor: v } }));
+  return { paths, fallback: false };
+}
 
-  // تعیین کلید معتبر
-  const vendorSlug = params.vendor || "";
-  const keys = Object.keys(data);
-  const resolved = resolveKey(vendorSlug, keys);
-
-  // بخش مربوط به برند
-  const section = data[resolved] || { title: resolved, items: [] };
-
-  // کلید لوگو (برای public/avatars/<key>.png)
-  const logoKey = resolveKey(resolved, keys);
+export async function getStaticProps(ctx) {
+  const vendor = (ctx.params?.vendor || "").toLowerCase();
+  const all = readProducts();
+  const block = all[vendor] || {};
+  const title = block.title || vendor.toUpperCase();
+  const intro = block.intro || "";
+  const items = Array.isArray(block.items) ? block.items : [];
 
   return {
-    props: {
-      title: section.title || resolved,
-      logoKey,
-      items: Array.isArray(section.items) ? section.items : [],
-    },
+    props: { vendor, title, intro, items },
   };
 }

@@ -3,102 +3,110 @@
 @tailwind components;
 @tailwind utilities;
 
-/* جهت‌دهی و آنتی‌الیاس فارسی */
+/* ——— پایه‌ی رندر و جهت‌دهی ——— */
 html, body {
   direction: rtl;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-
-/* جلوگیری از اسکرول افقی و گسترش ناخواسته */
-html, body, #__next {
-  width: 100%;
-  overflow-x: hidden;
-}
-
-/* رندر امن برای باکس‌ها و مدیا */
+html, body, #__next { width: 100%; overflow-x: hidden; }
 *, *::before, *::after { box-sizing: border-box; }
 img, video { max-width: 100%; height: auto; }
 
-/* ——— رنگ‌های پایه (قابل override) ——— */
-/* اگر کد رنگ لوگو/برند متفاوت است، این‌ها را مطابق برند خودت عوض کن */
+/* ——— رنگ‌های پیش‌فرض پروژه (قابل override با تم) ——— */
 :root{
-  /* رنگ‌های کلی پروژه */
+  /* لوگو/زرد پروژه */
   --logo-teal:   #14b8a6;   /* teal-500 */
-  --logo-yellow: #f4c21f;   /* زرد لوگو */
+  --logo-yellow: #f4c21f;
 
-  /* رنگ برند پیش‌فرض (برای دکمه‌ها) — شبیه تم که در صفحه اول داشتی */
-  --brand:       #f59e0b;   /* amber-500 */
-  --brand-600:   #d97706;   /* amber-600 */
-  --brand-700:   #b45309;   /* amber-700 */
-  --brand-50:    #fffbeb;   /* amber-50 */
+  /* پالت اصلی (primary) – پیش‌فرض مثل amber صفحه اول */
+  --brand:     #f59e0b;   /* 500 */
+  --brand-600: #d97706;   /* 600 */
+  --brand-700: #b45309;   /* 700 */
+  --brand-50:  #fffbeb;   /* 50  برای فوکوس نرم */
 
-  /* استایل دکمه‌ی Outline (Specsheet) */
+  /* پالت دوم (secondary) – برای .btn-secondary */
+  --brand2:     #0ea5e9;  /* sky-500 */
+  --brand2-600: #0284c7;  /* sky-600 */
+  --brand2-700: #0369a1;  /* sky-700 */
+  --brand2-50:  #f0f9ff;  /* sky-50 */
+
+  /* Outline (Specsheet) */
   --outline-bg:     #ffffff;
-  --outline-text:   #0f172a;           /* slate-900 */
-  --outline-border: rgba(2,6,23,.10);  /* مرز خیلی ظریف */
+  --outline-text:   #0f172a;        /* slate-900 */
+  --outline-border: rgba(2,6,23,.10);
 }
 
-/* اگر بخواهی رنگ‌ برند را صفحه‌به‌صفحه عوض کنی:
-   کافیست روی ریشه‌ی همان صفحه کلاس زیر را بگذاری */
-/* .vendor--dell   { --brand:#f59e0b; --brand-600:#d97706; --brand-700:#b45309; --brand-50:#fffbeb; }
-   .vendor--hpe    { --brand:#22c55e; --brand-600:#16a34a; --brand-700:#15803d; --brand-50:#f0fdf4; }
-   .vendor--cisco  { --brand:#0ea5e9; --brand-600:#0284c7; --brand-700:#0369a1; --brand-50:#f0f9ff; }
-   .vendor--lenovo { --brand:#ef4444; --brand-600:#dc2626; --brand-700:#b91c1c; --brand-50:#fef2f2; }
-*/
+/* ——— تم‌ها (دو روش: با data-theme یا با کلاس theme-*) ——— */
+/* Dell */
+[data-theme="dell"], .theme-dell {
+  --brand:#f59e0b;  --brand-600:#d97706; --brand-700:#b45309; --brand-50:#fffbeb;
+  --brand2:#0ea5e9; --brand2-600:#0284c7; --brand2-700:#0369a1; --brand2-50:#f0f9ff;
+}
+/* HPE (سبز) */
+[data-theme="hpe"], .theme-hpe {
+  --brand:#22c55e;  --brand-600:#16a34a; --brand-700:#15803d; --brand-50:#f0fdf4;
+  --brand2:#14b8a6; --brand2-600:#0d9488; --brand2-700:#0f766e; --brand2-50:#f0fdfa;
+}
+/* Cisco (آبی) */
+[data-theme="cisco"], .theme-cisco {
+  --brand:#0ea5e9;  --brand-600:#0284c7; --brand-700:#0369a1; --brand-50:#f0f9ff;
+  --brand2:#22c55e; --brand2-600:#16a34a; --brand2-700:#15803d; --brand2-50:#f0fdf4;
+}
+/* Lenovo (قرمز) */
+[data-theme="lenovo"], .theme-lenovo {
+  --brand:#ef4444;  --brand-600:#dc2626; --brand-700:#b91c1c; --brand-50:#fef2f2;
+  --brand2:#0ea5e9; --brand2-600:#0284c7; --brand2-700:#0369a1; --brand2-50:#f0f9ff;
+}
+/* Commvault (بنفش) */
+[data-theme="commvault"], .theme-commvault {
+  --brand:#8b5cf6;  --brand-600:#7c3aed; --brand-700:#6d28d9; --brand-50:#f5f3ff;
+  --brand2:#22c55e; --brand2-600:#16a34a; --brand2-700:#15803d; --brand2-50:#f0fdf4;
+}
+/* Oracle (سرخ/رز) */
+[data-theme="oracle"], .theme-oracle {
+  --brand:#f43f5e;  --brand-600:#e11d48; --brand-700:#be123c; --brand-50:#fff1f2;
+  --brand2:#0ea5e9; --brand2-600:#0284c7; --brand2-700:#0369a1; --brand2-50:#f0f9ff;
+}
+/* Juniper / Fujitsu / Quantum … در صورت نیاز اضافه کن */
 
-/* ——— دکمه‌های یکنواخت (بدون به‌هم‌زدن Tailwind) ——— */
+/* ——— دکمه‌ها ——— */
+/* بدنه‌ی مشترک دکمه‌ها بدون تداخل با Tailwind */
 .btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: .5rem;
-  padding: .75rem 1.25rem;      /* معادل py-3 px-5 */
-  border-radius: 1rem;          /* ~ rounded-2xl */
-  font-weight: 600;             /* font-semibold */
-  line-height: 1;
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  padding: .75rem 1.25rem;            /* py-3 px-5 */
+  border-radius: 1rem;                 /* rounded-2xl */
+  font-weight: 600; line-height: 1;
   border: 1px solid transparent;
-  transition:
-    background-color .2s ease,
-    color .2s ease,
-    border-color .2s ease,
-    box-shadow .2s ease,
-    transform .1s ease;
+  transition: background-color .2s ease, color .2s ease,
+              border-color .2s ease, box-shadow .2s ease, transform .1s ease;
   box-shadow: 0 1px 2px rgba(2,6,23,.05);
 }
-
-.btn:hover {
-  box-shadow: 0 4px 12px rgba(2,6,23,.08);
-  transform: translateY(-1px);
-}
-
-.btn:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 2px rgba(2,6,23,.05);
-}
-
+.btn:hover   { box-shadow: 0 4px 12px rgba(2,6,23,.08); transform: translateY(-1px); }
+.btn:active  { transform: translateY(0); box-shadow: 0 1px 2px rgba(2,6,23,.05); }
 .btn:focus { outline: none; }
 .btn:focus-visible {
   outline: none;
-  /* حلقه‌ی فوکوس نرم با رنگ برند */
-  box-shadow:
-    0 0 0 4px var(--brand-50),
-    0 0 0 2px var(--brand);
+  box-shadow: 0 0 0 4px var(--brand-50), 0 0 0 2px var(--brand);
 }
+.btn-sm { padding: .5rem .875rem;  border-radius: .75rem; }
+.btn-lg { padding: .875rem 1.5rem;  border-radius: 1.25rem; }
 
-/* سایزهای اختیاری */
-.btn-sm { padding: .5rem .875rem; border-radius: .75rem; }
-.btn-lg { padding: .875rem 1.5rem; border-radius: 1.25rem; }
-
-/* دکمه پررنگ (برای «درخواست مشاوره») */
+/* primary — برای «درخواست مشاوره» */
 .btn-primary {
-  background-color: var(--brand);
-  color: #fff;
+  background-color: var(--brand); color: #fff;
 }
 .btn-primary:hover  { background-color: var(--brand-600); }
 .btn-primary:active { background-color: var(--brand-700); }
 
-/* دکمه حاشیه‌دار (برای «Specsheet») */
+/* secondary — اگر خواستی دکمه دوم رنگی داشته باشی */
+.btn-secondary {
+  background-color: var(--brand2); color: #fff;
+}
+.btn-secondary:hover  { background-color: var(--brand2-600); }
+.btn-secondary:active { background-color: var(--brand2-700); }
+
+/* outline — برای Specsheet */
 .btn-outline {
   background-color: var(--outline-bg);
   color: var(--outline-text);
@@ -111,17 +119,11 @@ img, video { max-width: 100%; height: auto; }
 }
 
 /* حالت غیرفعال */
-.btn[disabled],
-.btn:disabled {
-  opacity: .6;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
+.btn[disabled], .btn:disabled {
+  opacity: .6; cursor: not-allowed; transform: none; box-shadow: none;
 }
 
-/* ——— کارت‌های شبکه محصول (اختیاری برای یکسان‌سازی ارتفاع) ——— */
-/* اگر پای کارت‌ها دکمه‌ها گاهی بالا/پایین بهم می‌خورند،
-   این دو کلاس را روی کانتینر و بدنه کارت بگذار: */
+/* ——— کمک برای هم‌ارتفاع شدن کارت‌ها (اختیاری) ——— */
 .card-equal { display: grid; }
 .card-body-equal { display: flex; flex-direction: column; }
 .card-body-equal .card-actions { margin-top: auto; }

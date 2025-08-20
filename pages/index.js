@@ -140,7 +140,6 @@ function BrandCard({ title, slug, href, logo, subtitle, index }) {
         />
         <div className="relative flex items-center gap-4">
           <div className="w-12 h-12 shrink-0 rounded-xl bg-black/5 flex items-center justify-center overflow-hidden ring-1 ring-black/5">
-            {/* از Image برای بهینه‌سازی */}
             <Image
               src={logoSrc}
               alt={title}

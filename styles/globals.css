@@ -35,53 +35,119 @@ img, video { max-width: 100%; height: auto; }
   --outline-bg:     #ffffff;
   --outline-text:   #0f172a;        /* slate-900 */
   --outline-border: rgba(2,6,23,.10);
+}
 
-  /* رنگ‌های عمومیِ دکمه‌های قرصی */
+/* ——— تم‌ها (دو روش: با data-theme یا با کلاس theme-*) ——— */
+/* Dell */
+[data-theme="dell"], .theme-dell {
+  --brand:#f59e0b;  --brand-600:#d97706; --brand-700:#b45309; --brand-50:#fffbeb;
+  --brand2:#0ea5e9; --brand2-600:#0284c7; --brand2-700:#0369a1; --brand2-50:#f0f9ff;
+}
+/* HPE (سبز) */
+[data-theme="hpe"], .theme-hpe {
+  --brand:#22c55e;  --brand-600:#16a34a; --brand-700:#15803d; --brand-50:#f0fdf4;
+  --brand2:#14b8a6; --brand2-600:#0d9488; --brand2-700:#0f766e; --brand2-50:#f0fdfa;
+}
+/* Cisco (آبی) */
+[data-theme="cisco"], .theme-cisco {
+  --brand:#0ea5e9;  --brand-600:#0284c7; --brand-700:#0369a1; --brand-50:#f0f9ff;
+  --brand2:#22c55e; --brand2-600:#16a34a; --brand2-700:#15803d; --brand2-50:#f0fdf4;
+}
+/* Lenovo (قرمز) */
+[data-theme="lenovo"], .theme-lenovo {
+  --brand:#ef4444;  --brand-600:#dc2626; --brand-700:#b91c1c; --brand-50:#fef2f2;
+  --brand2:#0ea5e9; --brand2-600:#0284c7; --brand2-700:#0369a1; --brand2-50:#f0f9ff;
+}
+/* Commvault (بنفش) */
+[data-theme="commvault"], .theme-commvault {
+  --brand:#8b5cf6;  --brand-600:#7c3aed; --brand-700:#6d28d9; --brand-50:#f5f3ff;
+  --brand2:#22c55e; --brand2-600:#16a34a; --brand2-700:#15803d; --brand2-50:#f0fdf4;
+}
+/* Oracle (سرخ/رز) */
+[data-theme="oracle"], .theme-oracle {
+  --brand:#f43f5e;  --brand-600:#e11d48; --brand-700:#be123c; --brand-50:#fff1f2;
+  --brand2:#0ea5e9; --brand2-600:#0284c7; --brand2-700:#0369a1; --brand2-50:#f0f9ff;
+}
+/* Juniper / Fujitsu / Quantum … در صورت نیاز اضافه کن */
+
+/* ——— دکمه‌ها ——— */
+/* بدنه‌ی مشترک دکمه‌ها بدون تداخل با Tailwind */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  padding: .75rem 1.25rem;            /* py-3 px-5 */
+  border-radius: 1rem;                 /* rounded-2xl */
+  font-weight: 600; line-height: 1;
+  border: 1px solid transparent;
+  transition: background-color .2s ease, color .2s ease,
+              border-color .2s ease, box-shadow .2s ease, transform .1s ease;
+  box-shadow: 0 1px 2px rgba(2,6,23,.05);
+}
+.btn:hover   { box-shadow: 0 4px 12px rgba(2,6,23,.08); transform: translateY(-1px); }
+.btn:active  { transform: translateY(0); box-shadow: 0 1px 2px rgba(2,6,23,.05); }
+.btn:focus { outline: none; }
+.btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--brand-50), 0 0 0 2px var(--brand);
+}
+.btn-sm { padding: .5rem .875rem;  border-radius: .75rem; }
+.btn-lg { padding: .875rem 1.5rem;  border-radius: 1.25rem; }
+
+/* primary — برای «درخواست مشاوره» */
+.btn-primary {
+  background-color: var(--brand); color: #fff;
+}
+.btn-primary:hover  { background-color: var(--brand-600); }
+.btn-primary:active { background-color: var(--brand-700); }
+
+/* secondary — اگر خواستی دکمه دوم رنگی داشته باشی */
+.btn-secondary {
+  background-color: var(--brand2); color: #fff;
+}
+.btn-secondary:hover  { background-color: var(--brand2-600); }
+.btn-secondary:active { background-color: var(--brand2-700); }
+
+/* outline — برای Specsheet */
+.btn-outline {
+  background-color: var(--outline-bg);
+  color: var(--outline-text);
+  border-color: var(--outline-border);
+}
+.btn-outline:hover {
+  background-color: var(--brand-50);
+  color: var(--brand-700);
+  border-color: var(--brand);
+}
+
+/* حالت غیرفعال */
+.btn[disabled], .btn:disabled {
+  opacity: .6; cursor: not-allowed; transform: none; box-shadow: none;
+}
+
+/* ——— کمک برای هم‌ارتفاع شدن کارت‌ها (اختیاری) ——— */
+.card-equal { display: grid; }
+.card-body-equal { display: flex; flex-direction: column; }
+.card-body-equal .card-actions { margin-top: auto; }
+
+
+/* ===== Buttons (Pill) ===== */
+:root{
+  /* رنگ‌های پیش‌فرض اگر تم ست نشود */
   --c-primary: #14b8a6;     /* teal-500 */
   --c-primary-600: #0d9488; /* teal-600 */
   --c-accent:  #f59e0b;     /* amber-500 */
   --c-accent-600:#d97706;   /* amber-600 */
 }
 
-/* ——— تم‌ها (با data-theme) ——— */
-[data-theme="dell"], .theme-dell {
-  --brand:#f59e0b;  --brand-600:#d97706; --brand-700:#b45309; --brand-50:#fffbeb;
-  --brand2:#0ea5e9; --brand2-600:#0284c7; --brand2-700:#0369a1; --brand2-50:#f0f9ff;
-  --c-primary:#14b8a6; --c-primary-600:#0d9488;
-  --c-accent:#f59e0b; --c-accent-600:#d97706;
+[data-theme="dell"]{
+  --c-primary:#14b8a6; --c-primary-600:#0d9488; /* teal */
+  --c-accent:#f59e0b;  --c-accent-600:#d97706;  /* amber */
 }
-[data-theme="hpe"], .theme-hpe {
-  --brand:#22c55e;  --brand-600:#16a34a; --brand-700:#15803d; --brand-50:#f0fdf4;
-  --brand2:#14b8a6; --brand2-600:#0d9488; --brand2-700:#0f766e; --brand2-50:#f0fdfa;
-  --c-primary:#22c55e; --c-primary-600:#16a34a;
-  --c-accent:#f59e0b; --c-accent-600:#d97706;
+[data-theme="hpe"]{
+  --c-primary:#22c55e; --c-primary-600:#16a34a; /* green */
+  --c-accent:#f59e0b;  --c-accent-600:#d97706;
 }
-[data-theme="cisco"], .theme-cisco {
-  --brand:#0ea5e9;  --brand-600:#0284c7; --brand-700:#0369a1; --brand-50:#f0f9ff;
-  --brand2:#22c55e; --brand2-600:#16a34a; --brand2-700:#15803d; --brand2-50:#f0fdf4;
-  --c-primary:#0ea5e9; --c-primary-600:#0284c7;
-  --c-accent:#22c55e; --c-accent-600:#16a34a;
-}
-[data-theme="lenovo"], .theme-lenovo {
-  --brand:#ef4444;  --brand-600:#dc2626; --brand-700:#b91c1c; --brand-50:#fef2f2;
-  --brand2:#0ea5e9; --brand2-600:#0284c7; --brand2-700:#0369a1; --brand2-50:#f0f9ff;
-  --c-primary:#ef4444; --c-primary-600:#dc2626;
-  --c-accent:#0ea5e9; --c-accent-600:#0284c7;
-}
-[data-theme="commvault"], .theme-commvault {
-  --brand:#8b5cf6;  --brand-600:#7c3aed; --brand-700:#6d28d9; --brand-50:#f5f3ff;
-  --brand2:#22c55e; --brand2-600:#16a34a; --brand2-700:#15803d; --brand2-50:#f0fdf4;
-  --c-primary:#8b5cf6; --c-primary-600:#7c3aed;
-  --c-accent:#22c55e; --c-accent-600:#16a34a;
-}
-[data-theme="oracle"], .theme-oracle {
-  --brand:#f43f5e;  --brand-600:#e11d48; --brand-700:#be123c; --brand-50:#fff1f2;
-  --brand2:#0ea5e9; --brand2-600:#0284c7; --brand2-700:#0369a1; --brand2-50:#f0f9ff;
-  --c-primary:#f43f5e; --c-primary-600:#e11d48;
-  --c-accent:#0ea5e9; --c-accent-600:#0284c7;
-}
+/* اگر برای برندهای دیگر هم خواستی، مشابه بالا اضافه کن */
 
-/* ——— دکمه‌ها (قرصی) ——— */
 .btn{
   display:inline-flex; align-items:center; justify-content:center;
   border-radius:9999px; /* قرصی */
@@ -89,21 +155,24 @@ img, video { max-width: 100%; height: auto; }
   font-size:0.95rem; font-weight:600;
   transition:all .15s ease-in-out;
   line-height:1;
-  border:2px solid transparent;
 }
-.btn[disabled], .btn:disabled { opacity:.6; cursor:not-allowed; transform:none; box-shadow:none; }
 
+/* پررنگ (Filled) – مشاوره */
 .btn-primary{
   background:var(--c-primary);
   color:#fff;
   box-shadow:0 0 0 1px rgba(255,255,255,0.05) inset;
 }
-.btn-primary:hover{ background:var(--c-primary-600); transform:translateY(-1px); }
+.btn-primary:hover{
+  background:var(--c-primary-600);
+  transform:translateY(-1px);
+}
 
+/* دورخطی (Outline) – Specsheet */
 .btn-outline{
   background:transparent;
   color:var(--c-accent);
-  border-color:var(--c-accent);
+  border:2px solid var(--c-accent);
 }
 .btn-outline:hover{
   background:var(--c-accent);
@@ -111,7 +180,8 @@ img, video { max-width: 100%; height: auto; }
   transform:translateY(-1px);
 }
 
-/* ==== Glass Card with brand glow (برای کارت‌های تجهیزات/عمومی) ==== */
+
+/* ==== Glass Card with brand glow ==== */
 .glass-card {
   position: relative;
   border-radius: 1.25rem;                 /* ≈ rounded-2xl */
@@ -122,176 +192,35 @@ img, video { max-width: 100%; height: auto; }
   transition: transform .25s ease, box-shadow .25s ease, background .25s ease;
   overflow: hidden;
 }
+
+/* هاله گرادیانی پشت کارت (با رنگ‌های متغیر) */
 .glass-card::before {
   content: "";
-  position: absolute; z-index: -1; inset: -2px; border-radius: inherit;
+  position: absolute;
+  z-index: -1;
+  inset: -2px;
+  border-radius: inherit;
   background: conic-gradient(from 140deg, var(--c1), var(--c2), var(--c1));
-  filter: blur(18px); opacity: .32;
+  filter: blur(18px);
+  opacity: .32;
   transition: opacity .25s ease, filter .25s ease;
 }
+
+/* نور رویی ملایم */
 .glass-card::after {
-  content: ""; position: absolute; inset: 0; border-radius: inherit;
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
   background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,0) 60%);
   pointer-events: none;
 }
-.glass-card:hover { transform: translateY(-2px); }
-.glass-card:hover::before { opacity: .55; filter: blur(26px); }
 
-/* ==== Flip Services (Front/Back) ==== */
-.flip-card{
-  position: relative;
-  perspective: 1200px;
-  border-radius: 1.25rem;
-  isolation: isolate;
-}
-.flip-inner{
-  position: relative;
-  width: 100%; height: 100%;
-  transform-style: preserve-3d;
-  transition: transform .6s cubic-bezier(.2,.65,.2,1);
-  will-change: transform;
-}
-.flip-face{
-  position: absolute; inset: 0;
-  border-radius: inherit;
-  backface-visibility: hidden; -webkit-backface-visibility: hidden;
-  overflow: hidden;
-}
-.flip-front{
-  /* کارت رویی: می‌تونی ترکیبش کنی با utility های Tailwind */
-}
-.flip-back{
-  transform: rotateY(180deg);
+.glass-card:hover {
+  transform: translateY(-2px);
 }
 
-/* فعال‌سازی با کلاس (برای کلیک موبایل) */
-.flip-card.is-flipped .flip-inner{ transform: rotateY(180deg); }
-
-/* فعال‌سازی با Hover فقط در دسکتاپ‌هایی که hover دارند */
-@media (hover:hover){
-  .flip-card:hover .flip-inner{ transform: rotateY(180deg); }
-  .flip-card:focus-within .flip-inner{ transform: rotateY(180deg); }
+.glass-card:hover::before {
+  opacity: .55;
+  filter: blur(26px);
 }
-
-/* دسترس‌پذیری – احترام به کاهش حرکت */
-@media (prefers-reduced-motion: reduce){
-  .flip-inner{ transition: none; }
-  .flip-card:hover .flip-inner,
-  .flip-card.is-flipped .flip-inner,
-  .flip-card:focus-within .flip-inner{ transform: none; }
-}
-
-/* سایهٔ نرم هنگام فلیپ */
-.flip-card:hover,
-.flip-card.is-flipped{
-  box-shadow: 0 8px 28px rgba(2,6,23,.10);
-}
-
-/* ==== Service Icon (آیکن حبابی کنار عنوان) ==== */
-.service-icon{
-  display:inline-flex; align-items:center; justify-content:center;
-  width:3.25rem; height:3.25rem; /* lg: 52px */
-  border-radius: 1rem;
-  background: radial-gradient(120% 120% at 30% 20%, rgba(255,255,255,.95), rgba(255,255,255,.65) 70%, rgba(255,255,255,.4));
-  border:1px solid rgba(2,6,23,.06);
-  box-shadow:
-    0 2px 4px rgba(2,6,23,.06),
-    inset 0 1px 0 rgba(255,255,255,.9);
-  color:#0f172a; /* slate-900 */
-}
-.service-icon img,
-.service-icon svg{ width: 70%; height: 70%; object-fit: contain; }
-
-/* لینک «ادامه» روی پشت کارت */
-.more-link{
-  display:inline-flex; align-items:center; gap:.4rem;
-  color: var(--c-primary);
-  font-weight:700;
-  text-decoration:none;
-}
-.more-link::after{
-  content:"›";
-  font-size:1.1em; line-height:1;
-  transform: translateY(-1px);
-}
-.more-link:hover{ color: var(--c-primary-600); }
-
-/* کمی پالیش عمومی کارت پشت */
-.flip-back .content{
-  color:#0f172a;
-}
-
-
-/* ===== Flip Card (services) – scard ===== */
-.scard{
-  position: relative;                 /* لایه‌گذاری چهره‌ها */
-  isolation: isolate;                 /* برای افکت‌ها/سایه‌های داخلی */
-  transform-style: preserve-3d;
-  perspective: 1000px;
-}
-
-.scard-face{
-  position: absolute;                 /* دو وجه روی هم */
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  border-radius: inherit;
-  display: flex;                      /* تا محتوا به‌هم نریزد */
-  flex-direction: column;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  transition: transform 500ms;
-  will-change: transform;
-}
-
-.scard-front { transform: rotateY(0deg); }
-.scard-back  { transform: rotateY(180deg); }
-
-/* حالت کلیک (موبایل/تاچ) */
-.scard.scard-flipped .scard-front { transform: rotateY(180deg); }
-.scard.scard-flipped .scard-back  { transform: rotateY(360deg); }
-
-/* Hover فقط برای دسکتاپ */
-@media (hover: hover) and (pointer: fine) {
-  .scard.hoverable:hover .scard-front { transform: rotateY(180deg); }
-  .scard.hoverable:hover .scard-back  { transform: rotateY(360deg); }
-}
-
-
-/* ===== Flip Card (services) ===== */
-.flip-card {
-  perspective: 1000px;
-}
-
-.flip-card-3d {
-  position: relative;
-  transform-style: preserve-3d;
-  transition: transform 500ms;
-  will-change: transform;
-}
-
-.flip-front, .flip-back {
-  position: absolute;
-  inset: 0;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-
-/* پیش‌فرض: روی رو ببینیم */
-.flip-front { transform: rotateY(0deg); }
-
-/* پشت کارت را 180 درجه می‌چرخانیم تا وقتی کانتینر 180 خورد، متنش عادی دیده شود */
-.flip-back  { transform: rotateY(180deg); }
-
-/* Hover فقط روی دسکتاپ */
-@media (hover: hover) and (pointer: fine) {
-  .flip-card:hover .flip-card-3d {
-    transform: rotateY(180deg);
-  }
-}
-
-/* وضعیت کلیک/تاچ (روی موبایل)؛ با اضافه‌کردن کلاس js */
-.flip-card.flipped .flip-card-3d {
-  transform: rotateY(180deg);
-}
-

@@ -1,12 +1,11 @@
-// pages/_app.js
-import '../styles/globals.css';           // مسیر نسبی به استایل سراسری
-import Header from '../components/Header'; // مسیر نسبی به کامپوننت هدر
+import "../styles/globals.css";
+import Header from "../components/Header";
 
 export default function App({ Component, pageProps }) {
   return (
-    <>
+    <div dir="rtl" lang="fa">
       <Header />
       <Component {...pageProps} />
-    </>
+    </div>
   );
 }

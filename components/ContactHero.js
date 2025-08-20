@@ -18,7 +18,7 @@ const ContactHero = () => {
           <div className="flex justify-center">
             <div className="relative w-[320px] h-[320px] md:w-[380px] md:h-[380px]">
               <Image
-                src="/avatars/contact-operator.png"
+                src="/avatars/contact-operator.webp"
                 alt="پشتیبان ساتراس با هدست"
                 fill
                 sizes="(max-width: 768px) 320px, 380px"

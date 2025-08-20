@@ -2,79 +2,84 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import vendors from "@/data/vendors"; // گرید «تجهیزات» از این می‌آید
+import vendors from "../data/vendors"; // ⟵ ایمپورت نسبی (بدون @)
 
-// رنگ‌ها
-const BRAND_COLORS = ["#00E5FF", "#2D5BFF"];      // رنگ‌های برند (برای هاله)
+//
+// رنگ‌ها و کمک‌تابع‌ها (بدون تکرار)
+//
+const BRAND_COLORS = ["#00E5FF", "#2D5BFF"]; // رنگ‌های برند
 const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
 
-const TEAL = "#14b8a6";                           // دکمه پر (نوبتی)
-const YELLOW = "#f4c21f";                         // دکمه خطی (نوبتی)
-const LOGO_COLORS = [TEAL, YELLOW];               // بوردر کارت‌ها
+const TEAL = "#14b8a6";     // دکمه پر (نوبتی)
+const YELLOW = "#f4c21f";   // دکمه خطی (نوبتی)
+const LOGO_COLORS = [TEAL, YELLOW];
 
-// ——— راهکارها (مودال شیشه‌ای)
+//
+// داده‌های راهکارها/خدمات (مودال شیشه‌ای)
+//
 const SOLUTIONS = [
   {
     name: "Commvault",
     slug: "commvault",
-    p1: " راهکار یکپارچهٔ حفاظت از داده است که پشتیبانی گسترده‌ای از بارکاری‌ها (VM، دیتابیس، فایل‌سرور، SaaS و کلود) دارد. Deduplication کارآمد، Policyهای انعطاف‌پذیر و Cloud Tiering باعث کاهش هزینهٔ ذخیره‌سازی و کوتاه‌شدن زمان بازیابی می‌شود.",
-    p2: "با Hyperscale X می‌توان حفاظت را به‌صورت Scale-out اجرا کرد و با Metallic سرویس‌های بکاپ را به‌صورت SaaS دریافت نمود. گزارش‌گیری جامع، خودکارسازی فرایندها، و رصد سلامت، تیم IT را از کارهای دستی رها می‌کند.",
-    p3: "سناریوهای متداول: محافظت سراسری Microsoft 365 و Endpointها، بکاپ ترکیبی On-prem/Cloud، و بازیابی سریع برای RTO/RPOهای سخت‌گیرانه.",
+    p1: "راهکار یکپارچهٔ حفاظت از داده برای VM/DB/Files/SaaS/Cloud با Dedup و Policyهای منعطف.",
+    p2: "Hyperscale X برای Scale-out و Metallic به‌صورت SaaS؛ گزارش‌گیری و خودکارسازی کامل.",
+    p3: "سناریوهای متداول: M365/Endpoint، بکاپ ترکیبی On-prem/Cloud، RTO/RPO سخت‌گیرانه.",
   },
   {
     name: "NetBackup",
     slug: "netbackup",
-    p1: "نت‌بکاپ از قدیمی‌ترین و قابل‌اعتمادترین پلتفرم‌های بکاپ سازمانی است. تمرکز آن روی کارایی، مقیاس‌پذیری و پوشش عمیق برای مجازی‌سازی و دیتابیس‌هاست. با Inline Dedup و شتاب‌دهی انتقال، پنجرهٔ بکاپ کوچک می‌شود.",
-    p2: "اپلاینس‌های سری 52xx و Flex زیرساخت آماده برای استقرار سریع ارائه می‌کنند؛ مدیریت متمرکز، نقش‌ها/مجوزها، و گزارش‌گیری دقیق، نگهداری روزمره را ساده می‌کند.",
-    p3: "سناریوهای متداول: حفاظت از VMware/Hyper-V، دیتابیس‌های Oracle/SQL، آرشیو بلندمدت روی نوار یا کلود، و بازیابی انتخابی در سطح فایل/آبجکت.",
+    p1: "پلتفرم بکاپ سازمانی با پوشش عمیق مجازی‌سازی/دیتابیس و Inline Dedup برای پنجرهٔ بکاپ کوچک.",
+    p2: "اپلاینس‌های سری 52xx/Flex، مدیریت متمرکز، RBAC و گزارش‌گیری دقیق.",
+    p3: "سناریوها: VMware/Hyper-V، Oracle/SQL، آرشیو نوار/کلود، بازیابی انتخابی سطح فایل.",
   },
 ];
 
-// ——— خدمات (کلیک = مودال، بدون لینک اضافه)
 const SERVICES = [
   {
     slug: "install",
     title: "نصب و راه‌اندازی",
     desc1:
-      "اجرای استاندارد از پیش‌نیازها تا استیجینگ؛ کابل‌کشی، کانفیگ اولیه، ارتقای Firmware و هم‌ترازی با Best Practice هر برند.",
+      "از پیش‌نیاز تا استیجینگ و کانفیگ استاندارد؛ ارتقای Firmware و هم‌ترازی با Best Practice.",
     desc2:
-      "در صورت نیاز مهاجرت بدون وقفه انجام می‌شود (Cutover برنامه‌ریزی‌شده) و در پایان، پذیرش فنی (UAT) و تحویل رسمی پروژه انجام می‌گردد.",
+      "در صورت نیاز مهاجرت بدون وقفه و در پایان UAT و تحویل رسمی پروژه انجام می‌شود.",
   },
   {
     slug: "monitoring",
     title: "پایش",
     desc1:
-      "طراحی مانیتورینگ با آستانه‌های درست، داشبورد و هشدارهای عملیاتی. گزارش‌گیری دوره‌ای برای SLA، ظرفیت‌سنجی و تحلیل عملکرد.",
+      "مانیتورینگ با آستانه‌های درست، داشبورد و هشدارهای عملیاتی + گزارش‌های SLA/ظرفیت/Performance.",
     desc2:
-      "بازبینی سلامت، ارزیابی ریسک و پیشنهادهای بهینه‌سازی منظم تا زیرساخت همیشه در نقطهٔ امن و پایدار باقی بماند.",
+      "بازبینی سلامت و پیشنهادهای بهینه‌سازی دوره‌ای برای پایداری زیرساخت.",
   },
   {
     slug: "training",
     title: "آموزش",
     desc1:
-      "انتقال دانش مبتنی بر سناریوهای واقعی: از اصول راهبری تا تِریبل‌شوتینگ. محتوای آموزشی اختصاصی + Lab/Runbook.",
+      "انتقال دانش سناریومحور: راهبری تا Troubleshooting + Lab/Runbook اختصاصی.",
     desc2:
-      "پس از دوره، پشتیبانی پرسش‌وپاسخ و به‌روزرسانی جزوات را داریم تا دانش در تیم پایدار بماند.",
+      "پس از دوره، پشتیبانی پرسش‌وپاسخ و به‌روزرسانی جزوات داریم.",
   },
   {
     slug: "consulting-design",
     title: "مشاوره و طراحی",
     desc1:
-      "نیازسنجی دقیق، اندازه‌گذاری ظرفیت، High Availability و Disaster Recovery. انتخاب راهکار با توجه به هزینه کل مالکیت (TCO) و رشد آتی.",
+      "نیازسنجی، ظرفیت‌سنجی، HA/DR و انتخاب راهکار با نگاه TCO و رشد آتی.",
     desc2:
-      "طرح نهایی شامل دیاگرام، BOM و نقشهٔ مهاجرت است؛ چند گزینهٔ فنی/مالی ارائه می‌شود تا تصمیم‌گیری شفاف باشد.",
+      "خروجی: دیاگرام، BOM و طرح مهاجرت + چند گزینهٔ فنی/مالی برای تصمیم شفاف.",
   },
   {
     slug: "operations",
     title: "راهبری",
     desc1:
-      "خدمت مدیریت‌شده (Managed Service): پچینگ، بکاپ‌وریفای، هاردنینگ، بررسی لاگ‌ها و رسیدگی به رخدادها طبق SLA.",
+      "Managed Service: پچینگ، بکاپ‌وریفای، هاردنینگ، بررسی لاگ و رسیدگی به رخدادها طبق SLA.",
     desc2:
-      "گزارش ماهانه سلامت، ظرفیت و ریسک‌ها + نشست مرور تغییرات (CAB) برای برنامه‌ریزی مطمئن و قابل پیش‌بینی.",
+      "گزارش ماهانه سلامت/ظرفیت/ریسک + نشست CAB.",
   },
 ];
 
-// دکمه‌های هیرو (سوئیچ نوبتی رنگ‌ها)
+//
+// دکمه‌های هیرو با جابجایی نوبتی رنگ‌ها
+//
 function useAlternatingBrandPair() {
   const [primary, setPrimary] = useState(YELLOW);   // Filled
   const [secondary, setSecondary] = useState(TEAL); // Outlined
@@ -98,31 +103,72 @@ function useAlternatingBrandPair() {
   return { primary, secondary, swap };
 }
 
-// کارت برند (Equipment) — نسخه ساده
-function BrandCard({ name, slug }) {
+//
+// کارت برند «تجهیزات» (Glass + هاله رنگی)
+//
+function BrandCard({ title, slug, href, logo, subtitle, index }) {
   const [border, setBorder] = useState("#e5e7eb");
+  const link = href || `/products/${slug || (title || "").toLowerCase()}`;
+  const logoSrc =
+    logo ||
+    (slug ? `/avatars/${slug}.png` : `/avatars/${(title || "").toLowerCase()}.png`);
+
   return (
-    <Link
-      href={`/products/${slug}`}
-      onMouseEnter={() =>
-        setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
-      }
-      onMouseLeave={() => setBorder("#e5e7eb")}
-      className="flex flex-col items-center justify-center gap-3 p-5 bg-white border rounded-lg hover:shadow-md transition text-center w-full max-w-[520px] mx-auto h-[120px]"
-      style={{ borderColor: border }}
-    >
-      <img
-        src={`/avatars/${slug}.png`}
-        alt={name}
-        className="w-12 h-12 object-contain"
-        onError={(e) => (e.currentTarget.src = "/avatars/default.png")}
-      />
-      <div className="font-bold text-gray-900">{name}</div>
+    <Link href={link} className="group block">
+      <div
+        className="
+          relative overflow-hidden rounded-2xl
+          border border-slate-200/70
+          bg-white/70 supports-[backdrop-filter]:bg-white/30
+          backdrop-blur-xl
+          p-5 transition duration-200
+          hover:-translate-y-1 hover:shadow-xl hover:border-slate-300
+        "
+        onMouseEnter={() =>
+          setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
+        }
+        onMouseLeave={() => setBorder("#e5e7eb")}
+        style={{ borderColor: border }}
+      >
+        <div
+          className="absolute inset-0 pointer-events-none opacity-35"
+          style={{
+            background: `radial-gradient(140% 120% at -10% -10%, ${colorOf(
+              index
+            )}33 0%, transparent 60%)`,
+          }}
+        />
+        <div className="relative flex items-center gap-4">
+          <div className="w-12 h-12 shrink-0 rounded-xl bg-black/5 flex items-center justify-center overflow-hidden ring-1 ring-black/5">
+            {/* از Image برای بهینه‌سازی */}
+            <Image
+              src={logoSrc}
+              alt={title}
+              width={48}
+              height={48}
+              onError={(e) => {
+                // fallback به آواتار پیش‌فرض
+                e.currentTarget.src = "/avatars/default.png";
+              }}
+            />
+          </div>
+          <div className="min-w-0">
+            <h3 className="text-slate-900 font-semibold">{title}</h3>
+            {subtitle && (
+              <p className="text-slate-600 text-sm mt-1 line-clamp-2">
+                {subtitle}
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
     </Link>
   );
 }
 
-// مودال شیشه‌ای
+//
+// مودال شیشه‌ای مشترک
+//
 function GlassModal({ open, onClose, title, paragraphs }) {
   const [closing, setClosing] = useState(false);
 
@@ -140,32 +186,61 @@ function GlassModal({ open, onClose, title, paragraphs }) {
 
   const handleClose = () => {
     setClosing(true);
-    setTimeout(() => { setClosing(false); onClose?.(); }, 200);
+    setTimeout(() => {
+      setClosing(false);
+      onClose?.();
+    }, 200);
   };
 
   if (!open) return null;
 
   return (
-    <div className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-200 ${closing ? "opacity-0" : "opacity-100"}`}>
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={handleClose} />
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-200 ${
+        closing ? "opacity-0" : "opacity-100"
+      }`}
+    >
+      <div
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        onClick={handleClose}
+      />
       <article
-        role="dialog" aria-modal="true"
-        className={`relative z-10 w-[min(92vw,760px)] mx-auto rounded-2xl overflow-hidden transform transition-all duration-200 ${closing ? "opacity-0 scale-95" : "opacity-100 scale-100"}`}
+        role="dialog"
+        aria-modal="true"
+        className={`relative z-10 w-[min(92vw,760px)] mx-auto rounded-2xl overflow-hidden transform transition-all duration-200 ${
+          closing ? "opacity-0 scale-95" : "opacity-100 scale-100"
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="relative rounded-2xl bg-white/45 supports-[backdrop-filter]:bg-white/40 backdrop-blur-2xl ring-1 ring-white/20 shadow-[0_20px_60px_-15px_rgba(0,0,0,.45)]">
           <div className="p-6 md:p-8 text-gray-900">
             <div className="flex items-start justify-between gap-6">
-              <h4 className="text-xl md:text-2xl font-extrabold drop-shadow-[0_1px_1px_rgba(255,255,255,.6)]">{title}</h4>
-              <button onClick={handleClose} aria-label="بستن" className="text-gray-800 hover:text-black transition text-2xl leading-none">×</button>
+              <h4 className="text-xl md:text-2xl font-extrabold drop-shadow-[0_1px_1px_rgba(255,255,255,.6)]">
+                {title}
+              </h4>
+              <button
+                onClick={handleClose}
+                aria-label="بستن"
+                className="text-gray-800 hover:text-black transition text-2xl leading-none"
+              >
+                ×
+              </button>
             </div>
             {paragraphs.map((tx, i) => (
-              <p key={i} className={`leading-8 ${i === 0 ? "mt-4" : "mt-3"} text-gray-900/95 drop-shadow-[0_1px_1px_rgba(255,255,255,.55)]`}>
+              <p
+                key={i}
+                className={`leading-8 ${
+                  i === 0 ? "mt-4" : "mt-3"
+                } text-gray-900/95 drop-shadow-[0_1px_1px_rgba(255,255,255,.55)]`}
+              >
                 {tx}
               </p>
             ))}
             <div className="mt-6 flex justify-end">
-              <button onClick={handleClose} className="px-4 py-2 rounded-lg border border-black/10 bg-white/30 hover:bg-white/40 transition">
+              <button
+                onClick={handleClose}
+                className="px-4 py-2 rounded-lg border border-black/10 bg-white/30 hover:bg-white/40 transition"
+              >
                 بستن
               </button>
             </div>
@@ -176,40 +251,53 @@ function GlassModal({ open, onClose, title, paragraphs }) {
   );
 }
 
-// کارت خدمت (کلیک = مودال)
 function ServiceCard({ title, desc1, desc2 }) {
   const [border, setBorder] = useState("#e5e7eb");
   const [open, setOpen] = useState(false);
   return (
     <>
       <div
-        onMouseEnter={() => setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])}
+        onMouseEnter={() =>
+          setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
+        }
         onMouseLeave={() => setBorder("#e5e7eb")}
         onClick={() => setOpen(true)}
         className="flex flex-col items-center justify-center gap-3 p-5 bg-white border rounded-lg hover:shadow-md transition text-center w-full max-w-[520px] mx-auto h-[120px] cursor-pointer select-none"
         style={{ borderColor: border }}
-        role="button" tabIndex={0} aria-haspopup="dialog" aria-expanded={open}
+        role="button"
+        tabIndex={0}
+        aria-haspopup="dialog"
+        aria-expanded={open}
       >
         <span className="font-semibold text-gray-900">{title}</span>
       </div>
-      <GlassModal open={open} onClose={() => setOpen(false)} title={title} paragraphs={[desc1, desc2]} />
+      <GlassModal
+        open={open}
+        onClose={() => setOpen(false)}
+        title={title}
+        paragraphs={[desc1, desc2]}
+      />
     </>
   );
 }
 
-// کارت راهکار (کلیک = مودال)
 function SolutionCard({ name, slug, p1, p2, p3 }) {
   const [border, setBorder] = useState("#e5e7eb");
   const [open, setOpen] = useState(false);
   return (
     <>
       <div
-        onMouseEnter={() => setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])}
+        onMouseEnter={() =>
+          setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
+        }
         onMouseLeave={() => setBorder("#e5e7eb")}
         onClick={() => setOpen(true)}
         className="flex flex-col items-center justify-center gap-3 p-5 bg-white border rounded-lg hover:shadow-md transition text-center w-full max-w-[520px] mx-auto h-[120px] cursor-pointer select-none"
         style={{ borderColor: border }}
-        role="button" tabIndex={0} aria-haspopup="dialog" aria-expanded={open}
+        role="button"
+        tabIndex={0}
+        aria-haspopup="dialog"
+        aria-expanded={open}
       >
         <img
           src={`/avatars/${slug}.png`}
@@ -219,7 +307,12 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
         />
         <div className="font-bold text-gray-900">{name}</div>
       </div>
-      <GlassModal open={open} onClose={() => setOpen(false)} title={name} paragraphs={[p1, p2, p3]} />
+      <GlassModal
+        open={open}
+        onClose={() => setOpen(false)}
+        title={name}
+        paragraphs={[p1, p2, p3]}
+      />
     </>
   );
 }
@@ -228,21 +321,28 @@ export default function Home() {
   const { primary, secondary, swap } = useAlternatingBrandPair();
   const primaryIsYellow = primary === YELLOW;
 
+  const safeVendors = Array.isArray(vendors) ? vendors : [];
+
   return (
     <main className="min-h-screen font-sans">
       {/* Hero */}
       <section className="bg-[linear-gradient(135deg,#000_0%,#0a0a0a_60%,#111_100%)] text-white">
         <div className="max-w-6xl mx-auto px-4 py-12 md:py-16 grid md:grid-cols-2 items-center gap-10">
           <div>
-            <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">زیرساخت هوشمند، با دقت مهندسی</h1>
-            <p className="mt-4 text-gray-300">از مشاوره تا پشتیبانی، درکنارشما.</p>
+            <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">
+              زیرساخت هوشمند، با دقت مهندسی
+            </h1>
+            <p className="mt-4 text-gray-300">از مشاوره تا پشتیبانی، درکنار شما.</p>
             <div className="mt-6 flex gap-3">
               {/* ارائه مشاوره — Filled */}
               <a
                 href="/contact"
                 onClick={swap}
                 className="rounded-full px-5 py-2.5 font-bold transition"
-                style={{ backgroundColor: primary, color: primaryIsYellow ? "#000" : "#fff" }}
+                style={{
+                  backgroundColor: primary,
+                  color: primaryIsYellow ? "#000" : "#fff",
+                }}
               >
                 ارائه مشاوره
               </a>
@@ -251,62 +351,47 @@ export default function Home() {
                 href="/tools"
                 onClick={swap}
                 className="rounded-full px-5 py-2.5 font-semibold transition"
-                style={{ border: `1px solid ${secondary}`, color: secondary, backgroundColor: "transparent" }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${secondary}1A`)}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                style={{
+                  border: `1px solid ${secondary}`,
+                  color: secondary,
+                  backgroundColor: "transparent",
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.backgroundColor = `${secondary}1A`)
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.backgroundColor = "transparent")
+                }
               >
                 مشاهده ابزارها
               </a>
             </div>
           </div>
           <div className="flex justify-center">
-            <img src="/satrass-hero.webp" alt="آواتار ساتراس" className="w-[280px] md:w-[340px] lg:w-[400px] h-auto object-contain" />
+            <img
+              src="/satrass-hero.webp"
+              alt="آواتار ساتراس"
+              className="w-[280px] md:w-[340px] lg:w-[400px] h-auto object-contain"
+            />
           </div>
         </div>
       </section>
 
-      {/* تجهیزات — کارت‌های شیشه‌ای با هاله رنگ برند */}
+      {/* تجهیزات */}
       <section id="vendors" className="relative py-12 max-w-6xl mx-auto px-4">
         <h2 className="text-2xl font-extrabold mb-6 text-slate-900">تجهیزات</h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {vendors.map((v, i) => (
-            <Link key={v.href || v.title} href={v.href || "#"} className="group block">
-              <div
-                className="
-                  relative overflow-hidden rounded-2xl
-                  border border-slate-200/70
-                  bg-white/70 supports-[backdrop-filter]:bg-white/30
-                  backdrop-blur-xl
-                  p-5 transition duration-200
-                  hover:-translate-y-1 hover:shadow-xl hover:border-slate-300
-                "
-              >
-                <div
-                  className="absolute inset-0 pointer-events-none opacity-35"
-                  style={{
-                    background: `radial-gradient(140% 120% at -10% -10%, ${colorOf(i)}33 0%, transparent 60%)`,
-                  }}
-                />
-                <div className="relative flex items-center gap-4">
-                  <div className="w-12 h-12 shrink-0 rounded-xl bg-black/5 flex items-center justify-center overflow-hidden ring-1 ring-black/5">
-                    {v.logo ? (
-                      <Image src={v.logo} alt={v.title} width={48} height={48} />
-                    ) : (
-                      <span className="text-slate-600 text-sm font-medium">
-                        {(v.title || "?")[0]}
-                      </span>
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className="text-slate-900 font-semibold">{v.title}</h3>
-                    {v.subtitle && (
-                      <p className="text-slate-600 text-sm mt-1 line-clamp-2">{v.subtitle}</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </Link>
+          {safeVendors.map((v, i) => (
+            <BrandCard
+              key={v.href || v.slug || v.title || i}
+              title={v.title}
+              slug={v.slug}
+              href={v.href}
+              logo={v.logo}
+              subtitle={v.subtitle}
+              index={i}
+            />
           ))}
         </div>
       </section>

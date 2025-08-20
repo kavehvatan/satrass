@@ -102,7 +102,7 @@ function BrandCard({ title, slug, href, subtitle, index, logo }) {
   const [border, setBorder] = useState("#e5e7eb");
   const link = href || `/products/${slug || (title || "").toLowerCase()}`;
 
-  // مسیرهای لوگو: webp → png → default
+  // نام پایه‌ی لوگو و آرت (webp → png → default.png)
   const base =
     logo
       ? logo.replace(/^\/?avatars\//, "").replace(/\.(png|webp)$/i, "")
@@ -110,6 +110,10 @@ function BrandCard({ title, slug, href, subtitle, index, logo }) {
 
   const webp = `/avatars/${base}.webp`;
   const png  = `/avatars/${base}.png`;
+
+  // مسیر تصویر پس‌زمینهٔ کارتونی (اختیاری)
+  const artWebp = `/brand-art/${base}.webp`;
+  const artPng  = `/brand-art/${base}.png`;
 
   return (
     <Link href={link} className="group block">
@@ -123,22 +127,38 @@ function BrandCard({ title, slug, href, subtitle, index, logo }) {
         "
         style={{ borderColor: border, borderWidth: 1 }}
         onMouseEnter={() =>
-          setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
+          setBorder(["#14b8a6", "#f4c21f"][Math.floor(Math.random() * 2)])
         }
         onMouseLeave={() => setBorder("#e5e7eb")}
       >
-        {/* هاله‌ی رنگی */}
+        {/* تصویر پس‌زمینهٔ خیلی کم‌رنگِ برند (اگر فایل باشد) */}
+        <picture className="pointer-events-none select-none">
+          <source srcSet={artWebp} type="image/webp" />
+          <img
+            src={artPng}
+            alt=""
+            aria-hidden="true"
+            className="
+              absolute right-4 bottom-2
+              h-[74%] max-w-none object-contain
+              opacity-[.10] md:opacity-[.12]
+              contrast-110 saturate-110
+            "
+            onError={(e) => (e.currentTarget.style.display = "none")}
+          />
+        </picture>
+
+        {/* هالهٔ ملایم رنگی (مثل قبل) */}
         <div
           className="absolute inset-0 pointer-events-none opacity-30"
           style={{
-            background: `radial-gradient(140% 120% at -10% -10%, ${colorOf(
-              index
-            )}33 0%, transparent 60%)`,
+            background: `radial-gradient(140% 120% at -10% -10%, ${["#00E5FF", "#2D5BFF"][index % 2]}33 0%, transparent 60%)`,
           }}
         />
 
+        {/* محتوای کارت */}
         <div className="relative flex items-center gap-4">
-          {/* کپسول لوگو (سفید خالص) */}
+          {/* کپسول لوگو (کاملاً سفید) */}
           <div className="w-14 h-14 shrink-0 rounded-xl bg-white ring-1 ring-black/5 shadow-sm grid place-items-center transition-transform duration-200 group-hover:scale-[1.03] overflow-hidden">
             <picture>
               <source srcSet={webp} type="image/webp" />
@@ -156,7 +176,9 @@ function BrandCard({ title, slug, href, subtitle, index, logo }) {
           <div className="min-w-0">
             <h3 className="text-slate-900 font-semibold">{title}</h3>
             {subtitle && (
-              <p className="text-slate-600 text-sm mt-1 line-clamp-2">{subtitle}</p>
+              <p className="text-slate-600 text-sm mt-1 line-clamp-2">
+                {subtitle}
+              </p>
             )}
           </div>
         </div>

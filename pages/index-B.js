@@ -97,12 +97,8 @@ function useAlternatingBrandPair() {
   return { primary, secondary, swap };
 }
 
-/** ---------------------------
- *  کارت برند «تجهیزات»
- *  تغییر خواسته‌شده: حذف نام برند و نمایش فقط لوگو
- *  پس‌زمینهٔ کارتونی با object-cover و کمی زوم حفظ شده.
- *  --------------------------- */
-function BrandCard({ title, slug, href, index, logo }) {
+// کارت برند «تجهیزات»
+function BrandCard({ title, slug, href, subtitle, index, logo }) {
   const [border, setBorder] = useState("#e5e7eb");
   const link = href || `/products/${slug || (title || "").toLowerCase()}`;
 
@@ -135,19 +131,24 @@ function BrandCard({ title, slug, href, index, logo }) {
         }
         onMouseLeave={() => setBorder("#e5e7eb")}
       >
-        {/* پس‌زمینهٔ کارتونی کم‌رنگ (تمام‌کادر + کمی زوم) */}
+        {/* ⬇️ تصویر پس‌زمینهٔ خیلی کم‌رنگِ برند — تمام‌کادر و کمی زوم‌شده */}
         <picture className="pointer-events-none select-none absolute inset-0">
           <source srcSet={artWebp} type="image/webp" />
           <img
             src={artPng}
             alt=""
             aria-hidden="true"
-            className="w-full h-full object-cover scale-[1.12] opacity-[.12] md:opacity-[.14] contrast-110 saturate-110"
+            className="
+              w-full h-full object-cover
+              scale-[1.12]
+              opacity-[.12] md:opacity-[.14]
+              contrast-110 saturate-110
+            "
             onError={(e) => (e.currentTarget.style.display = "none")}
           />
         </picture>
 
-        {/* هالهٔ ملایم رنگی */}
+        {/* هالهٔ ملایم رنگی (مثل قبل) */}
         <div
           className="absolute inset-0 pointer-events-none opacity-30"
           style={{
@@ -155,8 +156,9 @@ function BrandCard({ title, slug, href, index, logo }) {
           }}
         />
 
-        {/* فقط لوگو — بدون متن برند */}
-        <div className="relative flex items-center justify-end">
+        {/* محتوای کارت */}
+        <div className="relative flex items-center gap-4">
+          {/* کپسول لوگو (کاملاً سفید) */}
           <div className="w-14 h-14 shrink-0 rounded-xl bg-white ring-1 ring-black/5 shadow-sm grid place-items-center transition-transform duration-200 group-hover:scale-[1.03] overflow-hidden">
             <picture>
               <source srcSet={webp} type="image/webp" />
@@ -169,6 +171,15 @@ function BrandCard({ title, slug, href, index, logo }) {
                 onError={(e) => (e.currentTarget.src = "/avatars/default.png")}
               />
             </picture>
+          </div>
+
+          <div className="min-w-0">
+            <h3 className="text-slate-900 font-semibold">{title}</h3>
+            {subtitle && (
+              <p className="text-slate-600 text-sm mt-1 line-clamp-2">
+                {subtitle}
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -391,6 +402,7 @@ export default function Home() {
               title={v.title}
               slug={v.slug}
               href={v.href}
+              subtitle={v.subtitle}
               index={i}
               logo={v.logo}
             />

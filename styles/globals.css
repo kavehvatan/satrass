@@ -179,3 +179,48 @@ img, video { max-width: 100%; height: auto; }
   color:#111827; /* slate-900 */
   transform:translateY(-1px);
 }
+
+
+/* ==== Glass Card with brand glow ==== */
+.glass-card {
+  position: relative;
+  border-radius: 1.25rem;                 /* ≈ rounded-2xl */
+  background: rgba(255, 255, 255, 0.06);  /* شیشه‌ای کم‌رنگ */
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+  transition: transform .25s ease, box-shadow .25s ease, background .25s ease;
+  overflow: hidden;
+}
+
+/* هاله گرادیانی پشت کارت (با رنگ‌های متغیر) */
+.glass-card::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -2px;
+  border-radius: inherit;
+  background: conic-gradient(from 140deg, var(--c1), var(--c2), var(--c1));
+  filter: blur(18px);
+  opacity: .32;
+  transition: opacity .25s ease, filter .25s ease;
+}
+
+/* نور رویی ملایم */
+.glass-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,0) 60%);
+  pointer-events: none;
+}
+
+.glass-card:hover {
+  transform: translateY(-2px);
+}
+
+.glass-card:hover::before {
+  opacity: .55;
+  filter: blur(26px);
+}

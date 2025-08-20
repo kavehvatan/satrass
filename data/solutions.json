@@ -1,0 +1,16 @@
+{
+  "items": [
+    {
+      "title": "NetBackup",
+      "logo": "/avatars/netbackup.png",
+      "desc": "پشتیبان‌گیری سازمانی و بازیابی فاجعه.",
+      "url": "/services/backup"          // مثلا به صفحه ی خدمات مرتبط یا هر URL دلخواه
+    },
+    {
+      "title": "Commvault",
+      "logo": "/avatars/commvault.png",
+      "desc": "Data protection و مدیریت کپی داده.",
+      "url": "/contact"                  // اگر ندادید، به صورت پیش‌فرض به /contact می‌رود
+    }
+  ]
+}

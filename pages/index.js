@@ -104,32 +104,37 @@ function useAlternatingBrandPair() {
 }
 
 //
-// کارت برند «تجهیزات» (Glass + هاله رنگی)
+// کارت برند «تجهیزات» (Glass + هاله رنگی + کپسول لوگو سفید)
 //
-function BrandCard({ title, slug, href, logo, subtitle, index }) {
+function BrandCard({ title, slug, href, subtitle, index, logo }) {
   const [border, setBorder] = useState("#e5e7eb");
   const link = href || `/products/${slug || (title || "").toLowerCase()}`;
-  const logoSrc =
-    logo ||
-    (slug ? `/avatars/${slug}.png` : `/avatars/${(title || "").toLowerCase()}.png`);
+
+  // مسیرهای لوگو: اول webp، بعد png، بعد default
+  const base = logo
+    ? logo.replace(/\.(png|webp)$/i, "")
+    : (slug || (title || "")).toLowerCase();
+
+  const webp = `/avatars/${base}.webp`;
+  const png  = `/avatars/${base}.png`;
 
   return (
     <Link href={link} className="group block">
       <div
         className="
           relative overflow-hidden rounded-2xl
-          border border-slate-200/70
-          bg-white/70 supports-[backdrop-filter]:bg-white/30
+          border bg-white/70 supports-[backdrop-filter]:bg-white/35
           backdrop-blur-xl
           p-5 transition duration-200
-          hover:-translate-y-1 hover:shadow-xl hover:border-slate-300
+          hover:-translate-y-0.5 hover:shadow-xl
         "
+        style={{ borderColor: border, borderWidth: 1 }}
         onMouseEnter={() =>
           setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
         }
         onMouseLeave={() => setBorder("#e5e7eb")}
-        style={{ borderColor: border }}
       >
+        {/* هاله رنگی لطیف */}
         <div
           className="absolute inset-0 pointer-events-none opacity-35"
           style={{
@@ -138,25 +143,27 @@ function BrandCard({ title, slug, href, logo, subtitle, index }) {
             )}33 0%, transparent 60%)`,
           }}
         />
+
         <div className="relative flex items-center gap-4">
-          <div className="w-12 h-12 shrink-0 rounded-xl bg-black/5 flex items-center justify-center overflow-hidden ring-1 ring-black/5">
-            <Image
-              src={logoSrc}
-              alt={title}
-              width={48}
-              height={48}
-              onError={(e) => {
-                // fallback به آواتار پیش‌فرض
-                e.currentTarget.src = "/avatars/default.png";
-              }}
-            />
+          {/* کپسول لوگو (کاملاً سفید) */}
+          <div className="w-14 h-14 shrink-0 rounded-xl bg-white ring-1 ring-black/5 shadow-sm grid place-items-center transition-transform duration-200 group-hover:scale-[1.03] overflow-hidden">
+            <picture>
+              <source srcSet={webp} type="image/webp" />
+              <img
+                src={png}
+                alt={title}
+                width={56}
+                height={56}
+                className="w-10 h-10 object-contain"
+                onError={(e) => (e.currentTarget.src = "/avatars/default.png")}
+              />
+            </picture>
           </div>
+
           <div className="min-w-0">
             <h3 className="text-slate-900 font-semibold">{title}</h3>
             {subtitle && (
-              <p className="text-slate-600 text-sm mt-1 line-clamp-2">
-                {subtitle}
-              </p>
+              <p className="text-slate-600 text-sm mt-1 line-clamp-2">{subtitle}</p>
             )}
           </div>
         </div>
@@ -199,10 +206,7 @@ function GlassModal({ open, onClose, title, paragraphs }) {
         closing ? "opacity-0" : "opacity-100"
       }`}
     >
-      <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-        onClick={handleClose}
-      />
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={handleClose} />
       <article
         role="dialog"
         aria-modal="true"
@@ -228,9 +232,7 @@ function GlassModal({ open, onClose, title, paragraphs }) {
             {paragraphs.map((tx, i) => (
               <p
                 key={i}
-                className={`leading-8 ${
-                  i === 0 ? "mt-4" : "mt-3"
-                } text-gray-900/95 drop-shadow-[0_1px_1px_rgba(255,255,255,.55)]`}
+                className={`leading-8 ${i === 0 ? "mt-4" : "mt-3"} text-gray-900/95 drop-shadow-[0_1px_1px_rgba(255,255,255,.55)]`}
               >
                 {tx}
               </p>
@@ -299,10 +301,10 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
         aria-expanded={open}
       >
         <img
-          src={`/avatars/${slug}.png`}
+          src={`/avatars/${slug}.webp`}
+          onError={(e) => (e.currentTarget.src = `/avatars/${slug}.png`)}
           alt={name}
           className="w-12 h-12 object-contain"
-          onError={(e) => (e.currentTarget.src = "/avatars/default.png")}
         />
         <div className="font-bold text-gray-900">{name}</div>
       </div>
@@ -387,9 +389,9 @@ export default function Home() {
               title={v.title}
               slug={v.slug}
               href={v.href}
-              logo={v.logo}
               subtitle={v.subtitle}
               index={i}
+              logo={v.logo}
             />
           ))}
         </div>

@@ -329,7 +329,7 @@ export default function Home() {
           {/* آواتار هِرو */}
           <div className="flex justify-center">
             <img
-              src="/satrass-hero.png"
+              src="/satrass-hero.webp"
               alt="آواتار ساتراس"
               className="w-[280px] md:w-[340px] lg:w-[400px] h-auto object-contain"
             />

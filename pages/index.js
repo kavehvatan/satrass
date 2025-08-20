@@ -2,7 +2,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import vendors from "../data/vendors"; // ⟵ ایمپورت نسبی، بدون @
+import vendors from "../data/vendors"; // ⟵ ایمپورت نسبی
 
 // رنگ‌ها و کمک‌تابع‌ها
 const BRAND_COLORS = ["#00E5FF", "#2D5BFF"];
@@ -99,8 +99,7 @@ function useAlternatingBrandPair() {
 
 /** ---------------------------
  *  کارت برند «تجهیزات»
- *  تغییر خواسته‌شده: حذف نام برند و نمایش فقط لوگو
- *  پس‌زمینهٔ کارتونی با object-cover و کمی زوم حفظ شده.
+ *  (بدون تغییر نسبت به نسخهٔ اخیر: فقط لوگو، پس‌زمینهٔ کارتونی کم‌رنگ)
  *  --------------------------- */
 function BrandCard({ title, slug, href, index, logo }) {
   const [border, setBorder] = useState("#e5e7eb");
@@ -142,7 +141,7 @@ function BrandCard({ title, slug, href, index, logo }) {
             src={artPng}
             alt=""
             aria-hidden="true"
-            className="w-full h-full object-cover scale-[1.12] opacity-[.35] md:opacity-[.35] contrast-115 saturate-110"
+            className="w-full h-full object-cover scale-[1.12] opacity-[.38] md:opacity-[.38] contrast-115 saturate-110"
             onError={(e) => (e.currentTarget.style.display = "none")}
           />
         </picture>
@@ -176,7 +175,9 @@ function BrandCard({ title, slug, href, index, logo }) {
   );
 }
 
-// مودال شیشه‌ای
+/** ---------------------------
+ *  مودال شیشه‌ای (برای راهکارها)
+ *  --------------------------- */
 function GlassModal({ open, onClose, title, paragraphs }) {
   const [closing, setClosing] = useState(false);
 
@@ -254,33 +255,77 @@ function GlassModal({ open, onClose, title, paragraphs }) {
   );
 }
 
-function ServiceCard({ title, desc1, desc2 }) {
+/** ---------------------------
+ *  کارت خدمات با Flip (Hover دسکتاپ / Click موبایل)
+ *  پشت کارت: توضیحات + لینک «ادامه»
+ *  --------------------------- */
+function ServiceCard({ slug, title, desc1, desc2 }) {
   const [border, setBorder] = useState("#e5e7eb");
   const [open, setOpen] = useState(false);
+
+  // برای موبایل با کلیک باز/بسته شود
+  const toggle = () => setOpen((v) => !v);
+
+  // سوییچ با کیبورد
+  const onKey = (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      toggle();
+    }
+  };
+
   return (
-    <>
+    <div
+      className={`flip-card group w-full max-w-[520px] mx-auto`}
+      onMouseEnter={() =>
+        setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
+      }
+      onMouseLeave={() => setBorder("#e5e7eb")}
+    >
       <div
-        onMouseEnter={() =>
-          setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
-        }
-        onMouseLeave={() => setBorder("#e5e7eb")}
-        onClick={() => setOpen(true)}
-        className="flex flex-col items-center justify-center gap-3 p-5 bg-white border rounded-lg hover:shadow-md transition text-center w-full max-w-[520px] mx-auto h-[120px] cursor-pointer select-none"
-        style={{ borderColor: border }}
-        role="button"
-        tabIndex={0}
-        aria-haspopup="dialog"
-        aria-expanded={open}
+        className={`flip-card-3d border rounded-xl bg-white/80 supports-[backdrop-filter]:bg-white/60 backdrop-blur-md hover:shadow-md transition`}
+        style={{
+          borderColor: border,
+          // اگر open بود (موبایل/کلیک)، بچرخان:
+          transform: open ? "rotateY(180deg)" : undefined,
+        }}
       >
-        <span className="font-semibold text-gray-900">{title}</span>
+        {/* روی کارت */}
+        <button
+          type="button"
+          className="flip-front flex flex-col items-center justify-center gap-3 p-5 text-center h-[140px] w-full cursor-pointer select-none"
+          onClick={toggle}
+          onKeyDown={onKey}
+          aria-label={`مشاهده توضیحات ${title}`}
+        >
+          <span className="font-semibold text-gray-900">{title}</span>
+        </button>
+
+        {/* پشت کارت */}
+        <div className="flip-back p-5 h-[140px] w-full text-gray-900">
+          <div className="text-base leading-6">
+            <div className="font-bold mb-1">{title}</div>
+            <p className="text-sm">{desc1}</p>
+            <p className="text-sm mt-1">{desc2}</p>
+          </div>
+          <div className="mt-3 flex items-center gap-3">
+            <Link
+              href={`/contact?service=${encodeURIComponent(slug)}`}
+              className="text-sm font-semibold px-3 py-1.5 rounded-full border border-black/10 hover:bg-black/5 transition"
+            >
+              ادامه
+            </Link>
+            <button
+              type="button"
+              onClick={toggle}
+              className="text-sm px-3 py-1.5 rounded-full border border-black/10 hover:bg-black/5 transition"
+            >
+              بستن
+            </button>
+          </div>
+        </div>
       </div>
-      <GlassModal
-        open={open}
-        onClose={() => setOpen(false)}
-        title={title}
-        paragraphs={[desc1, desc2]}
-      />
-    </>
+    </div>
   );
 }
 

@@ -2,21 +2,17 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import vendors from "../data/vendors"; // ⟵ ایمپورت نسبی (بدون @)
+import vendors from "../data/vendors"; // ⟵ ایمپورت نسبی، بدون @
 
-//
-// رنگ‌ها و کمک‌تابع‌ها (بدون تکرار)
-//
-const BRAND_COLORS = ["#00E5FF", "#2D5BFF"]; // رنگ‌های برند
+// رنگ‌ها و کمک‌تابع‌ها
+const BRAND_COLORS = ["#00E5FF", "#2D5BFF"];
 const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
 
-const TEAL = "#14b8a6";     // دکمه پر (نوبتی)
-const YELLOW = "#f4c21f";   // دکمه خطی (نوبتی)
+const TEAL = "#14b8a6";
+const YELLOW = "#f4c21f";
 const LOGO_COLORS = [TEAL, YELLOW];
 
-//
-// داده‌های راهکارها/خدمات (مودال شیشه‌ای)
-//
+// داده‌های راهکارها/خدمات (بدون تغییرات دیگر)
 const SOLUTIONS = [
   {
     name: "Commvault",
@@ -77,9 +73,7 @@ const SERVICES = [
   },
 ];
 
-//
 // دکمه‌های هیرو با جابجایی نوبتی رنگ‌ها
-//
 function useAlternatingBrandPair() {
   const [primary, setPrimary] = useState(YELLOW);   // Filled
   const [secondary, setSecondary] = useState(TEAL); // Outlined
@@ -103,17 +97,16 @@ function useAlternatingBrandPair() {
   return { primary, secondary, swap };
 }
 
-//
-// کارت برند «تجهیزات» (Glass + هاله رنگی + کپسول لوگو سفید)
-//
+// کارت برند «تجهیزات»
 function BrandCard({ title, slug, href, subtitle, index, logo }) {
   const [border, setBorder] = useState("#e5e7eb");
   const link = href || `/products/${slug || (title || "").toLowerCase()}`;
 
-  // مسیرهای لوگو: اول webp، بعد png، بعد default
-  const base = logo
-    ? logo.replace(/\.(png|webp)$/i, "")
-    : (slug || (title || "")).toLowerCase();
+  // مسیرهای لوگو: webp → png → default
+  const base =
+    logo
+      ? logo.replace(/^\/?avatars\//, "").replace(/\.(png|webp)$/i, "")
+      : (slug || (title || "")).toLowerCase();
 
   const webp = `/avatars/${base}.webp`;
   const png  = `/avatars/${base}.png`;
@@ -134,9 +127,9 @@ function BrandCard({ title, slug, href, subtitle, index, logo }) {
         }
         onMouseLeave={() => setBorder("#e5e7eb")}
       >
-        {/* هاله رنگی لطیف */}
+        {/* هاله‌ی رنگی */}
         <div
-          className="absolute inset-0 pointer-events-none opacity-35"
+          className="absolute inset-0 pointer-events-none opacity-30"
           style={{
             background: `radial-gradient(140% 120% at -10% -10%, ${colorOf(
               index
@@ -145,7 +138,7 @@ function BrandCard({ title, slug, href, subtitle, index, logo }) {
         />
 
         <div className="relative flex items-center gap-4">
-          {/* کپسول لوگو (کاملاً سفید) */}
+          {/* کپسول لوگو (سفید خالص) */}
           <div className="w-14 h-14 shrink-0 rounded-xl bg-white ring-1 ring-black/5 shadow-sm grid place-items-center transition-transform duration-200 group-hover:scale-[1.03] overflow-hidden">
             <picture>
               <source srcSet={webp} type="image/webp" />
@@ -172,9 +165,7 @@ function BrandCard({ title, slug, href, subtitle, index, logo }) {
   );
 }
 
-//
-// مودال شیشه‌ای مشترک
-//
+// مودال شیشه‌ای
 function GlassModal({ open, onClose, title, paragraphs }) {
   const [closing, setClosing] = useState(false);
 

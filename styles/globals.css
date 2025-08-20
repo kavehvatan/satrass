@@ -259,22 +259,39 @@ img, video { max-width: 100%; height: auto; }
 
 
 /* ===== Flip Card (services) ===== */
-.flip-card { perspective: 1000px; }
+.flip-card {
+  perspective: 1000px;
+}
+
 .flip-card-3d {
   position: relative;
   transform-style: preserve-3d;
   transition: transform 500ms;
+  will-change: transform;
 }
+
 .flip-front, .flip-back {
-  position: absolute; inset: 0;
-  backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
+
+/* پیش‌فرض: روی رو ببینیم */
 .flip-front { transform: rotateY(0deg); }
+
+/* پشت کارت را 180 درجه می‌چرخانیم تا وقتی کانتینر 180 خورد، متنش عادی دیده شود */
 .flip-back  { transform: rotateY(180deg); }
 
-/* Hover روی دسکتاپ */
+/* Hover فقط روی دسکتاپ */
 @media (hover: hover) and (pointer: fine) {
-  .flip-card:hover .flip-card-3d { transform: rotateY(180deg); }
+  .flip-card:hover .flip-card-3d {
+    transform: rotateY(180deg);
+  }
 }
 
+/* وضعیت کلیک/تاچ (روی موبایل)؛ با اضافه‌کردن کلاس js */
+.flip-card.flipped .flip-card-3d {
+  transform: rotateY(180deg);
+}
 

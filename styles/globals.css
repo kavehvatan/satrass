@@ -223,12 +223,27 @@ img, video { max-width: 100%; height: auto; }
 
 
 /* ===== Flip Card (services) – scard ===== */
-.scard { transform-style: preserve-3d; perspective: 1000px; }
-.scard-face {
+.scard{
+  position: relative;                 /* لایه‌گذاری چهره‌ها */
+  isolation: isolate;                 /* برای افکت‌ها/سایه‌های داخلی */
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.scard-face{
+  position: absolute;                 /* دو وجه روی هم */
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  display: flex;                      /* تا محتوا به‌هم نریزد */
+  flex-direction: column;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   transition: transform 500ms;
+  will-change: transform;
 }
+
 .scard-front { transform: rotateY(0deg); }
 .scard-back  { transform: rotateY(180deg); }
 
@@ -241,4 +256,6 @@ img, video { max-width: 100%; height: auto; }
   .scard.hoverable:hover .scard-front { transform: rotateY(180deg); }
   .scard.hoverable:hover .scard-back  { transform: rotateY(360deg); }
 }
+
+
 

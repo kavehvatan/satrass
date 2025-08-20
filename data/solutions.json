@@ -1,16 +1,18 @@
+
+
 {
   "items": [
     {
-      "title": "NetBackup",
-      "logo": "/avatars/netbackup.png",
-      "desc": "پشتیبان‌گیری سازمانی و بازیابی فاجعه.",
-      "url": "/services/backup"          // مثلا به صفحه ی خدمات مرتبط یا هر URL دلخواه
-    },
-    {
       "title": "Commvault",
       "logo": "/avatars/commvault.png",
-      "desc": "Data protection و مدیریت کپی داده.",
-      "url": "/contact"                  // اگر ندادید، به صورت پیش‌فرض به /contact می‌رود
+      "desc": "Data Protection مدرن با Dedup/Compression و پالیسی‌های منعطف برای سازمان‌ها.",
+      "url": "/services/commvault"
+    },
+    {
+      "title": "NetBackup",
+      "logo": "/avatars/netbackup.png",
+      "desc": "راهکار بکاپ سازمانی Veritas با مقیاس‌پذیری بالا و اتوماسیون هوشمند.",
+      "url": "/services/netbackup"
     }
   ]
 }

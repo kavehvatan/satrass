@@ -220,3 +220,25 @@ img, video { max-width: 100%; height: auto; }
 .flip-back .content{
   color:#0f172a;
 }
+
+
+/* ===== Flip Card (services) – scard ===== */
+.scard { transform-style: preserve-3d; perspective: 1000px; }
+.scard-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transition: transform 500ms;
+}
+.scard-front { transform: rotateY(0deg); }
+.scard-back  { transform: rotateY(180deg); }
+
+/* حالت کلیک (موبایل/تاچ) */
+.scard.scard-flipped .scard-front { transform: rotateY(180deg); }
+.scard.scard-flipped .scard-back  { transform: rotateY(360deg); }
+
+/* Hover فقط برای دسکتاپ */
+@media (hover: hover) and (pointer: fine) {
+  .scard.hoverable:hover .scard-front { transform: rotateY(180deg); }
+  .scard.hoverable:hover .scard-back  { transform: rotateY(360deg); }
+}
+

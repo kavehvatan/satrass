@@ -142,7 +142,7 @@ function BrandCard({ title, slug, href, index, logo }) {
             src={artPng}
             alt=""
             aria-hidden="true"
-            className="w-full h-full object-cover scale-[1.12] opacity-[.26] md:opacity-[.26] contrast-110 saturate-110"
+            className="w-full h-full object-cover scale-[1.12] opacity-[.26] md:opacity-[.26] contrast-115 saturate-110"
             onError={(e) => (e.currentTarget.style.display = "none")}
           />
         </picture>

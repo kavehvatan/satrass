@@ -16,3 +16,22 @@
     }
   ]
 }
+
+
+
+{
+  "items": [
+    {
+      "title": "Commvault",
+      "logo": "/avatars/commvault.png",
+      "desc": "Data Protection مدرن با Dedup/Compression و پالیسی‌های منعطف.",
+      "url": "/services/commvault"
+    },
+    {
+      "title": "NetBackup",
+      "logo": "/avatars/netbackup.png",
+      "desc": "راهکار بکاپ سازمانی Veritas با مقیاس‌پذیری و اتوماسیون بالا.",
+      "url": "/services/netbackup"
+    }
+  ]
+}

@@ -1,10 +1,9 @@
 // pages/services/index.js
 import Head from "next/head";
 import Link from "next/link";
-import solutions from "@/data/solutions.json";
+import solutions from "../../data/solutions.json";
 
 function Card({ item, idx }) {
-  // چند گرادیان ملایم (می‌توانید رنگ‌ها را عوض کنید)
   const palettes = [
     "from-emerald-500/20 via-emerald-400/10 to-emerald-300/10",
     "from-sky-500/20 via-sky-400/10 to-sky-300/10",
@@ -14,6 +13,7 @@ function Card({ item, idx }) {
   ];
   const bg = palettes[idx % palettes.length];
   const href = item.url && item.url.trim() ? item.url : "/contact";
+  const isInternal = href.startsWith("/");
 
   const Inner = (
     <article
@@ -24,7 +24,6 @@ function Card({ item, idx }) {
         transition hover:shadow-[0_12px_40px_rgba(0,0,0,0.18)]
       `}
     >
-      {/* گرادیان لطیف */}
       <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${bg}`} />
       <div className="relative p-6 flex items-center gap-4">
         {item.logo && (
@@ -45,7 +44,6 @@ function Card({ item, idx }) {
           )}
         </div>
       </div>
-      {/* فلش ظریف سمت چپ */}
       <div className="absolute left-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-80 transition">
         <svg width="28" height="28" viewBox="0 0 24 24" className="text-white/70">
           <path fill="currentColor" d="M9 18l6-6l-6-6" />
@@ -53,9 +51,6 @@ function Card({ item, idx }) {
       </div>
     </article>
   );
-
-  // اگر لینک داخلی است (شروع با /) از <Link> استفاده کنیم؛ وگرنه <a> (خارجی)
-  const isInternal = href.startsWith("/");
 
   return isInternal ? (
     <Link href={href} className="block">{Inner}</Link>
@@ -67,13 +62,12 @@ function Card({ item, idx }) {
 }
 
 export default function ServicesIndex() {
-  const items = solutions?.items ?? [];
+  const items = Array.isArray(solutions?.items) ? solutions.items : [];
 
   return (
     <>
       <Head><title>راهکارها و نرم‌افزارها — ساتراس</title></Head>
 
-      {/* هدر کوچک صفحه */}
       <section className="bg-[linear-gradient(135deg,#0b0f14_0%,#0e1217_60%,#11161d_100%)] text-white">
         <div className="max-w-6xl mx-auto px-4 py-10">
           <h1 className="text-3xl md:text-4xl font-extrabold">
@@ -85,7 +79,6 @@ export default function ServicesIndex() {
         </div>
       </section>
 
-      {/* کارت‌ها */}
       <main className="max-w-6xl mx-auto px-4 py-10">
         {items.length === 0 ? (
           <div className="rounded-xl border border-white/10 bg-white/5 text-white/80 p-6">

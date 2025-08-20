@@ -347,12 +347,12 @@ export default function Home() {
       </section>
 
       {/* تجهیزات */}
-    <section id="vendors" className="relative py-12">
+<section id="vendors" className="relative py-12">
   <h2 className="text-2xl font-extrabold mb-6 text-slate-900">تجهیزات</h2>
 
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
     {vendors.map((v, i) => (
-      <Link key={v.slug || v.title} href={v.href || "#"} className="group block">
+      <Link key={v.href || v.title} href={v.href || "#"} className="group block">
         <div
           className="
             relative overflow-hidden rounded-2xl
@@ -363,7 +363,7 @@ export default function Home() {
             hover:-translate-y-1 hover:shadow-xl hover:border-slate-300
           "
         >
-          {/* هاله رنگی (حتی روی پس‌زمینه سفید هم دیده می‌شود) */}
+          {/* هاله رنگی که روی پس‌زمینه سفید هم دیده می‌شود */}
           <div
             className="absolute inset-0 pointer-events-none opacity-35"
             style={{
@@ -375,7 +375,7 @@ export default function Home() {
             <div className="w-12 h-12 shrink-0 rounded-xl bg-black/5 flex items-center justify-center overflow-hidden ring-1 ring-black/5">
               {v.logo ? (
                 <Image
-                  src={v.logo}     // مثال: '/avatars/dell.webp'
+                  src={v.logo}
                   alt={v.title}
                   width={48}
                   height={48}

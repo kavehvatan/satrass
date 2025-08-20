@@ -1,36 +1,15 @@
-
-
 {
   "items": [
     {
       "title": "Commvault",
-      "logo": "/avatars/commvault.png",
-      "desc": "Data Protection مدرن با Dedup/Compression و پالیسی‌های منعطف برای سازمان‌ها.",
-      "url": "/services/commvault"
-    },
-    {
-      "title": "NetBackup",
-      "logo": "/avatars/netbackup.png",
-      "desc": "راهکار بکاپ سازمانی Veritas با مقیاس‌پذیری بالا و اتوماسیون هوشمند.",
-      "url": "/services/netbackup"
-    }
-  ]
-}
-
-
-
-{
-  "items": [
-    {
-      "title": "Commvault",
-      "logo": "/avatars/commvault.png",
+      "logo": "/avatars/commvault.webp",
       "desc": "Data Protection مدرن با Dedup/Compression و پالیسی‌های منعطف.",
       "url": "/services/commvault"
     },
     {
       "title": "NetBackup",
-      "logo": "/avatars/netbackup.png",
-      "desc": "راهکار بکاپ سازمانی Veritas با مقیاس‌پذیری و اتوماسیون بالا.",
+      "logo": "/avatars/netbackup.webp",
+      "desc": "راهکار بکاپ سازمانی Veritas با مقیاس‌پذیری بالا و اتوماسیون.",
       "url": "/services/netbackup"
     }
   ]

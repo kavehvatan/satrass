@@ -1,6 +1,13 @@
 // pages/index.js
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import vendors from "@/data/vendors"; // ← این مهمه
+
+const BRAND_COLORS = ["#00E5FF", "#2D5BFF"];
+const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
+
 const BRAND_COLORS = ["#00E5FF", "#2D5BFF"]; // رنگ‌های لوگو
 const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length]; // پایدار (نه رندوم هر بار)
 

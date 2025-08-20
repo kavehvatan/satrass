@@ -1,6 +1,8 @@
 // pages/index.js
 import Link from "next/link";
 import { useEffect, useState } from "react";
+const BRAND_COLORS = ["#00E5FF", "#2D5BFF"]; // رنگ‌های لوگو
+const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length]; // پایدار (نه رندوم هر بار)
 
 const TEAL = "#14b8a6";
 const YELLOW = "#f4c21f";
@@ -338,14 +340,60 @@ export default function Home() {
       </section>
 
       {/* تجهیزات */}
-      <section id="products" className="max-w-6xl mx-auto px-4 py-10 border-t border-black/10">
-        <h2 className="text-2xl font-bold mb-6">تجهیزات</h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-          {EQUIPMENT.map((b) => (
-            <BrandCard key={b.slug} {...b} />
-          ))}
+    <section id="vendors" className="relative py-12">
+  <h2 className="text-2xl font-extrabold mb-6 text-slate-900">تجهیزات</h2>
+
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    {vendors.map((v, i) => (
+      <Link key={v.slug || v.title} href={v.href || "#"} className="group block">
+        <div
+          className="
+            relative overflow-hidden rounded-2xl
+            border border-slate-200/70
+            bg-white/70 supports-[backdrop-filter]:bg-white/30
+            backdrop-blur-xl
+            p-5 transition duration-200
+            hover:-translate-y-1 hover:shadow-xl hover:border-slate-300
+          "
+        >
+          {/* هاله رنگی (حتی روی پس‌زمینه سفید هم دیده می‌شود) */}
+          <div
+            className="absolute inset-0 pointer-events-none opacity-35"
+            style={{
+              background: `radial-gradient(140% 120% at -10% -10%, ${colorOf(i)}33 0%, transparent 60%)`,
+            }}
+          />
+
+          <div className="relative flex items-center gap-4">
+            <div className="w-12 h-12 shrink-0 rounded-xl bg-black/5 flex items-center justify-center overflow-hidden ring-1 ring-black/5">
+              {v.logo ? (
+                <Image
+                  src={v.logo}     // مثال: '/avatars/dell.webp'
+                  alt={v.title}
+                  width={48}
+                  height={48}
+                />
+              ) : (
+                <span className="text-slate-600 text-sm font-medium">
+                  {(v.title || "?")[0]}
+                </span>
+              )}
+            </div>
+
+            <div className="min-w-0">
+              <h3 className="text-slate-900 font-semibold">{v.title}</h3>
+              {v.subtitle && (
+                <p className="text-slate-600 text-sm mt-1 line-clamp-2">
+                  {v.subtitle}
+                </p>
+              )}
+            </div>
+          </div>
         </div>
-      </section>
+      </Link>
+    ))}
+  </div>
+</section>
 
       {/* راهکارها + خدمات */}
       <section id="solutions" className="max-w-6xl mx-auto px-4 pb-10">

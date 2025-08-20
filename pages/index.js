@@ -131,17 +131,17 @@ function BrandCard({ title, slug, href, subtitle, index, logo }) {
         }
         onMouseLeave={() => setBorder("#e5e7eb")}
       >
-        {/* تصویر پس‌زمینهٔ خیلی کم‌رنگِ برند (اگر فایل باشد) */}
-        <picture className="pointer-events-none select-none">
+        {/* ⬇️ تصویر پس‌زمینهٔ خیلی کم‌رنگِ برند — تمام‌کادر و کمی زوم‌شده */}
+        <picture className="pointer-events-none select-none absolute inset-0">
           <source srcSet={artWebp} type="image/webp" />
           <img
             src={artPng}
             alt=""
             aria-hidden="true"
             className="
-              absolute right-4 bottom-2
-              h-[74%] max-w-none object-contain
-              opacity-[.10] md:opacity-[.12]
+              w-full h-full object-cover
+              scale-[1.12]
+              opacity-[.12] md:opacity-[.14]
               contrast-110 saturate-110
             "
             onError={(e) => (e.currentTarget.style.display = "none")}

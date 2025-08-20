@@ -1,11 +1,12 @@
-import "../styles/globals.css";
-import Header from "../components/Header";
+// pages/_app.js
+import '@/styles/globals.css';                 // اگر alias @ نداری، از '../styles/globals.css' استفاده کن
+import Header from '@/components/Header';     // اگر alias @ ندارید: '../components/Header'
 
 export default function App({ Component, pageProps }) {
   return (
-    <div dir="rtl" lang="fa">
+    <>
       <Header />
       <Component {...pageProps} />
-    </div>
+    </>
   );
 }

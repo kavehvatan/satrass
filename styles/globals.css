@@ -258,4 +258,23 @@ img, video { max-width: 100%; height: auto; }
 }
 
 
+/* ===== Flip Card (services) ===== */
+.flip-card { perspective: 1000px; }
+.flip-card-3d {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 500ms;
+}
+.flip-front, .flip-back {
+  position: absolute; inset: 0;
+  backface-visibility: hidden; -webkit-backface-visibility: hidden;
+}
+.flip-front { transform: rotateY(0deg); }
+.flip-back  { transform: rotateY(180deg); }
+
+/* Hover روی دسکتاپ */
+@media (hover: hover) and (pointer: fine) {
+  .flip-card:hover .flip-card-3d { transform: rotateY(180deg); }
+}
+
 

@@ -2,17 +2,17 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import vendors from "../data/vendors"; // ⟵ ایمپورت نسبی، بدون @
+import vendors from "../data/vendors"; // ⟵ ایمپورت نسبی (بدون @)
 
-// رنگ‌ها و کمک‌تابع‌ها
-const BRAND_COLORS = ["#00E5FF", "#2D5BFF"];
+// -------------------- رنگ‌ها و کمک‌تابع‌ها --------------------
+const BRAND_COLORS = ["#00E5FF", "#2D5BFF"]; // آبی‌ فیروزه‌ای و آبی تیره (تم لوگو)
 const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
 
 const TEAL = "#14b8a6";
 const YELLOW = "#f4c21f";
 const LOGO_COLORS = [TEAL, YELLOW];
 
-// داده‌های راهکارها/خدمات (بدون تغییرات دیگر)
+// -------------------- داده‌های راهکارها و خدمات --------------------
 const SOLUTIONS = [
   {
     name: "Commvault",
@@ -73,110 +73,56 @@ const SERVICES = [
   },
 ];
 
-// دکمه‌های هیرو با جابجایی نوبتی رنگ‌ها
+// -------------------- پس‌زمینه‌ی فالبک برای کارت‌های خدمات --------------------
+const BRAND_TEAL = "#14b8a6";
+const BRAND_AMBER = "#f4c21f";
+const serviceBgStyle = (i) => {
+  const a = i % 2 === 0 ? BRAND_TEAL : BRAND_AMBER;
+  const b = i % 3 === 0 ? BRAND_AMBER : BRAND_TEAL;
+  return {
+    background: `
+      radial-gradient(120% 120% at 10% 10%, ${a}1f 0%, transparent 50%),
+      linear-gradient(135deg, ${a}12, ${b}14)
+    `,
+    boxShadow: "0 8px 28px rgba(2, 6, 23, .06)",
+  };
+};
+
+// -------------------- جابجایی رنگ دکمه‌های هیرو (نوبتی و پایدار) --------------------
 function useAlternatingBrandPair() {
-  const [primary, setPrimary] = useState(YELLOW);   // Filled
+  const [primary, setPrimary] = useState(YELLOW); // Filled
   const [secondary, setSecondary] = useState(TEAL); // Outlined
+
   useEffect(() => {
     try {
       const lastIsTeal = localStorage.getItem("satrass_btn_pair") === "1";
       const nextIsTeal = !lastIsTeal;
       localStorage.setItem("satrass_btn_pair", nextIsTeal ? "1" : "0");
-      if (nextIsTeal) { setPrimary(TEAL); setSecondary(YELLOW); }
-      else { setPrimary(YELLOW); setSecondary(TEAL); }
+      if (nextIsTeal) {
+        setPrimary(TEAL);
+        setSecondary(YELLOW);
+      } else {
+        setPrimary(YELLOW);
+        setSecondary(TEAL);
+      }
     } catch {}
   }, []);
+
   const swap = () => {
     setPrimary((p) => {
       const np = p === TEAL ? YELLOW : TEAL;
       setSecondary(np === TEAL ? YELLOW : TEAL);
-      try { localStorage.setItem("satrass_btn_pair", np === TEAL ? "1" : "0"); } catch {}
+      try {
+        localStorage.setItem("satrass_btn_pair", np === TEAL ? "1" : "0");
+      } catch {}
       return np;
     });
   };
+
   return { primary, secondary, swap };
 }
 
-/** ---------------------------
- *  کارت برند «تجهیزات»
- *  تغییر خواسته‌شده: حذف نام برند و نمایش فقط لوگو
- *  پس‌زمینهٔ کارتونی با object-cover و کمی زوم حفظ شده.
- *  --------------------------- */
-function BrandCard({ title, slug, href, index, logo }) {
-  const [border, setBorder] = useState("#e5e7eb");
-  const link = href || `/products/${slug || (title || "").toLowerCase()}`;
-
-  // نام پایه‌ی لوگو و آرت (webp → png → default.png)
-  const base =
-    logo
-      ? logo.replace(/^\/?avatars\//, "").replace(/\.(png|webp)$/i, "")
-      : (slug || (title || "")).toLowerCase();
-
-  const webp = `/avatars/${base}.webp`;
-  const png  = `/avatars/${base}.png`;
-
-  // مسیر تصویر پس‌زمینهٔ کارتونی (اختیاری)
-  const artWebp = `/brand-art/${base}.webp`;
-  const artPng  = `/brand-art/${base}.png`;
-
-  return (
-    <Link href={link} className="group block">
-      <div
-        className="
-          relative overflow-hidden rounded-2xl
-          border bg-white/70 supports-[backdrop-filter]:bg-white/35
-          backdrop-blur-xl
-          p-5 transition duration-200
-          hover:-translate-y-0.5 hover:shadow-xl
-        "
-        style={{ borderColor: border, borderWidth: 1 }}
-        onMouseEnter={() =>
-          setBorder(["#14b8a6", "#f4c21f"][Math.floor(Math.random() * 2)])
-        }
-        onMouseLeave={() => setBorder("#e5e7eb")}
-      >
-        {/* پس‌زمینهٔ کارتونی کم‌رنگ (تمام‌کادر + کمی زوم) */}
-        <picture className="pointer-events-none select-none absolute inset-0">
-          <source srcSet={artWebp} type="image/webp" />
-          <img
-            src={artPng}
-            alt=""
-            aria-hidden="true"
-            className="w-full h-full object-cover scale-[1.12] opacity-[.35] md:opacity-[.35] contrast-115 saturate-110"
-            onError={(e) => (e.currentTarget.style.display = "none")}
-          />
-        </picture>
-
-        {/* هالهٔ ملایم رنگی */}
-        <div
-          className="absolute inset-0 pointer-events-none opacity-30"
-          style={{
-            background: `radial-gradient(140% 120% at -10% -10%, ${["#00E5FF", "#2D5BFF"][index % 2]}33 0%, transparent 60%)`,
-          }}
-        />
-
-        {/* فقط لوگو — بدون متن برند */}
-        <div className="relative flex items-center justify-end">
-          <div className="w-14 h-14 shrink-0 rounded-xl bg-white ring-1 ring-black/5 shadow-sm grid place-items-center transition-transform duration-200 group-hover:scale-[1.03] overflow-hidden">
-            <picture>
-              <source srcSet={webp} type="image/webp" />
-              <img
-                src={png}
-                alt={title}
-                width={56}
-                height={56}
-                className="w-10 h-10 object-contain"
-                onError={(e) => (e.currentTarget.src = "/avatars/default.png")}
-              />
-            </picture>
-          </div>
-        </div>
-      </div>
-    </Link>
-  );
-}
-
-// مودال شیشه‌ای
+// -------------------- مودال شیشه‌ای عمومی --------------------
 function GlassModal({ open, onClose, title, paragraphs }) {
   const [closing, setClosing] = useState(false);
 
@@ -254,7 +200,80 @@ function GlassModal({ open, onClose, title, paragraphs }) {
   );
 }
 
-function ServiceCard({ title, desc1, desc2 }) {
+// -------------------- کارت برند «تجهیزات» (فقط لوگو + پس‌زمینه کارتونی) --------------------
+function BrandCard({ title, slug, href, index, logo }) {
+  const [border, setBorder] = useState("#e5e7eb");
+  const link = href || `/products/${slug || (title || "").toLowerCase()}`;
+
+  // نام پایه‌ی لوگو و آرت (webp → png → default.png)
+  const base = logo
+    ? logo.replace(/^\/?avatars\//, "").replace(/\.(png|webp)$/i, "")
+    : (slug || (title || "")).toLowerCase();
+
+  const webp = `/avatars/${base}.webp`;
+  const png = `/avatars/${base}.png`;
+  const artWebp = `/brand-art/${base}.webp`;
+  const artPng = `/brand-art/${base}.png`;
+
+  return (
+    <Link href={link} className="group block">
+      <div
+        className="
+          relative overflow-hidden rounded-2xl
+          border bg-white/70 supports-[backdrop-filter]:bg-white/35
+          backdrop-blur-xl
+          p-5 transition duration-200
+          hover:-translate-y-0.5 hover:shadow-xl
+        "
+        style={{ borderColor: border, borderWidth: 1 }}
+        onMouseEnter={() =>
+          setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
+        }
+        onMouseLeave={() => setBorder("#e5e7eb")}
+      >
+        {/* پس‌زمینهٔ کارتونی کم‌رنگ (Cover + کمی زوم) */}
+        <picture className="pointer-events-none select-none absolute inset-0">
+          <source srcSet={artWebp} type="image/webp" />
+          <img
+            src={artPng}
+            alt=""
+            aria-hidden="true"
+            className="w-full h-full object-cover scale-[1.12] opacity-[.42] md:opacity-[.38] contrast-115 saturate-110"
+            onError={(e) => (e.currentTarget.style.display = "none")}
+          />
+        </picture>
+
+        {/* هالهٔ ملایم رنگی */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-25"
+          style={{
+            background: `radial-gradient(140% 120% at -10% -10%, ${colorOf(index)}33 0%, transparent 60%)`,
+          }}
+        />
+
+        {/* فقط لوگو — بدون نام برند کناری */}
+        <div className="relative flex items-center justify-end">
+          <div className="w-14 h-14 shrink-0 rounded-xl bg-white ring-1 ring-black/5 shadow-sm grid place-items-center transition-transform duration-200 group-hover:scale-[1.03] overflow-hidden">
+            <picture>
+              <source srcSet={webp} type="image/webp" />
+              <img
+                src={png}
+                alt={title}
+                width={56}
+                height={56}
+                className="w-10 h-10 object-contain"
+                onError={(e) => (e.currentTarget.src = "/avatars/default.png")}
+              />
+            </picture>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+// -------------------- کارت‌های خدمات و راهکارها (با مودال شیشه‌ای) --------------------
+function ServiceCard({ title, desc1, desc2, index }) {
   const [border, setBorder] = useState("#e5e7eb");
   const [open, setOpen] = useState(false);
   return (
@@ -265,8 +284,8 @@ function ServiceCard({ title, desc1, desc2 }) {
         }
         onMouseLeave={() => setBorder("#e5e7eb")}
         onClick={() => setOpen(true)}
-        className="flex flex-col items-center justify-center gap-3 p-5 bg-white border rounded-lg hover:shadow-md transition text-center w-full max-w-[520px] mx-auto h-[120px] cursor-pointer select-none"
-        style={{ borderColor: border }}
+        className="flex flex-col items-center justify-center gap-3 p-5 border rounded-2xl hover:shadow-md transition text-center w-full max-w-[520px] mx-auto h-[120px] cursor-pointer select-none"
+        style={{ borderColor: border, ...serviceBgStyle(index) }}
         role="button"
         tabIndex={0}
         aria-haspopup="dialog"
@@ -284,7 +303,7 @@ function ServiceCard({ title, desc1, desc2 }) {
   );
 }
 
-function SolutionCard({ name, slug, p1, p2, p3 }) {
+function SolutionCard({ name, slug, p1, p2, p3, index }) {
   const [border, setBorder] = useState("#e5e7eb");
   const [open, setOpen] = useState(false);
   return (
@@ -295,8 +314,8 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
         }
         onMouseLeave={() => setBorder("#e5e7eb")}
         onClick={() => setOpen(true)}
-        className="flex flex-col items-center justify-center gap-3 p-5 bg-white border rounded-lg hover:shadow-md transition text-center w-full max-w-[520px] mx-auto h-[120px] cursor-pointer select-none"
-        style={{ borderColor: border }}
+        className="flex flex-col items-center justify-center gap-3 p-5 border rounded-2xl hover:shadow-md transition text-center w-full max-w-[520px] mx-auto h-[140px] cursor-pointer select-none bg-white"
+        style={{ borderColor: border, ...serviceBgStyle(index) }}
         role="button"
         tabIndex={0}
         aria-haspopup="dialog"
@@ -320,6 +339,7 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
   );
 }
 
+// -------------------- صفحه اصلی --------------------
 export default function Home() {
   const { primary, secondary, swap } = useAlternatingBrandPair();
   const primaryIsYellow = primary === YELLOW;
@@ -402,15 +422,15 @@ export default function Home() {
       <section id="solutions" className="max-w-6xl mx-auto px-4 pb-10">
         <h2 className="text-2xl font-bold mb-6">راهکارها</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center mb-10">
-          {SOLUTIONS.map((s) => (
-            <SolutionCard key={s.slug} {...s} />
+          {SOLUTIONS.map((s, i) => (
+            <SolutionCard key={s.slug} {...s} index={i} />
           ))}
         </div>
 
         <h3 className="text-xl font-bold mb-4">خدمات</h3>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-          {SERVICES.map((s) => (
-            <ServiceCard key={s.slug} {...s} />
+          {SERVICES.map((s, i) => (
+            <ServiceCard key={s.slug} {...s} index={i} />
           ))}
         </div>
       </section>

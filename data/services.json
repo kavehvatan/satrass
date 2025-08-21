@@ -1,16 +1,30 @@
 {
-  "install": { "title": "نصب و راه‌اندازی", "intro": "…" , "items": [] },
-  "monitoring": { "title": "پایش", "intro": "…" , "items": [] },
-  "training": { "title": "آموزش", "intro": "…" , "items": [] },
-  "consulting-design": { "title": "مشاوره و طراحی", "intro": "…" , "items": [] },
-  "operations": { "title": "راهبری", "intro": "…" , "items": [] }
   "items": [
     {
- 
-}
-
-{
-  "items": [
+      "title": "آموزش",
+      "href": "/services/training",
+      "icon": "/icons/services/training.webp"
+    },
+    {
+      "title": "پایش",
+      "href": "/services/monitoring",
+      "icon": "/icons/services/monitoring.webp"
+    },
+    {
+      "title": "نصب و راه‌اندازی",
+      "href": "/services/install",
+      "icon": "/icons/services/install.webp"
+    },
+    {
+      "title": "راهبری",
+      "href": "/services/operations",
+      "icon": "/icons/services/operations.webp"
+    },
+    {
+      "title": "مشاوره و طراحی",
+      "href": "/services/consulting-design",
+      "icon": "/icons/services/consulting.webp"
+    },
     {
       "title": "Commvault",
       "desc": "پیاده‌سازی و پشتیبانی بکاپ/ریکاوری سازمانی Commvault.",
@@ -23,7 +37,5 @@
       "href": "/services/netbackup",
       "icon": "/avatars/netbackup.webp"
     }
-
-    // ... سایر خدمات قبلی‌ات
   ]
 }

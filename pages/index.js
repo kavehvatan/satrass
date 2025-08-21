@@ -6,11 +6,11 @@ import Link from "next/link";
 import vendors from "../data/vendors";          // تجهیزات
 import services from "../data/services.json";   // خدمات
 
-/* === رنگ‌های برند === */
+/* === رنگ‌های برند (ثابت) === */
 const BRAND_TEAL  = "#14b8a6";
 const BRAND_AMBER = "#f4c21f";
 
-// رنگ ثابت (و کامل) هر کارت خدمات بر اساس ایندکس (بدون تغییر در هر رندر)
+/** رنگ یکنواخت کارت خدمات بر اساس ایندکس (پایدار و قابل‌پیش‌بینی) */
 const serviceSolidBg = (i) => (i % 2 === 0 ? BRAND_TEAL : BRAND_AMBER);
 
 export default function Home() {
@@ -20,12 +20,12 @@ export default function Home() {
         <title>ساتراس | راهکارها و تجهیزات زیرساخت</title>
         <meta
           name="description"
-          content="ارائه راهکارها و نرم‌افزارها، تجهیزات سازمانی و خدمات تخصصی توسط ساتراس."
+          content="ارائهٔ خدمات تخصصی زیرساخت، از مشاوره و طراحی تا نصب، پایش و راهبری؛ به‌همراه معرفی تجهیزات سازمانی."
         />
       </Head>
 
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-        {/* هرو */}
+        {/* هدر/هِرو */}
         <section className="mb-10">
           <div className="rounded-3xl bg-white/60 dark:bg-slate-900/40 backdrop-blur-md ring-1 ring-slate-200/60 dark:ring-slate-700/50 p-8 md:p-12 flex flex-col md:flex-row gap-8 items-center">
             <div className="flex-1 text-center md:text-right">
@@ -78,7 +78,7 @@ export default function Home() {
               const logoSrc =
                 v.logo ||
                 (v.slug ? `/avatars/${v.slug}.webp` : "/avatars/default.png");
-              const cover = v.cover || `/covers/${v.slug || "default"}.webp`;
+              const coverSrc = v.cover || `/covers/${v.slug || "default"}.webp`;
 
               return (
                 <Link
@@ -86,10 +86,10 @@ export default function Home() {
                   href={v.href || `/products/${v.slug}`}
                   className="group relative block rounded-2xl overflow-hidden ring-1 ring-slate-200/70 dark:ring-slate-700/50 bg-white/70 dark:bg-slate-900/40 backdrop-blur-md hover:shadow-lg transition-all"
                 >
-                  {/* پس‌زمینهٔ محو (کاور برند) */}
+                  {/* کاور کم‌رنگ */}
                   <div className="absolute inset-0">
                     <Image
-                      src={cover}
+                      src={coverSrc}
                       alt=""
                       fill
                       sizes="180px"
@@ -108,7 +108,7 @@ export default function Home() {
                         sizes="64px"
                       />
                     </div>
-                    {/* عنوان برند را عمداً نشان نمی‌دهیم */}
+                    {/* عنوان برند را نمایش نمی‌دهیم */}
                   </div>
                 </Link>
               );
@@ -124,8 +124,8 @@ export default function Home() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {services?.items?.map((s, i) => {
-              const bg = serviceSolidBg(i); // یکی از دو رنگ برند، کامل و ثابت
-              const isLight = bg === BRAND_AMBER;
+              const bg = serviceSolidBg(i);
+              const isLight = bg === BRAND_AMBER; // روی کهربایی متن تیره‌تر
               const titleColor = isLight ? "text-slate-900" : "text-white";
               const bodyColor = isLight ? "text-slate-800/90" : "text-white/90";
               const ringColor = isLight ? "ring-black/10" : "ring-white/20";
@@ -136,36 +136,15 @@ export default function Home() {
                   className={`rounded-2xl p-6 md:p-7 ring-1 ${ringColor} transition-all`}
                   style={{ backgroundColor: bg }}
                 >
-                  <div className="flex items-center gap-3 mb-3">
-                    {/* آیکون اختیاری — اگر در JSON نبود، چیزی نمایش داده نمی‌شود */}
-                    {s.icon && (
-                      <span
-                        className="inline-flex w-10 h-10 items-center justify-center rounded-xl bg-black/10"
-                        aria-hidden
-                      >
-                        <span className="relative w-6 h-6">
-                          <Image
-                            src={s.icon}
-                            alt=""
-                            fill
-                            className="object-contain"
-                            sizes="24px"
-                          />
-                        </span>
-                      </span>
-                    )}
+                  {/* فقط عنوان — آیکون/دکمه حذف شد */}
+                  <h3 className={`text-xl md:text-2xl font-extrabold mb-3 ${titleColor}`}>
+                    {s.title}
+                  </h3>
 
-                    <h3
-                      className={`text-xl md:text-2xl font-extrabold ${titleColor}`}
-                    >
-                      {s.title}
-                    </h3>
-                  </div>
+                  {/* توضیح سرویس */}
+                  {s.desc && <p className={`leading-7 ${bodyColor}`}>{s.desc}</p>}
 
-                  {s.desc && (
-                    <p className={`leading-7 ${bodyColor}`}>{s.desc}</p>
-                  )}
-
+                  {/* لینک ادامه (اختیاری) */}
                   {s.href && (
                     <div className="mt-5">
                       <Link

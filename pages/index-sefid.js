@@ -1,26 +1,18 @@
 // pages/index.js
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import vendors from "../data/vendors"; // ⟵ ایمپورت نسبی، بدون @
 
-// ---------------------- رنگ‌ها و کمک‌تابع‌ها ----------------------
-const TEAL = "#14b8a6";
-const YELLOW = "#f4c21f";
+// رنگ‌ها و کمک‌تابع‌ها
 const BRAND_COLORS = ["#00E5FF", "#2D5BFF"];
 const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
+
+const TEAL = "#14b8a6";
+const YELLOW = "#f4c21f";
 const LOGO_COLORS = [TEAL, YELLOW];
 
-// تبدیل #RRGGBB به #RRGGBBAA با آلفای اعشاری 0..1
-function withAlpha(hex, alpha = 0.7) {
-  const a = Math.round(Math.min(1, Math.max(0, alpha)) * 255)
-    .toString(16)
-    .padStart(2, "0");
-  // اگر hex مثل #14b8a6 باشد:
-  return hex.length === 7 ? `${hex}${a}` : hex;
-}
-
-// ---------------------- داده‌ها: راهکارها/خدمات ----------------------
-// راهکارها (قدیم) – الان می‌بریم داخل «خدمات»
+// داده‌های راهکارها/خدمات (بدون تغییرات دیگر)
 const SOLUTIONS = [
   {
     name: "Commvault",
@@ -38,8 +30,7 @@ const SOLUTIONS = [
   },
 ];
 
-// خدمات اصلی
-const SERVICES_BASE = [
+const SERVICES = [
   {
     slug: "install",
     title: "نصب و راه‌اندازی",
@@ -61,12 +52,14 @@ const SERVICES_BASE = [
     title: "آموزش",
     desc1:
       "انتقال دانش سناریومحور: راهبری تا Troubleshooting + Lab/Runbook اختصاصی.",
-    desc2: "پس از دوره، پشتیبانی پرسش‌وپاسخ و به‌روزرسانی جزوات داریم.",
+    desc2:
+      "پس از دوره، پشتیبانی پرسش‌وپاسخ و به‌روزرسانی جزوات داریم.",
   },
   {
     slug: "consulting-design",
     title: "مشاوره و طراحی",
-    desc1: "نیازسنجی، ظرفیت‌سنجی، HA/DR و انتخاب راهکار با نگاه TCO و رشد آتی.",
+    desc1:
+      "نیازسنجی، ظرفیت‌سنجی، HA/DR و انتخاب راهکار با نگاه TCO و رشد آتی.",
     desc2:
       "خروجی: دیاگرام، BOM و طرح مهاجرت + چند گزینهٔ فنی/مالی برای تصمیم شفاف.",
   },
@@ -75,71 +68,52 @@ const SERVICES_BASE = [
     title: "راهبری",
     desc1:
       "Managed Service: پچینگ، بکاپ‌وریفای، هاردنینگ، بررسی لاگ و رسیدگی به رخدادها طبق SLA.",
-    desc2: "گزارش ماهانه سلامت/ظرفیت/ریسک + نشست CAB.",
+    desc2:
+      "گزارش ماهانه سلامت/ظرفیت/ریسک + نشست CAB.",
   },
 ];
 
-// راهکارها را به آیتم‌های «خدمات» تبدیل می‌کنیم (بدون لوگو آیکن – صرفاً عنوان و توضیح)
-const SOLUTIONS_AS_SERVICES = SOLUTIONS.map((s) => ({
-  slug: s.slug,
-  title: s.name,
-  desc1: s.p1,
-  desc2: `${s.p2} ${s.p3}`,
-}));
-
-// ترکیب نهایی «خدمات» (راهکارها هم اضافه شد) — در صورت نیاز ترتیب را جابه‌جا کن
-const SERVICES = [...SOLUTIONS_AS_SERVICES, ...SERVICES_BASE];
-
-// ---------------------- هوک جابجایی رنگ دکمه‌های هیرو ----------------------
+// دکمه‌های هیرو با جابجایی نوبتی رنگ‌ها
 function useAlternatingBrandPair() {
-  const [primary, setPrimary] = useState(YELLOW); // Filled
+  const [primary, setPrimary] = useState(YELLOW);   // Filled
   const [secondary, setSecondary] = useState(TEAL); // Outlined
-
   useEffect(() => {
     try {
       const lastIsTeal = localStorage.getItem("satrass_btn_pair") === "1";
       const nextIsTeal = !lastIsTeal;
       localStorage.setItem("satrass_btn_pair", nextIsTeal ? "1" : "0");
-      if (nextIsTeal) {
-        setPrimary(TEAL);
-        setSecondary(YELLOW);
-      } else {
-        setPrimary(YELLOW);
-        setSecondary(TEAL);
-      }
+      if (nextIsTeal) { setPrimary(TEAL); setSecondary(YELLOW); }
+      else { setPrimary(YELLOW); setSecondary(TEAL); }
     } catch {}
   }, []);
-
   const swap = () => {
     setPrimary((p) => {
       const np = p === TEAL ? YELLOW : TEAL;
       setSecondary(np === TEAL ? YELLOW : TEAL);
-      try {
-        localStorage.setItem("satrass_btn_pair", np === TEAL ? "1" : "0");
-      } catch {}
+      try { localStorage.setItem("satrass_btn_pair", np === TEAL ? "1" : "0"); } catch {}
       return np;
     });
   };
-
   return { primary, secondary, swap };
 }
 
-// ---------------------- کارت برند «تجهیزات» ----------------------
+// کارت برند «تجهیزات»
 function BrandCard({ title, slug, href, subtitle, index, logo }) {
   const [border, setBorder] = useState("#e5e7eb");
   const link = href || `/products/${slug || (title || "").toLowerCase()}`;
 
   // نام پایه‌ی لوگو و آرت (webp → png → default.png)
-  const base = logo
-    ? logo.replace(/^\/?avatars\//, "").replace(/\.(png|webp)$/i, "")
-    : (slug || (title || "")).toLowerCase();
+  const base =
+    logo
+      ? logo.replace(/^\/?avatars\//, "").replace(/\.(png|webp)$/i, "")
+      : (slug || (title || "")).toLowerCase();
 
   const webp = `/avatars/${base}.webp`;
-  const png = `/avatars/${base}.png`;
+  const png  = `/avatars/${base}.png`;
 
-  // تصویر پس‌زمینهٔ کارتونی (اختیاری)
+  // مسیر تصویر پس‌زمینهٔ کارتونی (اختیاری)
   const artWebp = `/brand-art/${base}.webp`;
-  const artPng = `/brand-art/${base}.png`;
+  const artPng  = `/brand-art/${base}.png`;
 
   return (
     <Link href={link} className="group block">
@@ -147,39 +121,44 @@ function BrandCard({ title, slug, href, subtitle, index, logo }) {
         className="
           relative overflow-hidden rounded-2xl
           border bg-white/70 supports-[backdrop-filter]:bg-white/35
-          backdrop-blur-xl p-5 transition duration-200
+          backdrop-blur-xl
+          p-5 transition duration-200
           hover:-translate-y-0.5 hover:shadow-xl
         "
         style={{ borderColor: border, borderWidth: 1 }}
         onMouseEnter={() =>
-          setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
+          setBorder(["#14b8a6", "#f4c21f"][Math.floor(Math.random() * 2)])
         }
         onMouseLeave={() => setBorder("#e5e7eb")}
       >
-        {/* بک‌گراند برند (خیلی کم‌رنگ) */}
+        {/* ⬇️ تصویر پس‌زمینهٔ خیلی کم‌رنگِ برند — تمام‌کادر و کمی زوم‌شده */}
         <picture className="pointer-events-none select-none absolute inset-0">
           <source srcSet={artWebp} type="image/webp" />
           <img
             src={artPng}
             alt=""
             aria-hidden="true"
-            className="w-full h-full object-cover scale-[1.12] opacity-[.12] md:opacity-[.14] contrast-110 saturate-110"
+            className="
+              w-full h-full object-cover
+              scale-[1.12]
+              opacity-[.12] md:opacity-[.14]
+              contrast-110 saturate-110
+            "
             onError={(e) => (e.currentTarget.style.display = "none")}
           />
         </picture>
 
-        {/* هالهٔ ملایم رنگی برای هماهنگی بصری */}
+        {/* هالهٔ ملایم رنگی (مثل قبل) */}
         <div
           className="absolute inset-0 pointer-events-none opacity-30"
           style={{
-            background: `radial-gradient(140% 120% at -10% -10%, ${colorOf(
-              index
-            )}33 0%, transparent 60%)`,
+            background: `radial-gradient(140% 120% at -10% -10%, ${["#00E5FF", "#2D5BFF"][index % 2]}33 0%, transparent 60%)`,
           }}
         />
 
         {/* محتوای کارت */}
         <div className="relative flex items-center gap-4">
+          {/* کپسول لوگو (کاملاً سفید) */}
           <div className="w-14 h-14 shrink-0 rounded-xl bg-white ring-1 ring-black/5 shadow-sm grid place-items-center transition-transform duration-200 group-hover:scale-[1.03] overflow-hidden">
             <picture>
               <source srcSet={webp} type="image/webp" />
@@ -208,7 +187,7 @@ function BrandCard({ title, slug, href, subtitle, index, logo }) {
   );
 }
 
-// ---------------------- مودال شیشه‌ای عمومی ----------------------
+// مودال شیشه‌ای
 function GlassModal({ open, onClose, title, paragraphs }) {
   const [closing, setClosing] = useState(false);
 
@@ -240,10 +219,7 @@ function GlassModal({ open, onClose, title, paragraphs }) {
         closing ? "opacity-0" : "opacity-100"
       }`}
     >
-      <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-        onClick={handleClose}
-      />
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={handleClose} />
       <article
         role="dialog"
         aria-modal="true"
@@ -269,9 +245,7 @@ function GlassModal({ open, onClose, title, paragraphs }) {
             {paragraphs.map((tx, i) => (
               <p
                 key={i}
-                className={`leading-8 ${
-                  i === 0 ? "mt-4" : "mt-3"
-                } text-gray-900/95 drop-shadow-[0_1px_1px_rgba(255,255,255,.55)]`}
+                className={`leading-8 ${i === 0 ? "mt-4" : "mt-3"} text-gray-900/95 drop-shadow-[0_1px_1px_rgba(255,255,255,.55)]`}
               >
                 {tx}
               </p>
@@ -291,12 +265,9 @@ function GlassModal({ open, onClose, title, paragraphs }) {
   );
 }
 
-// ---------------------- کارت «خدمات» (پس‌زمینه رنگی با آلفا 70٪) ----------------------
-function ServiceCard({ title, desc1, desc2, index }) {
+function ServiceCard({ title, desc1, desc2 }) {
   const [border, setBorder] = useState("#e5e7eb");
-  const bgBase = index % 2 === 0 ? TEAL : YELLOW; // یکی از دو رنگ سایت
-  const bg = withAlpha(bgBase, 0.7); // شفافیت ~70%
-
+  const [open, setOpen] = useState(false);
   return (
     <>
       <div
@@ -305,17 +276,18 @@ function ServiceCard({ title, desc1, desc2, index }) {
         }
         onMouseLeave={() => setBorder("#e5e7eb")}
         onClick={() => setOpen(true)}
-        className="flex flex-col items-center justify-center gap-3 p-5 border rounded-lg hover:shadow-md transition text-center w-full max-w-[520px] mx-auto h-[120px] cursor-pointer select-none"
-        style={{ borderColor: border, backgroundColor: bg }}
+        className="flex flex-col items-center justify-center gap-3 p-5 bg-white border rounded-lg hover:shadow-md transition text-center w-full max-w-[520px] mx-auto h-[120px] cursor-pointer select-none"
+        style={{ borderColor: border }}
         role="button"
         tabIndex={0}
         aria-haspopup="dialog"
+        aria-expanded={open}
       >
         <span className="font-semibold text-gray-900">{title}</span>
       </div>
       <GlassModal
-        open={false /* مودال با کلیک زیر باز می‌شود */}
-        onClose={() => {}}
+        open={open}
+        onClose={() => setOpen(false)}
         title={title}
         paragraphs={[desc1, desc2]}
       />
@@ -323,13 +295,9 @@ function ServiceCard({ title, desc1, desc2, index }) {
   );
 }
 
-// برای باز شدن مودال با کلیک: نسخه‌ای با state داخلی
-function ServiceCardWithModal(props) {
-  const [open, setOpen] = useState(false);
+function SolutionCard({ name, slug, p1, p2, p3 }) {
   const [border, setBorder] = useState("#e5e7eb");
-  const bgBase = props.index % 2 === 0 ? TEAL : YELLOW;
-  const bg = withAlpha(bgBase, 0.7);
-
+  const [open, setOpen] = useState(false);
   return (
     <>
       <div
@@ -338,26 +306,31 @@ function ServiceCardWithModal(props) {
         }
         onMouseLeave={() => setBorder("#e5e7eb")}
         onClick={() => setOpen(true)}
-        className="flex flex-col items-center justify-center gap-3 p-5 border rounded-lg hover:shadow-md transition text-center w-full max-w-[520px] mx-auto h-[120px] cursor-pointer select-none"
-        style={{ borderColor: border, backgroundColor: bg }}
+        className="flex flex-col items-center justify-center gap-3 p-5 bg-white border rounded-lg hover:shadow-md transition text-center w-full max-w-[520px] mx-auto h-[120px] cursor-pointer select-none"
+        style={{ borderColor: border }}
         role="button"
         tabIndex={0}
         aria-haspopup="dialog"
         aria-expanded={open}
       >
-        <span className="font-semibold text-gray-900">{props.title}</span>
+        <img
+          src={`/avatars/${slug}.webp`}
+          onError={(e) => (e.currentTarget.src = `/avatars/${slug}.png`)}
+          alt={name}
+          className="w-12 h-12 object-contain"
+        />
+        <div className="font-bold text-gray-900">{name}</div>
       </div>
       <GlassModal
         open={open}
         onClose={() => setOpen(false)}
-        title={props.title}
-        paragraphs={[props.desc1, props.desc2]}
+        title={name}
+        paragraphs={[p1, p2, p3]}
       />
     </>
   );
 }
 
-// ---------------------- صفحه اصلی ----------------------
 export default function Home() {
   const { primary, secondary, swap } = useAlternatingBrandPair();
   const primaryIsYellow = primary === YELLOW;
@@ -366,17 +339,16 @@ export default function Home() {
 
   return (
     <main className="min-h-screen font-sans">
-      {/* Hero (بنر تیره) */}
+      {/* Hero */}
       <section className="bg-[linear-gradient(135deg,#000_0%,#0a0a0a_60%,#111_100%)] text-white">
         <div className="max-w-6xl mx-auto px-4 py-12 md:py-16 grid md:grid-cols-2 items-center gap-10">
           <div>
             <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">
-              راهکارها و تجهیزات سازمانی با تمرکز بر کارایی و سادگی
+              زیرساخت هوشمند، با دقت مهندسی
             </h1>
-            <p className="mt-4 text-gray-300">
-              از مشاوره و طراحی تا اجرا، پایش و راهبری؛ همیشه کنار شما هستیم.
-            </p>
+            <p className="mt-4 text-gray-300">از مشاوره تا پشتیبانی، درکنار شما.</p>
             <div className="mt-6 flex gap-3">
+              {/* ارائه مشاوره — Filled */}
               <a
                 href="/contact"
                 onClick={swap}
@@ -388,6 +360,7 @@ export default function Home() {
               >
                 ارائه مشاوره
               </a>
+              {/* مشاهده ابزارها — Outlined */}
               <a
                 href="/tools"
                 onClick={swap}
@@ -437,17 +410,23 @@ export default function Home() {
         </div>
       </section>
 
-      {/* خدمات (شامل Commvault و NetBackup) */}
-      <section id="services" className="max-w-6xl mx-auto px-4 pb-10">
-        <h2 className="text-2xl font-bold mb-6">خدمات</h2>
+      {/* راهکارها + خدمات */}
+      <section id="solutions" className="max-w-6xl mx-auto px-4 pb-10">
+        <h2 className="text-2xl font-bold mb-6">راهکارها</h2>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center mb-10">
+          {SOLUTIONS.map((s) => (
+            <SolutionCard key={s.slug} {...s} />
+          ))}
+        </div>
+
+        <h3 className="text-xl font-bold mb-4">خدمات</h3>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-          {SERVICES.map((s, i) => (
-            <ServiceCardWithModal key={s.slug || s.title} index={i} {...s} />
+          {SERVICES.map((s) => (
+            <ServiceCard key={s.slug} {...s} />
           ))}
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="bg-black text-white">
         <div className="max-w-6xl mx-auto px-4 py-6 text-center">
           <p>© {new Date().getFullYear()} ساتراس، همه حقوق محفوظ است</p>

@@ -34,28 +34,43 @@ import services from "../data/services.json";
 /*                     کارت برند (تجهیزات)                */
 /*  لوگو فقط سمت چپ؛ عنوان روی کارت نمایش داده نمی‌شود.   */
 /* ======================================================= */
-function BrandCard({ title, slug, index, logo = slug, art = slug }) {
-  const webpLogo = `/avatars/${logo}.webp`;
-  const pngLogo = `/avatars/${logo}.png`;
-  const webpArt = `/brand-art/${art}.webp`;
-  const pngArt = `/brand-art/${art}.png`;
+// ---------------------- کارت برند «تجهیزات» ----------------------
+function BrandCard({ title, slug, href, index, logo }) {
+  const [border, setBorder] = useState("#e5e7eb");
+  const link = href || `/products/${slug || (title || "").toLowerCase()}`;
+
+  // نام پایه‌ی لوگو و آرت (webp → png → default.png)
+  const base = (logo
+    ? logo.replace(/^\/?avatars\//, "").replace(/\.(png|webp)$/i, "")
+    : (slug || (title || "")).toLowerCase()
+  );
+
+  const webp   = `/avatars/${base}.webp`;
+  const png    = `/avatars/${base}.png`;
+  const artWebp = `/brand-art/${base}.webp`;
+  const artPng  = `/brand-art/${base}.png`;
 
   return (
-    <Link href={`/products/${slug}`} className="group block">
+    <Link href={link} className="group block">
       <div
         className="
           relative overflow-hidden rounded-2xl
-          border border-slate-200 bg-white/70 supports-[backdrop-filter]:bg-white/35
+          border bg-white/70 supports-[backdrop-filter]:bg-white/35
           backdrop-blur-xl p-5 transition duration-200
           hover:-translate-y-0.5 hover:shadow-xl
-          h-[152px]  // ارتفاع ثابت کارت (مثل قبل)
+          min-h-[110px] md:min-h-[140px]
         "
+        style={{ borderColor: border, borderWidth: 1 }}
+        onMouseEnter={() =>
+          setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
+        }
+        onMouseLeave={() => setBorder("#e5e7eb")}
       >
-        {/* بک‌گراند کارتونی بسیار کم‌رنگ */}
+        {/* بک‌گراند کارتونی خیلی کم‌رنگ */}
         <picture className="pointer-events-none select-none absolute inset-0">
-          <source srcSet={webpArt} type="image/webp" />
+          <source srcSet={artWebp} type="image/webp" />
           <img
-            src={pngArt}
+            src={artPng}
             alt=""
             aria-hidden="true"
             className="w-full h-full object-cover scale-[1.12] opacity-[.12] md:opacity-[.14] contrast-110 saturate-110"
@@ -63,24 +78,24 @@ function BrandCard({ title, slug, index, logo = slug, art = slug }) {
           />
         </picture>
 
-        {/* هاله‌ی رنگی خیلی ملایم برای حس عمق (دلخواه) */}
+        {/* هالهٔ ملایم رنگی */}
         <div
-          className="absolute inset-0 pointer-events-none opacity-25"
+          className="absolute inset-0 pointer-events-none opacity-30"
           style={{
-            background: `radial-gradient(140% 120% at -10% -10%, ${
-              LOGO_COLORS[index % LOGO_COLORS.length]
-            }33 0%, transparent 60%)`,
+            background: `radial-gradient(140% 120% at -10% -10%, ${colorOf(
+              index
+            )}33 0%, transparent 60%)`,
           }}
         />
 
-        {/* محتوا — فقط لوگو؛ LTR تا در RTL هم «چپ» بماند */}
-        <div className="relative flex items-center gap-4" dir="ltr">
-          <div className="w-14 h-14 shrink-0 rounded-xl bg-white ring-1 ring-black/5 shadow-sm grid place-items-center transition-transform duration-200 group-hover:scale-[1.03] overflow-hidden">
+        {/* فقط لوگو — پین‌شده به «چپ» کارت و وسط عمودی */}
+        <div className="absolute left-5 top-1/2 -translate-y-1/2">
+          <div className="w-14 h-14 rounded-xl bg-white ring-1 ring-black/5 shadow-sm grid place-items-center overflow-hidden transition-transform duration-200 group-hover:scale-[1.03]">
             <picture>
-              <source srcSet={webpLogo} type="image/webp" />
+              <source srcSet={webp} type="image/webp" />
               <img
-                src={pngLogo}
-                alt={title}
+                src={png}
+                alt={title || base}
                 width={56}
                 height={56}
                 className="w-10 h-10 object-contain"
@@ -88,14 +103,12 @@ function BrandCard({ title, slug, index, logo = slug, art = slug }) {
               />
             </picture>
           </div>
-
-          {/* عنوان را روی کارت نمایش نمی‌دهیم؛ فقط برای دسترس‌پذیری */}
-          <span className="sr-only">{title}</span>
         </div>
       </div>
     </Link>
   );
 }
+
 
 /* ======================================================= */
 /*                        کارت خدمات                      */

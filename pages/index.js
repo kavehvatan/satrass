@@ -1,7 +1,7 @@
 // pages/index.js
+import React, { useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import Image from "next/image";
 
 /* -------------------- تنظیم رنگ‌ها -------------------- */
 const BRAND_TEAL = "#14b8a6";   // فیروزه‌ای
@@ -11,6 +11,7 @@ const LOGO_COLORS = ["#14b8a6", "#2d5bff"]; // برای هاله‌ی خیلی �
 // 70% شفافیت به‌صورت هگز 8 رقمی (#RRGGBBAA) => AA = B3
 const with70 = (hex) => `${hex}B3`;
 const pickServiceColor = (i) => (i % 2 === 0 ? BRAND_TEAL : BRAND_AMBER);
+const colorOf = (i) => LOGO_COLORS[i % LOGO_COLORS.length];
 
 /* -------------------- داده‌های وندورها -------------------- */
 /** آرت‌ها و لوگوها را در:
@@ -34,7 +35,6 @@ import services from "../data/services.json";
 /*                     کارت برند (تجهیزات)                */
 /*  لوگو فقط سمت چپ؛ عنوان روی کارت نمایش داده نمی‌شود.   */
 /* ======================================================= */
-// ---------------------- کارت برند «تجهیزات» ----------------------
 function BrandCard({ title, slug, href, index, logo }) {
   const [border, setBorder] = useState("#e5e7eb");
   const link = href || `/products/${slug || (title || "").toLowerCase()}`;
@@ -45,10 +45,10 @@ function BrandCard({ title, slug, href, index, logo }) {
     : (slug || (title || "")).toLowerCase()
   );
 
-  const webp   = `/avatars/${base}.webp`;
-  const png    = `/avatars/${base}.png`;
   const artWebp = `/brand-art/${base}.webp`;
   const artPng  = `/brand-art/${base}.png`;
+  const logoWebp = `/avatars/${base}.webp`;
+  const logoPng  = `/avatars/${base}.png`;
 
   return (
     <Link href={link} className="group block">
@@ -92,9 +92,9 @@ function BrandCard({ title, slug, href, index, logo }) {
         <div className="absolute left-5 top-1/2 -translate-y-1/2">
           <div className="w-14 h-14 rounded-xl bg-white ring-1 ring-black/5 shadow-sm grid place-items-center overflow-hidden transition-transform duration-200 group-hover:scale-[1.03]">
             <picture>
-              <source srcSet={webp} type="image/webp" />
+              <source srcSet={logoWebp} type="image/webp" />
               <img
-                src={png}
+                src={logoPng}
                 alt={title || base}
                 width={56}
                 height={56}
@@ -108,7 +108,6 @@ function BrandCard({ title, slug, href, index, logo }) {
     </Link>
   );
 }
-
 
 /* ======================================================= */
 /*                        کارت خدمات                      */
@@ -165,17 +164,13 @@ export default function Home() {
               <div className="mt-8 flex flex-wrap gap-4">
                 <Link
                   href="/contact#contact"
-                  className="
-                    rounded-full px-6 py-3 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold
-                  "
+                  className="rounded-full px-6 py-3 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold"
                 >
                   ارائه مشاوره
                 </Link>
                 <Link
                   href="/tools"
-                  className="
-                    rounded-full px-6 py-3 border border-teal-400/60 text-teal-300 hover:bg-teal-500/10
-                  "
+                  className="rounded-full px-6 py-3 border border-teal-400/60 text-teal-300 hover:bg-teal-500/10"
                 >
                   مشاهده ابزارها
                 </Link>

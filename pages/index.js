@@ -173,21 +173,26 @@ function BrandCard({ title, slug, href, subtitle, index, logo }) {
         />
 
         {/* محتوا: لوگو سمت چپ، عنوان کنار آن */}
-        <div className="relative flex items-center gap-4">
-          <div className="w-14 h-14 shrink-0 rounded-xl bg-white ring-1 ring-black/5 shadow-sm grid place-items-center transition-transform duration-200 group-hover:scale-[1.03] overflow-hidden">
-            <picture>
-              <source srcSet={webp} type="image/webp" />
-              <img
-                src={png}
-                alt={title}
-                width={56}
-                height={56}
-                className="w-10 h-10 object-contain"
-                onError={(e) => (e.currentTarget.src = "/avatars/default.png")}
-              />
-            </picture>
-          </div>
+      // --- داخل BrandCard، جای بخش «محتوا: لوگو، عنوان» قبلی را با این بگذار ---
+<div className="relative flex items-center gap-4" dir="ltr">
+  {/* لوگو - سمت چپ باقی می‌ماند چون ظرف لِی‌اوت LTR است */}
+  <div className="w-14 h-14 shrink-0 rounded-xl bg-white ring-1 ring-black/5 shadow-sm grid place-items-center transition-transform duration-200 group-hover:scale-[1.03] overflow-hidden">
+    <picture>
+      <source srcSet={webp} type="image/webp" />
+      <img
+        src={png}
+        alt={title}
+        width={56}
+        height={56}
+        className="w-10 h-10 object-contain"
+        onError={(e) => (e.currentTarget.src = "/avatars/default.png")}
+      />
+    </picture>
+  </div>
 
+  {/* عنوان برند را نمایش نمی‌دهیم؛ فقط برای اسکرین‌ریدرها نگه می‌داریم */}
+  <span className="sr-only">{title}</span>
+</div>
           <div className="min-w-0">
             <h3 className="text-slate-900 font-semibold">{title}</h3>
             {subtitle && (

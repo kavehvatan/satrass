@@ -72,17 +72,17 @@ const SERVICES = [
       "گزارش ماهانه سلامت/ظرفیت/ریسک + نشست CAB.",
   },
 ];
-
-// -------------------- پس‌زمینه‌ی فالبک برای کارت‌های خدمات --------------------
-const BRAND_TEAL = "#14b8a6";
+// -------------------- پس‌زمینه‌ی فالبک برای کارت‌های خدمات (تک‌رنگ) --------------------
+const BRAND_TEAL  = "#14b8a6";
 const BRAND_AMBER = "#f4c21f";
+
+// فقط یکی از دو رنگ را (به‌صورت پایدار بر اساس ایندکس) انتخاب می‌کنیم
 const serviceBgStyle = (i) => {
-  const a = i % 2 === 0 ? BRAND_TEAL : BRAND_AMBER;
-  const b = i % 3 === 0 ? BRAND_AMBER : BRAND_TEAL;
+  const c = i % 2 === 0 ? BRAND_TEAL : BRAND_AMBER;   // شبه‌تصادفیِ پایدار
   return {
     background: `
-      radial-gradient(120% 120% at 10% 10%, ${a}1f 0%, transparent 50%),
-      linear-gradient(135deg, ${a}12, ${b}14)
+      radial-gradient(120% 120% at 10% 10%, ${c}1f 0%, transparent 55%),
+      linear-gradient(135deg, ${c}12, ${c}10)
     `,
     boxShadow: "0 8px 28px rgba(2, 6, 23, .06)",
   };

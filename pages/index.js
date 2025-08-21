@@ -1,173 +1,194 @@
 // pages/index.js
+import Head from "next/head";
+import Image from "next/image";
 import Link from "next/link";
-import { useCallback } from "react";
 
-// داده‌ها (بدون آلیاس)
-import vendors from "../data/vendors";          // [{ slug,title,href,logo?,cover? }, ...]
-import services from "../data/services.json";   // { items: [{ title, desc?, href? }, ...] }
+import vendors from "../data/vendors";          // گرید تجهیزات
+import services from "../data/services.json";   // لیست خدمات
 
-const TEAL  = "#14b8a6";
-const AMBER = "#f4c21f";
+/* رنگ‌های برند برای کارت خدمات (تمام‌سطح) */
+const BRAND_TEAL  = "#14b8a6";
+const BRAND_AMBER = "#f4c21f";
+const serviceSolidBg = (i) => (i % 2 === 0 ? BRAND_TEAL : BRAND_AMBER);
 
-// رنگ یک‌درمیان برای کارت خدمات (تمام‌پُر)
-const serviceBg = (i) => (i % 2 === 0 ? TEAL : AMBER);
-
-// onError برای عکس‌ها تا به فالبک بروند
-const useImgFallback = () =>
-  useCallback((e, fallback) => {
-    if (!e?.target) return;
-    if (e.target.dataset.fallbackApplied) return;
-    e.target.dataset.fallbackApplied = "1";
-    e.target.src = fallback;
-  }, []);
-
-export default function HomePage() {
-  const onLogoErr  = useImgFallback();
-  const onCoverErr = useImgFallback();
-
-  const VendorCard = ({ v }) => {
-    // مسیرها: سعی می‌کنیم webp داشته باشیم؛ اگر نبود در onError به default می‌رویم
-    const cover = v.cover || `/covers/${v.slug}.webp`;
-    const logo  = v.logo  || `/avatars/${v.slug}.webp`;
-
-    return (
-      <Link
-        href={v.href || `/products/${v.slug}`}
-        className="group block"
-        prefetch={false}
-      >
-        <div className="relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white/60 hover:translate-y-1 hover:shadow-xl transition-all duration-300">
-          {/* پس‌زمینهٔ سرور کم‌رنگ */}
-          <img
-            alt={`${v.title} cover`}
-            src={cover}
-            className="absolute inset-0 h-full w-full object-cover opacity-25"
-            onError={(e) => onCoverErr(e, "/covers/fallback.webp")}
-            draggable="false"
-          />
-          {/* واریانت شیشه‌ای خیلی ملایم بالای بک‌گراند */}
-          <div className="absolute inset-0 pointer-events-none opacity-50" style={{
-            background: "radial-gradient(140% 120% at 10% 10%, rgba(20,184,166,.12) 0%, transparent 45%), radial-gradient(120% 140% at 90% 10%, rgba(244,194,31,.10) 0%, transparent 50%)"
-          }}/>
-          {/* محتوای کارت */}
-          <div className="relative flex items-center justify-center px-6 py-14">
-            {/* فقط لوگو داخل یک کپسول سفید */}
-            <div className="h-16 w-16 shrink-0 rounded-2xl bg-white/95 ring-1 ring-slate-900/5 shadow-sm flex items-center justify-center">
-              <img
-                alt={`${v.title} logo`}
-                src={logo}
-                className="max-h-10 max-w-12 object-contain"
-                onError={(e) => onLogoErr(e, "/avatars/default.png")}
-                draggable="false"
-              />
-            </div>
-          </div>
-        </div>
-      </Link>
-    );
-  };
-
-  const ServiceCard = ({ s, i }) => {
-    const bg = serviceBg(i);
-    return (
-      <div
-        className="rounded-2xl border border-slate-200/60 p-8 lg:p-10 shadow-sm hover:shadow-lg transition"
-        style={{ background: bg }}
-      >
-        <h3 className="text-2xl font-extrabold text-slate-900 mb-3">
-          {s.title}
-        </h3>
-        {s.desc && (
-          <p className="text-slate-900/90 leading-8">
-            {s.desc}
-          </p>
-        )}
-        {s.href && (
-          <div className="mt-6">
-            <Link
-              href={s.href}
-              className="inline-flex items-center gap-2 rounded-xl bg-white/90 px-4 py-2 text-slate-900 hover:bg-white transition"
-              prefetch={false}
-            >
-              <span>ادامه</span>
-              <span aria-hidden className="translate-y-[1px]">↗</span>
-            </Link>
-          </div>
-        )}
-      </div>
-    );
-  };
-
+export default function Home() {
   return (
-    <main className="min-h-screen">
-      {/* هِرو */}
-      <section className="container mx-auto max-w-6xl px-4 sm:px-6 pt-10 sm:pt-14">
-        <div className="rounded-3xl border border-slate-200/60 bg-white/70 p-6 sm:p-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-8">
-            {/* تصویر هِرو — اگر تصویر نداری، لوگو/پِلِیس‌هولدر */}
-            <div className="flex items-center justify-center">
-              <img
-                src="/hero.webp"
-                alt="تصویر هِرو ساتراس"
-                className="max-h-40 sm:max-h-56 object-contain"
-                onError={(e) => onCoverErr(e, "/logo.png")}
-                draggable="false"
-              />
-            </div>
-            <div>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 leading-snug">
-                راهکارها و تجهیزات سازمانی با تمرکز بر کارایی و سادگی
-              </h1>
-              <p className="mt-4 text-slate-700">
-                از مشاوره و طراحی تا اجرا، پایش و راهبری؛ همیشه کنار شما هستیم.
-              </p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Link
-                  href="/contact#contact"
-                  prefetch={false}
-                  className="rounded-2xl bg-teal-500 hover:bg-teal-600 text-white px-5 py-3 transition"
-                >
-                  درخواست مشاوره
-                </Link>
-                <Link
-                  href="/contact"
-                  prefetch={false}
-                  className="rounded-2xl border border-slate-300 hover:border-slate-400 text-slate-900 px-5 py-3 bg-white/80 transition"
-                >
-                  با ما تماس
-                </Link>
+    <>
+      <Head>
+        <title>ساتراس | راهکارها و تجهیزات سازمانی</title>
+        <meta
+          name="description"
+          content="راهکارها و تجهیزات زیرساخت با تمرکز بر کارایی و سادگی. از مشاوره و طراحی تا اجرا، پایش و راهبری کنار شما هستیم."
+        />
+      </Head>
+
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+
+        {/* ——— Hero تیره ——— */}
+        <section className="mb-12">
+          <div className="relative overflow-hidden rounded-3xl ring-1 ring-white/10">
+            {/* پس‌زمینه‌ی تیره با گرادیان */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-black via-slate-900 to-slate-800" />
+            {/* کمی افکت نور */}
+            <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-teal-500/20 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-20 -left-16 h-72 w-72 rounded-full bg-amber-400/15 blur-3xl" />
+
+            <div className="relative z-[1] p-8 md:p-12 flex flex-col md:flex-row items-center gap-10 text-white">
+              {/* متن */}
+              <div className="flex-1 text-center md:text-right">
+                <h1 className="text-3xl md:text-5xl font-extrabold leading-[1.2]">
+                  راهکارها و تجهیزات سازمانی
+                  <br className="hidden md:block" />
+                  <span className="whitespace-nowrap"> با تمرکز بر کارایی و سادگی</span>
+                </h1>
+                <p className="mt-4 text-white/80">
+                  از مشاوره و طراحی تا اجرا، پایش و راهبری؛ همیشه کنار شما هستیم.
+                </p>
+
+                <div className="mt-6 flex flex-wrap justify-center md:justify-start gap-3">
+                  <Link href="/contact" className="btn-brand">
+                    درخواست مشاوره
+                  </Link>
+                  <Link href="/tools" className="btn-ghost">
+                    ابزارها
+                  </Link>
+                </div>
+              </div>
+
+              {/* تصویر هرو (در صورت نبود فایل، آسیبی نمی‌زند) */}
+              <div className="relative w-[260px] h-[200px] md:w-[320px] md:h-[240px] select-none">
+                <Image
+                  src="/hero-satrass.webp"
+                  alt="تصویر هرو ساتراس"
+                  fill
+                  className="object-contain drop-shadow-[0_10px_30px_rgba(0,0,0,.5)]"
+                  sizes="(min-width: 768px) 320px, 260px"
+                  priority
+                />
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* تجهیزات */}
-      <section id="vendors" className="container mx-auto max-w-6xl px-4 sm:px-6 mt-12 sm:mt-14">
-        <div className="flex items-center justify-between mb-5 sm:mb-6">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">تجهیزات</h2>
-          <Link href="/products" prefetch={false} className="text-teal-600 hover:text-teal-700">
-            مشاهده همه
-          </Link>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-5">
-          {(vendors || []).slice(0, 5).map((v) => (
-            <VendorCard key={v.slug || v.title} v={v} />
-          ))}
-        </div>
-      </section>
+        {/* ——— تجهیزات ——— */}
+        <section className="mb-14" id="vendors">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900">تجهیزات</h2>
+            <Link
+              href="/products"
+              className="text-sm font-bold text-slate-700 hover:text-slate-900"
+            >
+              مشاهده همه
+            </Link>
+          </div>
 
-      {/* خدمات */}
-      <section id="services" className="container mx-auto max-w-6xl px-4 sm:px-6 mt-12 sm:mt-14 mb-16 sm:mb-24">
-        <div className="mb-5 sm:mb-6">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">خدمات</h2>
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          {(services?.items || []).map((s, i) => (
-            <ServiceCard key={s.id || s.title || i} s={s} i={i} />
-          ))}
-        </div>
-      </section>
-    </main>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            {vendors?.map((v) => {
+              const logoSrc =
+                v.logo ||
+                (v.slug ? `/avatars/${v.slug}.webp` : "/avatars/default.png");
+              const cover = v.cover || `/covers/${v.slug || "default"}.webp`;
+
+              return (
+                <Link
+                  key={v.slug || v.title}
+                  href={v.href || `/products/${v.slug}`}
+                  className="group relative block rounded-2xl overflow-hidden ring-1 ring-slate-200/70 bg-white/70 backdrop-blur-sm hover:shadow-lg transition-all"
+                >
+                  {/* پس‌زمینه‌ی کاور کم‌رنگ */}
+                  <div className="absolute inset-0">
+                    <Image
+                      src={cover}
+                      alt=""
+                      fill
+                      sizes="180px"
+                      className="object-cover opacity-20 group-hover:opacity-30 transition-opacity"
+                    />
+                  </div>
+
+                  {/* فقط لوگو */}
+                  <div className="relative flex h-28 items-center justify-center p-6">
+                    <div className="relative w-16 h-10">
+                      <Image
+                        src={logoSrc}
+                        alt={v.title || "brand"}
+                        fill
+                        className="object-contain"
+                        sizes="64px"
+                      />
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* ——— خدمات (رنگ کامل، بدون آیکون) ——— */}
+        <section className="mb-16" id="services">
+          <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 mb-6">خدمات</h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {services?.items?.map((s, i) => {
+              const bg = serviceSolidBg(i);                     // رنگ ثابت برای هر کارت
+              const isLight = bg === BRAND_AMBER;               // روی آمبر متن تیره‌تر
+              const titleColor = isLight ? "text-slate-900" : "text-white";
+              const bodyColor  = isLight ? "text-slate-800/90" : "text-white/90";
+              const ringColor  = isLight ? "ring-black/10" : "ring-white/20";
+
+              return (
+                <div
+                  key={s.id || s.title || i}
+                  className={`rounded-2xl p-6 md:p-7 ring-1 ${ringColor} transition-all`}
+                  style={{ backgroundColor: bg }}
+                >
+                  <h3 className={`text-xl md:text-2xl font-extrabold mb-3 ${titleColor}`}>
+                    {s.title}
+                  </h3>
+
+                  {s.desc && <p className={`leading-7 ${bodyColor}`}>{s.desc}</p>}
+
+                  {s.href && (
+                    <div className="mt-5">
+                      <Link
+                        href={s.href}
+                        className={`inline-flex items-center gap-2 text-sm font-bold underline-offset-4 hover:underline ${
+                          isLight ? "text-slate-900" : "text-white"
+                        }`}
+                      >
+                        ادامه
+                        <span aria-hidden>↗</span>
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* ——— CTA پایانی ——— */}
+        <section className="mb-8">
+          <div className="rounded-3xl bg-white/60 backdrop-blur-md ring-1 ring-slate-200/60 p-8 md:p-10 flex flex-col md:flex-row items-center gap-6">
+            <div className="flex-1 text-center md:text-right">
+              <h3 className="text-xl md:text-2xl font-extrabold text-slate-900">
+                برای انتخاب بهینه و استعلام، با ما در ارتباط باشید
+              </h3>
+              <p className="mt-2 text-slate-700/90">
+                تیم ساتراس آمادهٔ ارائهٔ مشاوره و همراهی گام‌به‌گام است.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Link href="/contact" className="btn-brand">
+                تماس با ما
+              </Link>
+              <Link href="/warranty" className="btn-ghost">
+                استعلام گارانتی
+              </Link>
+            </div>
+          </div>
+        </section>
+      </main>
+    </>
   );
 }

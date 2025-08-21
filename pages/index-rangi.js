@@ -3,52 +3,56 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 
-import vendors from "../data/vendors";          // لیست برندها برای «تجهیزات»
-import services from "../data/services.json";   // لیست آیتم‌های «خدمات»
+import vendors from "../data/vendors";          // تجهیزات
+import services from "../data/services.json";   // خدمات
 
-/* رنگ‌های برند برای کارت‌های «خدمات» */
+/* === رنگ‌های برند === */
 const BRAND_TEAL  = "#14b8a6";
 const BRAND_AMBER = "#f4c21f";
 
-// رنگ ثابت هر کارت خدمات بر اساس ایندکس (بدون نوسان در رندرها)
+// رنگ ثابتِ هر کارت خدمات بر اساس ایندکس (بدون تغییر در هر رندر)
 const serviceSolidBg = (i) => (i % 2 === 0 ? BRAND_TEAL : BRAND_AMBER);
 
 export default function Home() {
   return (
     <>
       <Head>
-        <title>ساتراس | خدمات و تجهیزات زیرساخت</title>
+        <title>ساتراس | راهکارها و تجهیزات زیرساخت</title>
         <meta
           name="description"
-          content="ارائهٔ خدمات تخصصی، مشاوره و تأمین تجهیزات سازمانی توسط ساتراس."
+          content="ارائه راهکارها و نرم‌افزارها، تجهیزات سازمانی و خدمات تخصصی توسط ساتراس."
         />
       </Head>
 
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-
-        {/* هِرو */}
+        {/* هرو */}
         <section className="mb-10">
           <div className="rounded-3xl bg-white/60 dark:bg-slate-900/40 backdrop-blur-md ring-1 ring-slate-200/60 dark:ring-slate-700/50 p-8 md:p-12 flex flex-col md:flex-row gap-8 items-center">
             <div className="flex-1 text-center md:text-right">
               <h1 className="text-3xl md:text-4xl font-extrabold leading-tight text-slate-900 dark:text-white">
-                راهکارهای زیرساخت، پشتیبانی و مرکز داده
+                راهکارها و تجهیزات سازمانی با تمرکز بر کارایی و سادگی
               </h1>
               <p className="mt-4 text-slate-700/90 dark:text-slate-300">
-                از مشاوره و طراحی تا اجرا، پایش و راهبری؛ کنار شما هستیم.
+                از مشاوره و طراحی تا اجرا، پایش و راهبری؛ همراه شما هستیم.
               </p>
+
               <div className="mt-6 flex flex-wrap justify-center md:justify-start gap-3">
-                <Link href="/contact" className="btn-brand">درخواست مشاوره</Link>
-                <Link href="/tools" className="btn-ghost">تماس با ما</Link>
+                <Link href="/tools" className="btn-brand">
+                  ابزارها
+                </Link>
+                <Link href="/contact" className="btn-ghost">
+                  ارائه مشاوره
+                </Link>
               </div>
             </div>
 
-            <div className="relative w-64 h-48 md:w-80 md:h-60">
+            <div className="w-40 h-40 relative select-none">
               <Image
-                src="/ hero.webp"
-                alt="تصویر هرو ساتراس"
+                alt="لوگو ساتراس"
+                src="/logo-satrass.png"
                 fill
-                className="object-cover rounded-2xl"
-                sizes="(max-width:768px) 256px, 320px"
+                className="object-contain"
+                sizes="160px"
                 priority
               />
             </div>
@@ -73,10 +77,9 @@ export default function Home() {
             {vendors?.map((v) => {
               const logoSrc =
                 v.logo ||
-                (v.slug ? `/avatars/${v.slug}.webp` : "/avatars/default.webp");
-              const coverSrc =
-                v.cover ||
-                (v.slug ? `/covers/${v.slug}.webp` : "/covers/default.webp");
+                (v.slug ? `/avatars/${v.slug}.webp` : "/avatars/default.png");
+
+              const cover = v.cover || `/covers/${v.slug || "default"}.webp`;
 
               return (
                 <Link
@@ -84,10 +87,9 @@ export default function Home() {
                   href={v.href || `/products/${v.slug}`}
                   className="group relative block rounded-2xl overflow-hidden ring-1 ring-slate-200/70 dark:ring-slate-700/50 bg-white/70 dark:bg-slate-900/40 backdrop-blur-md hover:shadow-lg transition-all"
                 >
-                  {/* بک‌گراند فتوکاور محو */}
                   <div className="absolute inset-0">
                     <Image
-                      src={coverSrc}
+                      src={cover}
                       alt=""
                       fill
                       sizes="180px"
@@ -95,9 +97,8 @@ export default function Home() {
                     />
                   </div>
 
-                  {/* فقط لوگو (متن برند نمایش داده نمی‌شود) */}
-                  <div className="relative flex items-center justify-center p-6 h-28">
-                    <div className="relative w-16 h-10">
+                  <div className="relative flex flex-col items-center justify-center p-6 h-28">
+                    <div className="w-16 h-10 relative">
                       <Image
                         src={logoSrc}
                         alt={v.title || "brand"}
@@ -106,6 +107,7 @@ export default function Home() {
                         sizes="64px"
                       />
                     </div>
+                    {/* فقط لوگو—عنوان برند را نمایش نده */}
                   </div>
                 </Link>
               );
@@ -113,7 +115,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* خدمات — شامل Commvault و NetBackup نیز اینجاست */}
+        {/* خدمات */}
         <section className="mb-16">
           <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white mb-6">
             خدمات
@@ -124,8 +126,8 @@ export default function Home() {
               const bg = serviceSolidBg(i);
               const isLight = bg === BRAND_AMBER;
               const titleColor = isLight ? "text-slate-900" : "text-white";
-              const bodyColor  = isLight ? "text-slate-800/90" : "text-white/90";
-              const ringColor  = isLight ? "ring-black/10" : "ring-white/20";
+              const bodyColor = isLight ? "text-slate-800/90" : "text-white/90";
+              const ringColor = isLight ? "ring-black/10" : "ring-white/20";
 
               return (
                 <div
@@ -136,8 +138,8 @@ export default function Home() {
                   <div className="flex items-center gap-3 mb-3">
                     {s.icon && (
                       <span
-                        aria-hidden
                         className="inline-flex w-10 h-10 items-center justify-center rounded-xl bg-black/10"
+                        aria-hidden
                       >
                         <span className="relative w-6 h-6">
                           <Image
@@ -150,12 +152,17 @@ export default function Home() {
                         </span>
                       </span>
                     )}
-                    <h3 className={`text-xl md:text-2xl font-extrabold ${titleColor}`}>
+
+                    <h3
+                      className={`text-xl md:text-2xl font-extrabold ${titleColor}`}
+                    >
                       {s.title}
                     </h3>
                   </div>
 
-                  {s.desc && <p className={`leading-7 ${bodyColor}`}>{s.desc}</p>}
+                  {s.desc && (
+                    <p className={`leading-7 ${bodyColor}`}>{s.desc}</p>
+                  )}
 
                   {s.href && (
                     <div className="mt-5">
@@ -188,8 +195,12 @@ export default function Home() {
               </p>
             </div>
             <div className="flex gap-3">
-              <Link href="/contact" className="btn-brand">تماس با ما</Link>
-              <Link href="/warranty" className="btn-ghost">استعلام گارانتی</Link>
+              <Link href="/contact" className="btn-brand">
+                تماس با ما
+              </Link>
+              <Link href="/warranty" className="btn-ghost">
+                استعلام گارانتی
+              </Link>
             </div>
           </div>
         </section>

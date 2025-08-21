@@ -4,4 +4,20 @@
   "training": { "title": "آموزش", "intro": "…" , "items": [] },
   "consulting-design": { "title": "مشاوره و طراحی", "intro": "…" , "items": [] },
   "operations": { "title": "راهبری", "intro": "…" , "items": [] }
+  "items": [
+    {
+      "title": "Commvault",
+      "desc": "پیاده‌سازی و پشتیبانی بکاپ/ریکاوری سازمانی Commvault.",
+      "href": "/services/commvault",
+      "icon": "/avatars/commvault.webp"
+    },
+    {
+      "title": "NetBackup",
+      "desc": "طراحی و پشتیبانی Veritas NetBackup برای محیط‌های سازمانی.",
+      "href": "/services/netbackup",
+      "icon": "/avatars/netbackup.webp"
+    }
+
+    // ... سایر خدمات قبلی‌ات
+  ]
 }

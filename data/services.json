@@ -6,6 +6,12 @@
   "operations": { "title": "راهبری", "intro": "…" , "items": [] }
   "items": [
     {
+ 
+}
+
+{
+  "items": [
+    {
       "title": "Commvault",
       "desc": "پیاده‌سازی و پشتیبانی بکاپ/ریکاوری سازمانی Commvault.",
       "href": "/services/commvault",

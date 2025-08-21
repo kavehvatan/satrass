@@ -1,7 +1,7 @@
 // pages/index.js
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import vendors from "../data/vendors"; // ⟵ ایمپورت نسبی
+import vendors from "../data/vendors"; // ⟵ ایمپورت نسبی، بدون @
 
 // ---------------------- رنگ‌ها و کمک‌تابع‌ها ----------------------
 const TEAL = "#14b8a6";
@@ -76,7 +76,6 @@ const SERVICES_BASE = [
   },
 ];
 
-// راهکارها را به آیتم‌های «خدمات» تبدیل می‌کنیم
 const SOLUTIONS_AS_SERVICES = SOLUTIONS.map((s) => ({
   slug: s.slug,
   title: s.name,
@@ -84,13 +83,12 @@ const SOLUTIONS_AS_SERVICES = SOLUTIONS.map((s) => ({
   desc2: `${s.p2} ${s.p3}`,
 }));
 
-// ترکیب نهایی «خدمات»
 const SERVICES = [...SOLUTIONS_AS_SERVICES, ...SERVICES_BASE];
 
 // ---------------------- هوک جابجایی رنگ دکمه‌های هیرو ----------------------
 function useAlternatingBrandPair() {
-  const [primary, setPrimary] = useState(YELLOW); // Filled
-  const [secondary, setSecondary] = useState(TEAL); // Outlined
+  const [primary, setPrimary] = useState(YELLOW);
+  const [secondary, setSecondary] = useState(TEAL);
 
   useEffect(() => {
     try {
@@ -121,8 +119,8 @@ function useAlternatingBrandPair() {
   return { primary, secondary, swap };
 }
 
-// ---------------------- کارت برند «تجهیزات» — فقط لوگو، سمت چپ ----------------------
-function BrandCard({ title, slug, href, index, logo }) {
+// ---------------------- کارت برند «تجهیزات» (نسخه‌ی درستِ چیدمان) ----------------------
+function BrandCard({ title, slug, href, subtitle, index, logo }) {
   const [border, setBorder] = useState("#e5e7eb");
   const link = href || `/products/${slug || (title || "").toLowerCase()}`;
 
@@ -133,6 +131,7 @@ function BrandCard({ title, slug, href, index, logo }) {
 
   const webp = `/avatars/${base}.webp`;
   const png = `/avatars/${base}.png`;
+
   const artWebp = `/brand-art/${base}.webp`;
   const artPng = `/brand-art/${base}.png`;
 
@@ -141,9 +140,9 @@ function BrandCard({ title, slug, href, index, logo }) {
       <div
         className="
           relative overflow-hidden rounded-2xl
-          border bg-white/70 supports-[backdrop-filter]:bg-white/35 backdrop-blur-xl
-          px-4 h-[110px] md:h-[120px]
-          transition duration-200 hover:-translate-y-0.5 hover:shadow-xl
+          border bg-white/70 supports-[backdrop-filter]:bg-white/35
+          backdrop-blur-xl p-5 transition duration-200
+          hover:-translate-y-0.5 hover:shadow-xl
         "
         style={{ borderColor: border, borderWidth: 1 }}
         onMouseEnter={() =>
@@ -151,21 +150,21 @@ function BrandCard({ title, slug, href, index, logo }) {
         }
         onMouseLeave={() => setBorder("#e5e7eb")}
       >
-        {/* بک‌گراند بسیار کم‌رنگ */}
+        {/* بک‌گراند کارتونی کم‌رنگ */}
         <picture className="pointer-events-none select-none absolute inset-0">
           <source srcSet={artWebp} type="image/webp" />
           <img
             src={artPng}
             alt=""
             aria-hidden="true"
-            className="w-full h-full object-cover scale-[1.12] opacity-[.10] md:opacity-[.12] contrast-110 saturate-110"
+            className="w-full h-full object-cover scale-[1.12] opacity-[.12] md:opacity-[.14] contrast-110 saturate-110"
             onError={(e) => (e.currentTarget.style.display = "none")}
           />
         </picture>
 
-        {/* هالهٔ ملایم رنگی */}
+        {/* هاله رنگی ملایم */}
         <div
-          className="absolute inset-0 pointer-events-none opacity-25"
+          className="absolute inset-0 pointer-events-none opacity-30"
           style={{
             background: `radial-gradient(140% 120% at -10% -10%, ${colorOf(
               index
@@ -173,30 +172,36 @@ function BrandCard({ title, slug, href, index, logo }) {
           }}
         />
 
-        {/* فقط لوگو — سمت چپ، وسط عمودی */}
-        <div
-          className="
-            relative w-12 h-12 md:w-14 md:h-14 rounded-xl bg-white ring-1 ring-black/5
-            shadow-sm grid place-items-center overflow-hidden
-            absolute top-1/2 -translate-y-1/2
-            transition-transform duration-200 group-hover:scale-[1.03]
-          "
-          style={{ left: "1rem", right: "auto" }}  // اجباری سمت چپ
-        >
-          <picture>
-            <source srcSet={webp} type="image/webp" />
-            <img
-              src={png}
-              alt={title}
-              className="w-10 h-10 object-contain"
-              onError={(e) => (e.currentTarget.src = "/avatars/default.png")}
-            />
-          </picture>
+        {/* محتوا: لوگو سمت چپ، عنوان کنار آن */}
+        <div className="relative flex items-center gap-4">
+          <div className="w-14 h-14 shrink-0 rounded-xl bg-white ring-1 ring-black/5 shadow-sm grid place-items-center transition-transform duration-200 group-hover:scale-[1.03] overflow-hidden">
+            <picture>
+              <source srcSet={webp} type="image/webp" />
+              <img
+                src={png}
+                alt={title}
+                width={56}
+                height={56}
+                className="w-10 h-10 object-contain"
+                onError={(e) => (e.currentTarget.src = "/avatars/default.png")}
+              />
+            </picture>
+          </div>
+
+          <div className="min-w-0">
+            <h3 className="text-slate-900 font-semibold">{title}</h3>
+            {subtitle && (
+              <p className="text-slate-600 text-sm mt-1 line-clamp-2">
+                {subtitle}
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </Link>
   );
 }
+
 // ---------------------- مودال شیشه‌ای عمومی ----------------------
 function GlassModal({ open, onClose, title, paragraphs }) {
   const [closing, setClosing] = useState(false);
@@ -280,12 +285,12 @@ function GlassModal({ open, onClose, title, paragraphs }) {
   );
 }
 
-// ---------------------- کارت «خدمات» (پس‌زمینه از دو رنگ برند با 70٪ شفافیت) ----------------------
+// ---------------------- کارت «خدمات» با رنگ فالبک 70٪ ----------------------
 function ServiceCardWithModal(props) {
   const [open, setOpen] = useState(false);
   const [border, setBorder] = useState("#e5e7eb");
   const bgBase = props.index % 2 === 0 ? TEAL : YELLOW;
-  const bg = withAlpha(bgBase, 0.3);
+  const bg = withAlpha(bgBase, 0.7);
 
   return (
     <>
@@ -365,6 +370,7 @@ export default function Home() {
               </a>
             </div>
           </div>
+
           <div className="flex justify-center">
             <img
               src="/satrass-hero.webp"
@@ -378,7 +384,6 @@ export default function Home() {
       {/* تجهیزات */}
       <section id="vendors" className="relative py-12 max-w-6xl mx-auto px-4">
         <h2 className="text-2xl font-extrabold mb-6 text-slate-900">تجهیزات</h2>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {safeVendors.map((v, i) => (
             <BrandCard
@@ -386,6 +391,7 @@ export default function Home() {
               title={v.title}
               slug={v.slug}
               href={v.href}
+              subtitle={v.subtitle}
               index={i}
               logo={v.logo}
             />

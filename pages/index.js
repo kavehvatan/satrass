@@ -295,7 +295,7 @@ function GlassModal({ open, onClose, title, paragraphs }) {
 function ServiceCard({ title, desc1, desc2, index }) {
   const [border, setBorder] = useState("#e5e7eb");
   const bgBase = index % 2 === 0 ? TEAL : YELLOW; // یکی از دو رنگ سایت
-  const bg = withAlpha(bgBase, 0.7); // شفافیت ~70%
+  const bg = withAlpha(bgBase, 0.5); // شفافیت ~70%
 
   return (
     <>
@@ -418,41 +418,53 @@ export default function Home() {
         </div>
       </section>
 
-      {/* تجهیزات */}
-      <section id="vendors" className="relative py-12 max-w-6xl mx-auto px-4">
-        <h2 className="text-2xl font-extrabold mb-6 text-slate-900">تجهیزات</h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {safeVendors.map((v, i) => (
-            <BrandCard
-              key={v.href || v.slug || v.title || i}
-              title={v.title}
-              slug={v.slug}
-              href={v.href}
-              subtitle={v.subtitle}
-              index={i}
-              logo={v.logo}
-            />
-          ))}
-        </div>
-      </section>
+{/* تجهیزات */}
+<h2 id="vendors" className="mt-10 mb-6 text-3xl font-extrabold text-slate-900">
+  تجهیزات
+</h2>
 
-      {/* خدمات (شامل Commvault و NetBackup) */}
-      <section id="services" className="max-w-6xl mx-auto px-4 pb-10">
-        <h2 className="text-2xl font-bold mb-6">خدمات</h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-          {SERVICES.map((s, i) => (
-            <ServiceCardWithModal key={s.slug || s.title} index={i} {...s} />
-          ))}
-        </div>
-      </section>
+<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+  {vendors.map((v) => {
+    const artSrc  = v.art  || `/brand-art/${v.slug}.webp`;
+    const logoSrc = v.logo || `/avatars/${v.slug}.webp`;
 
-      {/* Footer */}
-      <footer className="bg-black text-white">
-        <div className="max-w-6xl mx-auto px-4 py-6 text-center">
-          <p>© {new Date().getFullYear()} ساتراس، همه حقوق محفوظ است</p>
+    return (
+      <Link
+        key={v.slug}
+        href={`/products/${v.slug}`}
+        className="group relative overflow-hidden rounded-2xl ring-1 ring-slate-200/70 bg-white/5"
+      >
+        {/* بک‌گراند کارت (آرت برند) */}
+        <div className="absolute inset-0">
+          {/* اگر آرت نبود مشکلی پیش نمیاد؛ fill خودش چیزی نشان نمی‌دهد */}
+          <Image
+            src={artSrc}
+            alt=""
+            fill
+            className="object-cover opacity-55 group-hover:opacity-65 transition-opacity duration-300"
+            sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
+          />
+          {/* یک لایه لطیف برای خوانایی بیشتر */}
+          <div className="absolute inset-0 bg-white/55" />
         </div>
-      </footer>
-    </main>
-  );
-}
+
+        {/* محتوای کارت: فقط لوگو در سمت چپ؛ بدون متن برند */}
+        <div className="relative h-40 md:h-44">
+          <div className="absolute left-6 top-1/2 -translate-y-1/2">
+            <div className="h-16 w-16 md:h-20 md:w-20 rounded-2xl bg-white/90 backdrop-blur-sm
+                            ring-1 ring-slate-200 shadow-md flex items-center justify-center">
+              <Image
+                src={logoSrc}
+                alt={`${v.title} logo`}
+                width={56}
+                height={56}
+                className="object-contain"
+              />
+            </div>
+          </div>
+        </div>
+      </Link>
+    );
+  })}
+</div>

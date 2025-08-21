@@ -98,15 +98,13 @@ function useAlternatingBrandPair() {
 }
 
 /** ---------------------------
- *  کارت برند «تجهیزات»
- *  تغییر خواسته‌شده: حذف نام برند و نمایش فقط لوگو
- *  پس‌زمینهٔ کارتونی با object-cover و کمی زوم حفظ شده.
+ *  کارت برند «تجهیزات» (بدون تغییر)
+ *  فقط لوگو نمایش داده می‌شود.
  *  --------------------------- */
 function BrandCard({ title, slug, href, index, logo }) {
   const [border, setBorder] = useState("#e5e7eb");
   const link = href || `/products/${slug || (title || "").toLowerCase()}`;
 
-  // نام پایه‌ی لوگو و آرت (webp → png → default.png)
   const base =
     logo
       ? logo.replace(/^\/?avatars\//, "").replace(/\.(png|webp)$/i, "")
@@ -115,7 +113,6 @@ function BrandCard({ title, slug, href, index, logo }) {
   const webp = `/avatars/${base}.webp`;
   const png  = `/avatars/${base}.png`;
 
-  // مسیر تصویر پس‌زمینهٔ کارتونی (اختیاری)
   const artWebp = `/brand-art/${base}.webp`;
   const artPng  = `/brand-art/${base}.png`;
 
@@ -135,7 +132,6 @@ function BrandCard({ title, slug, href, index, logo }) {
         }
         onMouseLeave={() => setBorder("#e5e7eb")}
       >
-        {/* پس‌زمینهٔ کارتونی کم‌رنگ (تمام‌کادر + کمی زوم) */}
         <picture className="pointer-events-none select-none absolute inset-0">
           <source srcSet={artWebp} type="image/webp" />
           <img
@@ -147,15 +143,13 @@ function BrandCard({ title, slug, href, index, logo }) {
           />
         </picture>
 
-        {/* هالهٔ ملایم رنگی */}
         <div
           className="absolute inset-0 pointer-events-none opacity-30"
           style={{
-            background: `radial-gradient(140% 120% at -10% -10%, ${["#00E5FF", "#2D5BFF"][index % 2]}33 0%, transparent 60%)`,
+            background: `radial-gradient(140% 120% at -10% -10%, ${["#00E5FF", "#2D5FF"][index % 2]}33 0%, transparent 60%)`,
           }}
         />
 
-        {/* فقط لوگو — بدون متن برند */}
         <div className="relative flex items-center justify-end">
           <div className="w-14 h-14 shrink-0 rounded-xl bg-white ring-1 ring-black/5 shadow-sm grid place-items-center transition-transform duration-200 group-hover:scale-[1.03] overflow-hidden">
             <picture>
@@ -176,7 +170,7 @@ function BrandCard({ title, slug, href, index, logo }) {
   );
 }
 
-// مودال شیشه‌ای
+// مودال شیشه‌ای (بدون تغییر)
 function GlassModal({ open, onClose, title, paragraphs }) {
   const [closing, setClosing] = useState(false);
 
@@ -254,9 +248,19 @@ function GlassModal({ open, onClose, title, paragraphs }) {
   );
 }
 
-function ServiceCard({ title, desc1, desc2 }) {
+/** کارت «خدمات» — فقط همین بخش تغییر کرده:
+ *  پس‌زمینه‌ی پر با ۷۰٪ شفافیت از بین دو رنگ برند (بر اساس اندیس).
+ *  متن روی TEAL سفید، روی YELLOW مشکی.
+ *  سایر رفتارها/استایل‌ها دست‌نخورده ماند.
+ */
+function ServiceCard({ title, desc1, desc2, index = 0 }) {
   const [border, setBorder] = useState("#e5e7eb");
   const [open, setOpen] = useState(false);
+
+  const isTeal = index % 2 === 0;
+  const bg = isTeal ? "rgba(20,184,166,0.7)" : "rgba(244,194,31,0.7)"; // 70%
+  const fg = isTeal ? "#fff" : "#000";
+
   return (
     <>
       <div
@@ -265,14 +269,14 @@ function ServiceCard({ title, desc1, desc2 }) {
         }
         onMouseLeave={() => setBorder("#e5e7eb")}
         onClick={() => setOpen(true)}
-        className="flex flex-col items-center justify-center gap-3 p-5 bg-white border rounded-lg hover:shadow-md transition text-center w-full max-w-[520px] mx-auto h-[120px] cursor-pointer select-none"
-        style={{ borderColor: border }}
+        className="flex flex-col items-center justify-center gap-3 p-5 border rounded-lg hover:shadow-md transition text-center w-full max-w-[520px] mx-auto h-[120px] cursor-pointer select-none"
+        style={{ borderColor: border, background: bg, color: fg }}
         role="button"
         tabIndex={0}
         aria-haspopup="dialog"
         aria-expanded={open}
       >
-        <span className="font-semibold text-gray-900">{title}</span>
+        <span className="font-semibold" style={{ color: fg }}>{title}</span>
       </div>
       <GlassModal
         open={open}
@@ -409,8 +413,8 @@ export default function Home() {
 
         <h3 className="text-xl font-bold mb-4">خدمات</h3>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-          {SERVICES.map((s) => (
-            <ServiceCard key={s.slug} {...s} />
+          {SERVICES.map((s, i) => (
+            <ServiceCard key={s.slug} {...s} index={i} />
           ))}
         </div>
       </section>

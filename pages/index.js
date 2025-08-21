@@ -126,15 +126,13 @@ function BrandCard({ title, slug, href, index, logo }) {
   const [border, setBorder] = useState("#e5e7eb");
   const link = href || `/products/${slug || (title || "").toLowerCase()}`;
 
-  // نام پایه‌ی لوگو و آرت (webp → png → default.png)
+  // نام پایه‌ی لوگو و آرت
   const base = logo
     ? logo.replace(/^\/?avatars\//, "").replace(/\.(png|webp)$/i, "")
     : (slug || (title || "")).toLowerCase();
 
   const webp = `/avatars/${base}.webp`;
   const png = `/avatars/${base}.png`;
-
-  // تصویر پس‌زمینهٔ کارتونی (اختیاری و خیلی کم‌رنگ)
   const artWebp = `/brand-art/${base}.webp`;
   const artPng = `/brand-art/${base}.png`;
 
@@ -143,9 +141,9 @@ function BrandCard({ title, slug, href, index, logo }) {
       <div
         className="
           relative overflow-hidden rounded-2xl
-          border bg-white/70 supports-[backdrop-filter]:bg-white/35
-          backdrop-blur-xl px-5 h-[140px] transition duration-200
-          hover:-translate-y-0.5 hover:shadow-xl
+          border bg-white/70 supports-[backdrop-filter]:bg-white/35 backdrop-blur-xl
+          px-4 h-[110px] md:h-[120px]
+          transition duration-200 hover:-translate-y-0.5 hover:shadow-xl
         "
         style={{ borderColor: border, borderWidth: 1 }}
         onMouseEnter={() =>
@@ -153,21 +151,21 @@ function BrandCard({ title, slug, href, index, logo }) {
         }
         onMouseLeave={() => setBorder("#e5e7eb")}
       >
-        {/* بک‌گراند خیلی کم‌رنگ */}
+        {/* بک‌گراند بسیار کم‌رنگ */}
         <picture className="pointer-events-none select-none absolute inset-0">
           <source srcSet={artWebp} type="image/webp" />
           <img
             src={artPng}
             alt=""
             aria-hidden="true"
-            className="w-full h-full object-cover scale-[1.12] opacity-[.12] md:opacity-[.14] contrast-110 saturate-110"
+            className="w-full h-full object-cover scale-[1.12] opacity-[.10] md:opacity-[.12] contrast-110 saturate-110"
             onError={(e) => (e.currentTarget.style.display = "none")}
           />
         </picture>
 
-        {/* هاله رنگی ملایم */}
+        {/* هالهٔ ملایم رنگی */}
         <div
-          className="absolute inset-0 pointer-events-none opacity-30"
+          className="absolute inset-0 pointer-events-none opacity-25"
           style={{
             background: `radial-gradient(140% 120% at -10% -10%, ${colorOf(
               index
@@ -175,15 +173,21 @@ function BrandCard({ title, slug, href, index, logo }) {
           }}
         />
 
-        {/* فقط لوگو، سمت چپ و وسط عمودی */}
-        <div className="relative w-14 h-14 rounded-xl bg-white ring-1 ring-black/5 shadow-sm grid place-items-center overflow-hidden absolute left-5 top-1/2 -translate-y-1/2 transition-transform duration-200 group-hover:scale-[1.03]">
+        {/* فقط لوگو — سمت چپ، وسط عمودی */}
+        <div
+          className="
+            relative w-12 h-12 md:w-14 md:h-14 rounded-xl bg-white ring-1 ring-black/5
+            shadow-sm grid place-items-center overflow-hidden
+            absolute top-1/2 -translate-y-1/2
+            transition-transform duration-200 group-hover:scale-[1.03]
+          "
+          style={{ left: "1rem", right: "auto" }}  // اجباری سمت چپ
+        >
           <picture>
             <source srcSet={webp} type="image/webp" />
             <img
               src={png}
               alt={title}
-              width={56}
-              height={56}
               className="w-10 h-10 object-contain"
               onError={(e) => (e.currentTarget.src = "/avatars/default.png")}
             />
@@ -193,7 +197,6 @@ function BrandCard({ title, slug, href, index, logo }) {
     </Link>
   );
 }
-
 // ---------------------- مودال شیشه‌ای عمومی ----------------------
 function GlassModal({ open, onClose, title, paragraphs }) {
   const [closing, setClosing] = useState(false);

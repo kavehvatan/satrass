@@ -167,21 +167,21 @@ function BrandCard({ title, slug, href, index, logo }) {
         />
 
         {/* لوگو—سمت چپ */}
-        <div className="relative flex items-center justify-start">
-          <div className="w-14 h-14 shrink-0 rounded-xl bg-white ring-1 ring-black/5 shadow-sm grid place-items-center transition-transform duration-200 group-hover:scale-[1.03] overflow-hidden">
-            <picture>
-              <source srcSet={webp} type="image/webp" />
-              <img
-                src={png}
-                alt={title}
-                width={56}
-                height={56}
-                className="w-10 h-10 object-contain"
-                onError={(e) => (e.currentTarget.src = "/avatars/default.png")}
-              />
-            </picture>
-          </div>
-        </div>
+        <div className="relative flex items-center ltr:justify-start rtl:justify-end">
+  <div className="w-14 h-14 shrink-0 rounded-xl bg-white ring-1 ring-black/5 shadow-sm grid place-items-center transition-transform duration-200 group-hover:scale-[1.03] overflow-hidden">
+    <picture>
+      <source srcSet={webp} type="image/webp" />
+      <img
+        src={png}
+        alt={title}
+        width={56}
+        height={56}
+        className="w-10 h-10 object-contain"
+        onError={(e) => (e.currentTarget.src = "/avatars/default.png")}
+      />
+    </picture>
+  </div>
+</div>
       </div>
     </Link>
   );

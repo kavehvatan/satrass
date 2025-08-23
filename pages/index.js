@@ -414,7 +414,6 @@ export default function Home() {
           ))}
         </div>
       </section>
-
       {/* Footer با Sitemap */}
       <footer className="bg-black text-white">
   <div className="max-w-6xl mx-auto px-4 py-12">

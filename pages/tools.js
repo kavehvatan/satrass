@@ -43,15 +43,16 @@ function variantForIndex(i) {
 
 export default function Tools() {
   return (
-    <main className="min-h-screen">
-      <section className="max-w-6xl mx-auto px-4 py-10">
-        <h1 className="text-3xl font-extrabold mb-8">ابزارها</h1>
+    <main>
+      <section className="max-w-6xl mx-auto px-4 pt-10 pb-6">
+        <h1 className="text-3xl font-extrabold mb-6">ابزارها</h1>
 
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid md:grid-cols-2 gap-6">
           {TOOLS.map((t, i) => {
             const v = variantForIndex(i);
             const isFilled = v.type === "filled";
             const isYellow = v.color === YELLOW;
+
 
             // استایل مشترک دکمه
             const btnClass =

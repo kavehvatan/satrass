@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 const TEAL = "#14b8a6";
 const YELLOW = "#f4c21f";
 
-// همون منطق دوحالته مثل صفحه اول: هر بار لود جابه‌جا + با کلیک هم سوئیچ
+// جابه‌جایی نوبتی رنگ دکمه‌ها (مشابه صفحهٔ اول)
 function useAlternatingBrandPair() {
   const [primary, setPrimary] = useState(YELLOW);   // Filled
   const [secondary, setSecondary] = useState(TEAL); // Outlined
@@ -28,7 +28,8 @@ function useAlternatingBrandPair() {
   return { primary, secondary, swap };
 }
 
-// ✏️ این لیست رو هر وقت خواستی با آیتم‌های جدید آپدیت کن
+// ✏️ این لیست را هر زمان با آیتم‌های جدید به‌روزرسانی کنید
+// فایل‌ها را داخل public/downloads/ بگذارید و مسیرشان را در فیلد `file` بنویسید.
 const DOWNLOADS = [
   {
     title: "Unity OE 5.4.1",
@@ -47,17 +48,25 @@ export default function DownloadsPage() {
   const primaryIsYellow = primary === YELLOW;
 
   const copy = async (txt) => {
-    try { await navigator.clipboard.writeText(txt); alert("کپی شد ✅"); }
-    catch { alert(txt); }
+    try {
+      await navigator.clipboard.writeText(txt);
+      alert("کپی شد ✅");
+    } catch {
+      alert(txt);
+    }
   };
 
   return (
     <main className="font-sans">
+      {/* پدینگ پایینی کم شده تا فوتر خیلی پایین از دید خارج نشه */}
       <section className="max-w-6xl mx-auto px-4 pt-10 pb-6">
         <h1 className="text-3xl md:text-4xl font-extrabold mb-2">دانلودها</h1>
         <p className="text-gray-600 mb-8">
-          فایل‌ها را داخل <code className="mx-1 px-2 py-0.5 rounded bg-gray-100">public/downloads/</code> قرار بده؛
-          متادیتا را هم همین‌جا در لیست پایین اضافه کن.
+          فایل‌ها را داخل{" "}
+          <code className="mx-1 px-2 py-0.5 rounded bg-gray-100">
+            public/downloads/
+          </code>{" "}
+          قرار بده؛ متادیتا را هم همین‌جا در لیست پایین اضافه کن.
         </p>
 
         <div className="grid md:grid-cols-2 gap-6">
@@ -75,18 +84,14 @@ export default function DownloadsPage() {
                 </div>
               </div>
 
-              {/* اگر دکمه/لینک دانلود دارید، همان کد قبلی‌تان را اینجا بگذارید */}
-            </article>
-          ))}
-        </div>
-      </section>
-    </main>
-  );
-}
-              <p className="mt-3 text-gray-700 leading-7">{d.notes}</p>
+              {d.notes && (
+                <p className="mt-3 text-gray-700 leading-7">{d.notes}</p>
+              )}
 
               <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
-                <span className="px-2 py-0.5 rounded bg-gray-100 text-gray-700">MD5</span>
+                <span className="px-2 py-0.5 rounded bg-gray-100 text-gray-700">
+                  MD5
+                </span>
                 <code className="select-all text-gray-800">{d.md5}</code>
                 <button
                   onClick={() => copy(d.md5)}

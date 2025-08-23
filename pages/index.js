@@ -2,76 +2,15 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import vendors from "../data/vendors"; // ⟵ ایمپورت نسبی، بدون @
+import vendors from "../data/vendors";              // ← ایمپورت نسبی
+import services from "../data/services.json";       // ← خواندن خدمات از فایل
 
 // رنگ‌ها و کمک‌تابع‌ها
-const BRAND_COLORS = ["#00E5FF", "#2D5BFF"];
-const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
-
 const TEAL = "#14b8a6";
 const YELLOW = "#f4c21f";
+const BRAND_COLORS = ["#00E5FF", "#2D5BFF"];
 const LOGO_COLORS = [TEAL, YELLOW];
-
-// داده‌های راهکارها/خدمات (بدون تغییرات دیگر)
-const SOLUTIONS = [
-  {
-    name: "Commvault",
-    slug: "commvault",
-    p1: "راهکار یکپارچهٔ حفاظت از داده برای VM/DB/Files/SaaS/Cloud با Dedup و Policyهای منعطف.",
-    p2: "Hyperscale X برای Scale-out و Metallic به‌صورت SaaS؛ گزارش‌گیری و خودکارسازی کامل.",
-    p3: "سناریوهای متداول: M365/Endpoint، بکاپ ترکیبی On-prem/Cloud، RTO/RPO سخت‌گیرانه.",
-  },
-  {
-    name: "NetBackup",
-    slug: "netbackup",
-    p1: "پلتفرم بکاپ سازمانی با پوشش عمیق مجازی‌سازی/دیتابیس و Inline Dedup برای پنجرهٔ بکاپ کوچک.",
-    p2: "اپلاینس‌های سری 52xx/Flex، مدیریت متمرکز، RBAC و گزارش‌گیری دقیق.",
-    p3: "سناریوها: VMware/Hyper-V، Oracle/SQL، آرشیو نوار/کلود، بازیابی انتخابی سطح فایل.",
-  },
-];
-
-const SERVICES = [
-  {
-    slug: "install",
-    title: "نصب و راه‌اندازی",
-    desc1:
-      "از پیش‌نیاز تا استیجینگ و کانفیگ استاندارد؛ ارتقای Firmware و هم‌ترازی با Best Practice.",
-    desc2:
-      "در صورت نیاز مهاجرت بدون وقفه و در پایان UAT و تحویل رسمی پروژه انجام می‌شود.",
-  },
-  {
-    slug: "monitoring",
-    title: "پایش",
-    desc1:
-      "مانیتورینگ با آستانه‌های درست، داشبورد و هشدارهای عملیاتی + گزارش‌های SLA/ظرفیت/Performance.",
-    desc2:
-      "بازبینی سلامت و پیشنهادهای بهینه‌سازی دوره‌ای برای پایداری زیرساخت.",
-  },
-  {
-    slug: "training",
-    title: "آموزش",
-    desc1:
-      "انتقال دانش سناریومحور: راهبری تا Troubleshooting + Lab/Runbook اختصاصی.",
-    desc2:
-      "پس از دوره، پشتیبانی پرسش‌وپاسخ و به‌روزرسانی جزوات داریم.",
-  },
-  {
-    slug: "consulting-design",
-    title: "مشاوره و طراحی",
-    desc1:
-      "نیازسنجی، ظرفیت‌سنجی، HA/DR و انتخاب راهکار با نگاه TCO و رشد آتی.",
-    desc2:
-      "خروجی: دیاگرام، BOM و طرح مهاجرت + چند گزینهٔ فنی/مالی برای تصمیم شفاف.",
-  },
-  {
-    slug: "operations",
-    title: "راهبری",
-    desc1:
-      "Managed Service: پچینگ، بکاپ‌وریفای، هاردنینگ، بررسی لاگ و رسیدگی به رخدادها طبق SLA.",
-    desc2:
-      "گزارش ماهانه سلامت/ظرفیت/ریسک + نشست CAB.",
-  },
-];
+const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
 
 // دکمه‌های هیرو با جابجایی نوبتی رنگ‌ها
 function useAlternatingBrandPair() {
@@ -97,80 +36,7 @@ function useAlternatingBrandPair() {
   return { primary, secondary, swap };
 }
 
-/** ---------------------------
- *  کارت برند «تجهیزات» (بدون تغییر)
- *  فقط لوگو نمایش داده می‌شود.
- *  --------------------------- */
-function BrandCard({ title, slug, href, index, logo }) {
-  const [border, setBorder] = useState("#e5e7eb");
-  const link = href || `/products/${slug || (title || "").toLowerCase()}`;
-
-  const base =
-    logo
-      ? logo.replace(/^\/?avatars\//, "").replace(/\.(png|webp)$/i, "")
-      : (slug || (title || "")).toLowerCase();
-
-  const webp = `/avatars/${base}.webp`;
-  const png  = `/avatars/${base}.png`;
-
-  const artWebp = `/brand-art/${base}.webp`;
-  const artPng  = `/brand-art/${base}.png`;
-
-  return (
-    <Link href={link} className="group block">
-      <div
-        className="
-          relative overflow-hidden rounded-2xl
-          border bg-white/70 supports-[backdrop-filter]:bg-white/35
-          backdrop-blur-xl
-          p-5 transition duration-200
-          hover:-translate-y-0.5 hover:shadow-xl
-        "
-        style={{ borderColor: border, borderWidth: 1 }}
-        onMouseEnter={() =>
-          setBorder(["#14b8a6", "#f4c21f"][Math.floor(Math.random() * 2)])
-        }
-        onMouseLeave={() => setBorder("#e5e7eb")}
-      >
-        <picture className="pointer-events-none select-none absolute inset-0">
-          <source srcSet={artWebp} type="image/webp" />
-          <img
-            src={artPng}
-            alt=""
-            aria-hidden="true"
-            className="w-full h-full object-cover scale-[1.12] opacity-[.35] md:opacity-[.35] contrast-115 saturate-110"
-            onError={(e) => (e.currentTarget.style.display = "none")}
-          />
-        </picture>
-
-        <div
-          className="absolute inset-0 pointer-events-none opacity-30"
-          style={{
-            background: `radial-gradient(140% 120% at -10% -10%, ${["#00E5FF", "#2D5FF"][index % 2]}33 0%, transparent 60%)`,
-          }}
-        />
-
-        <div className="relative flex items-center justify-end">
-          <div className="w-14 h-14 shrink-0 rounded-xl bg-white ring-1 ring-black/5 shadow-sm grid place-items-center transition-transform duration-200 group-hover:scale-[1.03] overflow-hidden">
-            <picture>
-              <source srcSet={webp} type="image/webp" />
-              <img
-                src={png}
-                alt={title}
-                width={56}
-                height={56}
-                className="w-10 h-10 object-contain"
-                onError={(e) => (e.currentTarget.src = "/avatars/default.png")}
-              />
-            </picture>
-          </div>
-        </div>
-      </div>
-    </Link>
-  );
-}
-
-// مودال شیشه‌ای (بدون تغییر)
+/* ---------- مودال شیشه‌ای (همان قبلی) ---------- */
 function GlassModal({ open, onClose, title, paragraphs }) {
   const [closing, setClosing] = useState(false);
 
@@ -195,6 +61,7 @@ function GlassModal({ open, onClose, title, paragraphs }) {
   };
 
   if (!open) return null;
+  const paras = (paragraphs || []).filter(Boolean);
 
   return (
     <div
@@ -225,7 +92,7 @@ function GlassModal({ open, onClose, title, paragraphs }) {
                 ×
               </button>
             </div>
-            {paragraphs.map((tx, i) => (
+            {paras.map((tx, i) => (
               <p
                 key={i}
                 className={`leading-8 ${i === 0 ? "mt-4" : "mt-3"} text-gray-900/95 drop-shadow-[0_1px_1px_rgba(255,255,255,.55)]`}
@@ -248,15 +115,82 @@ function GlassModal({ open, onClose, title, paragraphs }) {
   );
 }
 
-/** کارت «خدمات» — فقط همین بخش تغییر کرده:
- *  پس‌زمینه‌ی پر با ۷۰٪ شفافیت از بین دو رنگ برند (بر اساس اندیس).
- *  متن روی TEAL سفید، روی YELLOW مشکی.
- *  سایر رفتارها/استایل‌ها دست‌نخورده ماند.
- */
-function ServiceCard({ title, desc1, desc2, index = 0 }) {
+/* ---------- کارت برند «تجهیزات» (بدون تغییرِ منطقی دیگر) ---------- */
+/* فقط لوگو نمایش داده می‌شود. (لوگو سمت چپ کارت قرار می‌گیرد) */
+function BrandCard({ title, slug, href, index, logo }) {
+  const [border, setBorder] = useState("#e5e7eb");
+  const link = href || `/products/${slug || (title || "").toLowerCase()}`;
+  const base =
+    logo
+      ? logo.replace(/^\/?avatars\//, "").replace(/\.(png|webp)$/i, "")
+      : (slug || (title || "")).toLowerCase();
+
+  const webp = `/avatars/${base}.webp`;
+  const png  = `/avatars/${base}.png`;
+  const artWebp = `/brand-art/${base}.webp`;
+  const artPng  = `/brand-art/${base}.png`;
+
+  return (
+    <Link href={link} className="group block">
+      <div
+        className="
+          relative overflow-hidden rounded-2xl
+          border bg-white/70 supports-[backdrop-filter]:bg-white/35
+          backdrop-blur-xl
+          p-5 transition duration-200
+          hover:-translate-y-0.5 hover:shadow-xl
+        "
+        style={{ borderColor: border, borderWidth: 1 }}
+        onMouseEnter={() =>
+          setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
+        }
+        onMouseLeave={() => setBorder("#e5e7eb")}
+      >
+        {/* تصویر پس‌زمینه کارت برند (کارتونی/کمرنگ) */}
+        <picture className="pointer-events-none select-none absolute inset-0">
+          <source srcSet={artWebp} type="image/webp" />
+          <img
+            src={artPng}
+            alt=""
+            aria-hidden="true"
+            className="w-full h-full object-cover scale-[1.12] opacity-[.35] md:opacity-[.35] contrast-115 saturate-110"
+            onError={(e) => (e.currentTarget.style.display = "none")}
+          />
+        </picture>
+
+        {/* هایلایت رنگی آرام */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-30"
+          style={{
+            background: `radial-gradient(140% 120% at -10% -10%, ${colorOf(index)}33 0%, transparent 60%)`,
+          }}
+        />
+
+        {/* لوگو—سمت چپ */}
+        <div className="relative flex items-center justify-start">
+          <div className="w-14 h-14 shrink-0 rounded-xl bg-white ring-1 ring-black/5 shadow-sm grid place-items-center transition-transform duration-200 group-hover:scale-[1.03] overflow-hidden">
+            <picture>
+              <source srcSet={webp} type="image/webp" />
+              <img
+                src={png}
+                alt={title}
+                width={56}
+                height={56}
+                className="w-10 h-10 object-contain"
+                onError={(e) => (e.currentTarget.src = "/avatars/default.png")}
+              />
+            </picture>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+/* ---------- کارت «خدمات» با پس‌زمینه ۷۰٪ از دو رنگ برند ---------- */
+function ServiceCard({ title, desc1, desc2, icon, index = 0 }) {
   const [border, setBorder] = useState("#e5e7eb");
   const [open, setOpen] = useState(false);
-
   const isTeal = index % 2 === 0;
   const bg = isTeal ? "rgba(20,184,166,0.7)" : "rgba(244,194,31,0.7)"; // 70%
   const fg = isTeal ? "#fff" : "#000";
@@ -276,6 +210,14 @@ function ServiceCard({ title, desc1, desc2, index = 0 }) {
         aria-haspopup="dialog"
         aria-expanded={open}
       >
+        {icon ? (
+          <img
+            src={icon}
+            onError={(e)=>{ e.currentTarget.style.display="none"; }}
+            alt=""
+            className="w-10 h-10 object-contain"
+          />
+        ) : null}
         <span className="font-semibold" style={{ color: fg }}>{title}</span>
       </div>
       <GlassModal
@@ -287,6 +229,24 @@ function ServiceCard({ title, desc1, desc2, index = 0 }) {
     </>
   );
 }
+
+/* ---------- راهکارها (بدون تغییر) ---------- */
+const SOLUTIONS = [
+  {
+    name: "Commvault",
+    slug: "commvault",
+    p1: "راهکار یکپارچهٔ حفاظت از داده برای VM/DB/Files/SaaS/Cloud با Dedup و Policyهای منعطف.",
+    p2: "Hyperscale X برای Scale-out و Metallic به‌صورت SaaS؛ گزارش‌گیری و خودکارسازی کامل.",
+    p3: "سناریوهای متداول: M365/Endpoint، بکاپ ترکیبی On-prem/Cloud، RTO/RPO سخت‌گیرانه.",
+  },
+  {
+    name: "NetBackup",
+    slug: "netbackup",
+    p1: "پلتفرم بکاپ سازمانی با پوشش عمیق مجازی‌سازی/دیتابیس و Inline Dedup برای پنجرهٔ بکاپ کوچک.",
+    p2: "اپلاینس‌های سری 52xx/Flex، مدیریت متمرکز، RBAC و گزارش‌گیری دقیق.",
+    p3: "سناریوها: VMware/Hyper-V، Oracle/SQL، آرشیو نوار/کلود، بازیابی انتخابی سطح فایل.",
+  },
+];
 
 function SolutionCard({ name, slug, p1, p2, p3 }) {
   const [border, setBorder] = useState("#e5e7eb");
@@ -327,12 +287,12 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
 export default function Home() {
   const { primary, secondary, swap } = useAlternatingBrandPair();
   const primaryIsYellow = primary === YELLOW;
-
   const safeVendors = Array.isArray(vendors) ? vendors : [];
+  const serviceItems = Array.isArray(services?.items) ? services.items : [];
 
   return (
     <main className="min-h-screen font-sans">
-      {/* Hero */}
+      {/* Hero (بنر مشکی بالا) */}
       <section className="bg-[linear-gradient(135deg,#000_0%,#0a0a0a_60%,#111_100%)] text-white">
         <div className="max-w-6xl mx-auto px-4 py-12 md:py-16 grid md:grid-cols-2 items-center gap-10">
           <div>
@@ -387,7 +347,6 @@ export default function Home() {
       {/* تجهیزات */}
       <section id="vendors" className="relative py-12 max-w-6xl mx-auto px-4">
         <h2 className="text-2xl font-extrabold mb-6 text-slate-900">تجهیزات</h2>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {safeVendors.map((v, i) => (
             <BrandCard
@@ -413,8 +372,15 @@ export default function Home() {
 
         <h3 className="text-xl font-bold mb-4">خدمات</h3>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-          {SERVICES.map((s, i) => (
-            <ServiceCard key={s.slug} {...s} index={i} />
+          {serviceItems.map((s, i) => (
+            <ServiceCard
+              key={s.href || s.title || i}
+              title={s.title}
+              desc1={s.desc}
+              desc2={s.desc2}
+              icon={s.icon}
+              index={i}
+            />
           ))}
         </div>
       </section>

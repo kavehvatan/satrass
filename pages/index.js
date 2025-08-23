@@ -327,7 +327,7 @@ export default function Home() {
   const { primary, secondary, swap } = useAlternatingBrandPair();
   const primaryIsYellow = primary === YELLOW;
   const safeVendors = Array.isArray(vendors) ? vendors : [];
-  const serviceItems = SERVICES;
+  const serviceItems = Array.isArray(services?.items) ? services.items : [];
   return (
     <main className="min-h-screen font-sans">
       {/* Hero (بنر مشکی بالا) */}

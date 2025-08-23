@@ -2,47 +2,17 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import vendors from "../data/vendors";              // ← ایمپورت نسبی
-import services from "../data/services.json";       // ← خواندن خدمات از فایل
+import vendors from "../data/vendors";            // داده‌های تجهیزات
+import services from "../data/services.json";     // داده‌های خدمات (با آیکون و توضیحات)
 
-// رنگ‌ها و کمک‌تابع‌ها
+// --- رنگ‌ها و کمک‌تابع‌ها
 const TEAL = "#14b8a6";
 const YELLOW = "#f4c21f";
 const BRAND_COLORS = ["#00E5FF", "#2D5BFF"];
 const LOGO_COLORS = [TEAL, YELLOW];
 const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
 
-// --- Sitemap (لینک‌های پایینِ بنر سیاه) ---
-const SITEMAP = [
-  {
-    title: "میان‌بُر",
-    links: [
-      { label: "تجهیزات", href: "#vendors" },
-      { label: "راهکارها", href: "#solutions" },
-      { label: "ابزارها", href: "/tools" },
-    ],
-  },
-  {
-    title: "خدمات",
-    links: [
-      { label: "نصب و راه‌اندازی", href: "#solutions" },
-      { label: "پایش", href: "#solutions" },
-      { label: "آموزش", href: "#solutions" },
-      { label: "مشاوره و طراحی", href: "#solutions" },
-      { label: "راهبری", href: "#solutions" },
-    ],
-  },
-  {
-    title: "صفحات",
-    links: [
-      { label: "تماس با ما", href: "/contact" },
-      { label: "درباره ما", href: "/about" },
-      { label: "استعلام گارانتی", href: "/warranty" },
-    ],
-  },
-];
-
-// دکمه‌های هیرو با جابجایی نوبتی رنگ‌ها
+// --- دکمه‌های هیرو با جابجایی نوبتی رنگ‌ها
 function useAlternatingBrandPair() {
   const [primary, setPrimary] = useState(YELLOW);   // Filled
   const [secondary, setSecondary] = useState(TEAL); // Outlined
@@ -66,7 +36,7 @@ function useAlternatingBrandPair() {
   return { primary, secondary, swap };
 }
 
-/* ---------- مودال شیشه‌ای (همان قبلی) ---------- */
+// --- مودال شیشه‌ای
 function GlassModal({ open, onClose, title, paragraphs }) {
   const [closing, setClosing] = useState(false);
 
@@ -145,8 +115,7 @@ function GlassModal({ open, onClose, title, paragraphs }) {
   );
 }
 
-/* ---------- کارت برند «تجهیزات» (بدون تغییرِ منطقی دیگر) ---------- */
-/* فقط لوگو نمایش داده می‌شود. (لوگو سمت چپ کارت قرار می‌گیرد) */
+// --- کارت برند «تجهیزات» (لوگو سمت چپ کارت)
 function BrandCard({ title, slug, href, index, logo }) {
   const [border, setBorder] = useState("#e5e7eb");
   const link = href || `/products/${slug || (title || "").toLowerCase()}`;
@@ -176,7 +145,7 @@ function BrandCard({ title, slug, href, index, logo }) {
         }
         onMouseLeave={() => setBorder("#e5e7eb")}
       >
-        {/* تصویر پس‌زمینه کارت برند (کارتونی/کمرنگ) */}
+        {/* پس‌زمینه کارت برند */}
         <picture className="pointer-events-none select-none absolute inset-0">
           <source srcSet={artWebp} type="image/webp" />
           <img
@@ -196,7 +165,7 @@ function BrandCard({ title, slug, href, index, logo }) {
           }}
         />
 
-        {/* لوگو—سمت چپ */}
+        {/* لوگو — سمت چپ فیزیکی */}
         <div className="relative flex items-center ltr:justify-start rtl:justify-end">
           <div className="w-14 h-14 shrink-0 rounded-xl bg-white ring-1 ring-black/5 shadow-sm grid place-items-center transition-transform duration-200 group-hover:scale-[1.03] overflow-hidden">
             <picture>
@@ -217,12 +186,12 @@ function BrandCard({ title, slug, href, index, logo }) {
   );
 }
 
-/* ---------- کارت «خدمات» با پس‌زمینه ۷۰٪ از دو رنگ برند ---------- */
+// --- کارت «خدمات» با پس‌زمینهٔ ۷۰٪ از دو رنگ برند + توضیحات در مودال
 function ServiceCard({ title, desc1, desc2, icon, index = 0 }) {
   const [border, setBorder] = useState("#e5e7eb");
   const [open, setOpen] = useState(false);
   const isTeal = index % 2 === 0;
-  const bg = isTeal ? "rgba(20,184,166,0.7)" : "rgba(244,194,31,0.7)"; // 70%
+  const bg = isTeal ? "rgba(20,184,166,0.7)" : "rgba(244,194,31,0.7)";
   const fg = isTeal ? "#fff" : "#000";
 
   return (
@@ -243,13 +212,14 @@ function ServiceCard({ title, desc1, desc2, icon, index = 0 }) {
         {icon ? (
           <img
             src={icon}
-            onError={(e)=>{ e.currentTarget.style.display="none"; }}
+            onError={(e) => { e.currentTarget.style.display = "none"; }}
             alt=""
             className="w-10 h-10 object-contain"
           />
         ) : null}
         <span className="font-semibold" style={{ color: fg }}>{title}</span>
       </div>
+
       <GlassModal
         open={open}
         onClose={() => setOpen(false)}
@@ -260,7 +230,7 @@ function ServiceCard({ title, desc1, desc2, icon, index = 0 }) {
   );
 }
 
-/* ---------- راهکارها (بدون تغییر) ---------- */
+// --- راهکارها
 const SOLUTIONS = [
   {
     name: "Commvault",
@@ -278,6 +248,7 @@ const SOLUTIONS = [
   },
 ];
 
+// --- کارت راهکار
 function SolutionCard({ name, slug, p1, p2, p3 }) {
   const [border, setBorder] = useState("#e5e7eb");
   const [open, setOpen] = useState(false);
@@ -304,6 +275,7 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
         />
         <div className="font-bold text-gray-900">{name}</div>
       </div>
+
       <GlassModal
         open={open}
         onClose={() => setOpen(false)}
@@ -314,9 +286,11 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
   );
 }
 
+// --- صفحه
 export default function Home() {
   const { primary, secondary, swap } = useAlternatingBrandPair();
   const primaryIsYellow = primary === YELLOW;
+
   const safeVendors = Array.isArray(vendors) ? vendors : [];
   const serviceItems = Array.isArray(services?.items) ? services.items : [];
 
@@ -408,50 +382,54 @@ export default function Home() {
               title={s.title}
               desc1={s.desc}
               desc2={s.desc2}
-              icon={s.icon}
+              icon={s.icon}             // مثل: "/icons/services/install.webp"
               index={i}
             />
           ))}
         </div>
       </section>
-      {/* Footer با Sitemap */}
+
+      {/* Footer + Sitemap (وسط‌چین) */}
       <footer className="bg-black text-white">
-  <div className="max-w-6xl mx-auto px-4 py-12">
-    {/* Sitemap */}
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 justify-items-center text-center">
-      <div>
-        <h4 className="font-bold mb-3">میانبر</h4>
-        <ul className="space-y-2 text-white/80">
-          <li><a href="#vendors" className="hover:text-white">تجهیزات</a></li>
-          <li><a href="#solutions" className="hover:text-white">راهکارها</a></li>
-          <li><a href="/tools" className="hover:text-white">ابزارها</a></li>
-        </ul>
-      </div>
+        <div className="max-w-6xl mx-auto px-4 py-12">
+          {/* sitemap */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 justify-items-center text-center">
+            <div>
+              <h4 className="font-bold mb-3">میان‌بُر</h4>
+              <ul className="space-y-2 text-white/80">
+                <li><a href="#vendors" className="hover:text-white">تجهیزات</a></li>
+                <li><a href="#solutions" className="hover:text-white">راهکارها</a></li>
+                <li><a href="/tools" className="hover:text-white">ابزارها</a></li>
+              </ul>
+            </div>
 
-      <div>
-        <h4 className="font-bold mb-3">خدمات</h4>
-        <ul className="space-y-2 text-white/80">
-          <li><a href="/services/install" className="hover:text-white">نصب و راه‌اندازی</a></li>
-          <li><a href="/services/monitoring" className="hover:text-white">پایش</a></li>
-          <li><a href="/services/training" className="hover:text-white">آموزش</a></li>
-          <li><a href="/services/consulting-design" className="hover:text-white">مشاوره و طراحی</a></li>
-          <li><a href="/services/operations" className="hover:text-white">راهبری</a></li>
-        </ul>
-      </div>
+            <div>
+              <h4 className="font-bold mb-3">خدمات</h4>
+              <ul className="space-y-2 text-white/80">
+                <li><a href="/services/install" className="hover:text-white">نصب و راه‌اندازی</a></li>
+                <li><a href="/services/monitoring" className="hover:text-white">پایش</a></li>
+                <li><a href="/services/training" className="hover:text-white">آموزش</a></li>
+                <li><a href="/services/consulting-design" className="hover:text-white">مشاوره و طراحی</a></li>
+                <li><a href="/services/operations" className="hover:text-white">راهبری</a></li>
+              </ul>
+            </div>
 
-      <div>
-        <h4 className="font-bold mb-3">صفحات</h4>
-        <ul className="space-y-2 text-white/80">
-          <li><a href="/contact" className="hover:text-white">تماس با ما</a></li>
-          <li><a href="/about" className="hover:text-white">درباره ما</a></li>
-          <li><a href="/warranty" className="hover:text-white">استعلام گارانتی</a></li>
-        </ul>
-      </div>
-    </div>
+            <div>
+              <h4 className="font-bold mb-3">صفحات</h4>
+              <ul className="space-y-2 text-white/80">
+                <li><a href="/contact" className="hover:text-white">تماس با ما</a></li>
+                <li><a href="/about" className="hover:text-white">درباره ما</a></li>
+                <li><a href="/warranty" className="hover:text-white">استعلام گارانتی</a></li>
+              </ul>
+            </div>
+          </div>
 
-    <hr className="border-white/10 my-6" />
-    <p className="text-center text-white/80 text-sm">
-      © {new Date().getFullYear()} ساتراس، همه حقوق محفوظ است
-    </p>
-  </div>
-</footer>
+          <hr className="border-white/10 my-6" />
+          <p className="text-center text-white/80 text-sm">
+            © {new Date().getFullYear()} ساتراس، همه حقوق محفوظ است
+          </p>
+        </div>
+      </footer>
+    </main>
+  );
+}

@@ -93,12 +93,6 @@ export default function About() {
           </p>
         </div>
       </section>
-
-      <footer className="bg-black text-white">
-        <div className="max-w-6xl mx-auto px-4 py-6 text-center">
-          <p>© {new Date().getFullYear()} ساتراس، همه حقوق محفوظ است</p>
-        </div>
-      </footer>
     </main>
   );
 }

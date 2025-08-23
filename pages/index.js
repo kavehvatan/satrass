@@ -367,7 +367,7 @@ export default function Home() {
 
       {/* راهکارها + خدمات */}
       <section id="solutions" className="max-w-6xl mx-auto px-4 pb-10">
-        <h2 className="text-2xl font-bold mb-6">نرم افزاهای تهیه نسخه پشتیبان</h2>
+        <h2 className="text-2xl font-bold mb-6">نرم افزارها</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center mb-10">
           {SOLUTIONS.map((s) => (
             <SolutionCard key={s.slug} {...s} />

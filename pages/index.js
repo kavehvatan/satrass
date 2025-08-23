@@ -12,42 +12,33 @@ const BRAND_COLORS = ["#00E5FF", "#2D5BFF"];
 const LOGO_COLORS = [TEAL, YELLOW];
 const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
 
-// --- توضیحات خدمات (داخل همین فایل) ---
-const SERVICES = [
+// --- Sitemap (لینک‌های پایینِ بنر سیاه) ---
+const SITEMAP = [
   {
-    slug: "install",
-    title: "نصب و راه‌اندازی",
-    desc1: "از پیش‌نیاز تا استیجینگ و کانفیگ استاندارد؛ ارتقای Firmware و هم‌ترازی با Best Practice.",
-    desc2: "در صورت نیاز مهاجرت بدون وقفه و در پایان UAT و تحویل رسمی پروژه انجام می‌شود.",
-    icon: "public/brand-art/install.webp", // اختیاری
+    title: "میان‌بُر",
+    links: [
+      { label: "تجهیزات", href: "#vendors" },
+      { label: "راهکارها", href: "#solutions" },
+      { label: "ابزارها", href: "/tools" },
+    ],
   },
   {
-    slug: "monitoring",
-    title: "پایش",
-    desc1: "مانیتورینگ با آستانه‌های درست، داشبورد و هشدارهای عملیاتی + گزارش‌های SLA/ظرفیت/Performance.",
-    desc2: "بازبینی سلامت و پیشنهادهای بهینه‌سازی دوره‌ای برای پایداری زیرساخت.",
-    icon: "/brand-art/monitoring.webp",
+    title: "خدمات",
+    links: [
+      { label: "نصب و راه‌اندازی", href: "#solutions" },
+      { label: "پایش", href: "#solutions" },
+      { label: "آموزش", href: "#solutions" },
+      { label: "مشاوره و طراحی", href: "#solutions" },
+      { label: "راهبری", href: "#solutions" },
+    ],
   },
   {
-    slug: "training",
-    title: "آموزش",
-    desc1: "انتقال دانش سناریومحور: راهبری تا Troubleshooting + Lab/Runbook اختصاصی.",
-    desc2: "پس از دوره، پشتیبانی پرسش‌وپاسخ و به‌روزرسانی جزوات داریم.",
-    icon: "/brand-art/training.webp",
-  },
-  {
-    slug: "consulting-design",
-    title: "مشاوره و طراحی",
-    desc1: "نیازسنجی، ظرفیت‌سنجی، HA/DR و انتخاب راهکار با نگاه TCO و رشد آتی.",
-    desc2: "خروجی: دیاگرام، BOM و طرح مهاجرت + چند گزینهٔ فنی/مالی برای تصمیم شفاف.",
-    icon: "/brand-art/consulting-design.webp",
-  },
-  {
-    slug: "operations",
-    title: "راهبری",
-    desc1: "Managed Service: پچینگ، بکاپ‌وریفای، هاردنینگ، بررسی لاگ و رسیدگی به رخدادها طبق SLA.",
-    desc2: "گزارش ماهانه سلامت/ظرفیت/ریسک + نشست CAB.",
-    icon: "/brand-art/operations.webp",
+    title: "صفحات",
+    links: [
+      { label: "تماس با ما", href: "/contact" },
+      { label: "درباره ما", href: "/about" },
+      { label: "استعلام گارانتی", href: "/warranty" },
+    ],
   },
 ];
 
@@ -207,20 +198,20 @@ function BrandCard({ title, slug, href, index, logo }) {
 
         {/* لوگو—سمت چپ */}
         <div className="relative flex items-center ltr:justify-start rtl:justify-end">
-  <div className="w-14 h-14 shrink-0 rounded-xl bg-white ring-1 ring-black/5 shadow-sm grid place-items-center transition-transform duration-200 group-hover:scale-[1.03] overflow-hidden">
-    <picture>
-      <source srcSet={webp} type="image/webp" />
-      <img
-        src={png}
-        alt={title}
-        width={56}
-        height={56}
-        className="w-10 h-10 object-contain"
-        onError={(e) => (e.currentTarget.src = "/avatars/default.png")}
-      />
-    </picture>
-  </div>
-</div>
+          <div className="w-14 h-14 shrink-0 rounded-xl bg-white ring-1 ring-black/5 shadow-sm grid place-items-center transition-transform duration-200 group-hover:scale-[1.03] overflow-hidden">
+            <picture>
+              <source srcSet={webp} type="image/webp" />
+              <img
+                src={png}
+                alt={title}
+                width={56}
+                height={56}
+                className="w-10 h-10 object-contain"
+                onError={(e) => (e.currentTarget.src = "/avatars/default.png")}
+              />
+            </picture>
+          </div>
+        </div>
       </div>
     </Link>
   );
@@ -328,6 +319,7 @@ export default function Home() {
   const primaryIsYellow = primary === YELLOW;
   const safeVendors = Array.isArray(vendors) ? vendors : [];
   const serviceItems = Array.isArray(services?.items) ? services.items : [];
+
   return (
     <main className="min-h-screen font-sans">
       {/* Hero (بنر مشکی بالا) */}
@@ -423,9 +415,37 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Footer با Sitemap */}
       <footer className="bg-black text-white">
-        <div className="max-w-6xl mx-auto px-4 py-6 text-center">
-          <p>© {new Date().getFullYear()} ساتراس، همه حقوق محفوظ است</p>
+        <div className="max-w-6xl mx:auto px-4 pt-10 pb-6">
+          {/* Sitemap */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-8 text-sm">
+            {SITEMAP.map((sec) => (
+              <div key={sec.title}>
+                <h4 className="font-bold mb-3 text-white/90">{sec.title}</h4>
+                <ul className="space-y-2">
+                  {sec.links.map((l) => (
+                    <li key={l.label}>
+                      <Link
+                        href={l.href}
+                        className="text-white/70 hover:text-white transition"
+                      >
+                        {l.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+            {/* ستون‌های رزرو برای تعادل */}
+            <div className="hidden md:block" />
+            <div className="hidden md:block" />
+          </div>
+
+          {/* کپی‌رایت */}
+          <div className="border-t border-white/10 mt-8 pt-6 text-center text-white/70 text-xs">
+            © {new Date().getFullYear()} ساتراس، همه حقوق محفوظ است
+          </div>
         </div>
       </footer>
     </main>

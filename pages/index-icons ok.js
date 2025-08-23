@@ -2,8 +2,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import vendors from "../data/vendors";
-import services from "../data/services.json";
+import vendors from "../data/vendors";              // ← ایمپورت نسبی
+import services from "../data/services.json";       // ← خواندن خدمات از فایل
 
 // رنگ‌ها و کمک‌تابع‌ها
 const TEAL = "#14b8a6";
@@ -36,7 +36,7 @@ function useAlternatingBrandPair() {
   return { primary, secondary, swap };
 }
 
-/* ---------- مودال شیشه‌ای ---------- */
+/* ---------- مودال شیشه‌ای (همان قبلی) ---------- */
 function GlassModal({ open, onClose, title, paragraphs }) {
   const [closing, setClosing] = useState(false);
 
@@ -115,11 +115,11 @@ function GlassModal({ open, onClose, title, paragraphs }) {
   );
 }
 
-/* ---------- کارت برند «تجهیزات» (لوگو سمت چپ، فقط لوگو) ---------- */
+/* ---------- کارت برند «تجهیزات» (بدون تغییرِ منطقی دیگر) ---------- */
+/* فقط لوگو نمایش داده می‌شود. (لوگو سمت چپ کارت قرار می‌گیرد) */
 function BrandCard({ title, slug, href, index, logo }) {
   const [border, setBorder] = useState("#e5e7eb");
   const link = href || `/products/${slug || (title || "").toLowerCase()}`;
-
   const base =
     logo
       ? logo.replace(/^\/?avatars\//, "").replace(/\.(png|webp)$/i, "")
@@ -146,7 +146,7 @@ function BrandCard({ title, slug, href, index, logo }) {
         }
         onMouseLeave={() => setBorder("#e5e7eb")}
       >
-        {/* پس‌زمینه کارت برند */}
+        {/* تصویر پس‌زمینه کارت برند (کارتونی/کمرنگ) */}
         <picture className="pointer-events-none select-none absolute inset-0">
           <source srcSet={artWebp} type="image/webp" />
           <img
@@ -158,7 +158,7 @@ function BrandCard({ title, slug, href, index, logo }) {
           />
         </picture>
 
-        {/* هایلایت آرام */}
+        {/* هایلایت رنگی آرام */}
         <div
           className="absolute inset-0 pointer-events-none opacity-30"
           style={{
@@ -166,7 +166,7 @@ function BrandCard({ title, slug, href, index, logo }) {
           }}
         />
 
-        {/* لوگو سمت چپ */}
+        {/* لوگو—سمت چپ */}
         <div className="relative flex items-center justify-start">
           <div className="w-14 h-14 shrink-0 rounded-xl bg-white ring-1 ring-black/5 shadow-sm grid place-items-center transition-transform duration-200 group-hover:scale-[1.03] overflow-hidden">
             <picture>
@@ -187,37 +187,13 @@ function BrandCard({ title, slug, href, index, logo }) {
   );
 }
 
-/* ---------- کارت «خدمات» با رنگ 70% و آیکون ---------- */
-function ServiceCard({
-  slug,
-  title,
-  icon,        // می‌تواند '/icons/services/xxx.webp' باشد یا فقط نام/فایل
-  index = 0,
-  ...rest      // desc, desc1, desc2, p1, p2, p3 ...
-}) {
+/* ---------- کارت «خدمات» با پس‌زمینه ۷۰٪ از دو رنگ برند ---------- */
+function ServiceCard({ title, desc1, desc2, icon, index = 0 }) {
   const [border, setBorder] = useState("#e5e7eb");
   const [open, setOpen] = useState(false);
-
-  // زمینه‌ی 70% (بدون تغییر نسبت به چیزی که توافق کردیم)
   const isTeal = index % 2 === 0;
-  const bg = isTeal ? "rgba(20,184,166,0.7)" : "rgba(244,194,31,0.7)";
+  const bg = isTeal ? "rgba(20,184,166,0.7)" : "rgba(244,194,31,0.7)"; // 70%
   const fg = isTeal ? "#fff" : "#000";
-
-  // جمع‌کردن همه‌ی فیلدهای توضیح
-  const paragraphs = [
-    rest.desc, rest.desc1, rest.desc2,
-    rest.p1, rest.p2, rest.p3
-  ].filter(Boolean);
-
-  // مسیر آیکون: اگر icon داده شده بود همان را normalize می‌کنیم،
-  // وگرنه از slug می‌سازیم (webp سپس png).
-  const iconBase = (
-    icon
-      ? icon.replace(/^\/?icons\/services\//, "").replace(/\.(webp|png)$/i, "")
-      : (slug || "").replace(/\.(webp|png)$/i, "")
-  );
-  const iconWebp = iconBase ? `/icons/services/${iconBase}.webp` : "";
-  const iconPng  = iconBase ? `/icons/services/${iconBase}.png`  : "";
 
   return (
     <>
@@ -234,31 +210,27 @@ function ServiceCard({
         aria-haspopup="dialog"
         aria-expanded={open}
       >
-        {iconBase ? (
-          <picture>
-            <source srcSet={iconWebp} type="image/webp" />
-            <img
-              src={iconPng} // اگر webp لود نشود، img دیده می‌شود
-              alt=""
-              className="w-10 h-10 object-contain"
-              onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = iconPng; }}
-            />
-          </picture>
+        {icon ? (
+          <img
+            src={icon}
+            onError={(e)=>{ e.currentTarget.style.display="none"; }}
+            alt=""
+            className="w-10 h-10 object-contain"
+          />
         ) : null}
         <span className="font-semibold" style={{ color: fg }}>{title}</span>
       </div>
-
       <GlassModal
         open={open}
         onClose={() => setOpen(false)}
         title={title}
-        paragraphs={paragraphs.length ? paragraphs : ["توضیحی ثبت نشده است."]}
+        paragraphs={[desc1, desc2]}
       />
     </>
   );
 }
 
-/* ---------- راهکارها ---------- */
+/* ---------- راهکارها (بدون تغییر) ---------- */
 const SOLUTIONS = [
   {
     name: "Commvault",
@@ -315,7 +287,6 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
 export default function Home() {
   const { primary, secondary, swap } = useAlternatingBrandPair();
   const primaryIsYellow = primary === YELLOW;
-
   const safeVendors = Array.isArray(vendors) ? vendors : [];
   const serviceItems = Array.isArray(services?.items) ? services.items : [];
 
@@ -330,6 +301,7 @@ export default function Home() {
             </h1>
             <p className="mt-4 text-gray-300">از مشاوره تا پشتیبانی، درکنار شما.</p>
             <div className="mt-6 flex gap-3">
+              {/* ارائه مشاوره — Filled */}
               <a
                 href="/contact"
                 onClick={swap}
@@ -341,6 +313,7 @@ export default function Home() {
               >
                 ارائه مشاوره
               </a>
+              {/* مشاهده ابزارها — Outlined */}
               <a
                 href="/tools"
                 onClick={swap}
@@ -400,7 +373,14 @@ export default function Home() {
         <h3 className="text-xl font-bold mb-4">خدمات</h3>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
           {serviceItems.map((s, i) => (
-            <ServiceCard key={s.slug || s.title || i} index={i} {...s} />
+            <ServiceCard
+              key={s.href || s.title || i}
+              title={s.title}
+              desc1={s.desc}
+              desc2={s.desc2}
+              icon={s.icon}
+              index={i}
+            />
           ))}
         </div>
       </section>

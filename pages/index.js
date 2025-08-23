@@ -393,7 +393,7 @@ export default function Home() {
       <footer className="bg-black text-white">
         <div className="max-w-6xl mx-auto px-4 py-12">
           {/* sitemap */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 justify-items-center text-center">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 justify-items-center">
             <div>
               <h4 className="font-bold mb-3">میان‌بُر</h4>
               <ul className="space-y-2 text-white/80">

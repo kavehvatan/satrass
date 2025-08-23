@@ -417,37 +417,42 @@ export default function Home() {
 
       {/* Footer با Sitemap */}
       <footer className="bg-black text-white">
-        <div className="max-w-6xl mx:auto px-4 pt-10 pb-6">
-          {/* Sitemap */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-8 text-sm">
-            {SITEMAP.map((sec) => (
-              <div key={sec.title}>
-                <h4 className="font-bold mb-3 text-white/90">{sec.title}</h4>
-                <ul className="space-y-2">
-                  {sec.links.map((l) => (
-                    <li key={l.label}>
-                      <Link
-                        href={l.href}
-                        className="text-white/70 hover:text-white transition"
-                      >
-                        {l.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-            {/* ستون‌های رزرو برای تعادل */}
-            <div className="hidden md:block" />
-            <div className="hidden md:block" />
-          </div>
+  <div className="max-w-6xl mx-auto px-4 py-12">
+    {/* Sitemap */}
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 justify-items-center text-center">
+      <div>
+        <h4 className="font-bold mb-3">میانبر</h4>
+        <ul className="space-y-2 text-white/80">
+          <li><a href="#vendors" className="hover:text-white">تجهیزات</a></li>
+          <li><a href="#solutions" className="hover:text-white">راهکارها</a></li>
+          <li><a href="/tools" className="hover:text-white">ابزارها</a></li>
+        </ul>
+      </div>
 
-          {/* کپی‌رایت */}
-          <div className="border-t border-white/10 mt-8 pt-6 text-center text-white/70 text-xs">
-            © {new Date().getFullYear()} ساتراس، همه حقوق محفوظ است
-          </div>
-        </div>
-      </footer>
-    </main>
-  );
-}
+      <div>
+        <h4 className="font-bold mb-3">خدمات</h4>
+        <ul className="space-y-2 text-white/80">
+          <li><a href="/services/install" className="hover:text-white">نصب و راه‌اندازی</a></li>
+          <li><a href="/services/monitoring" className="hover:text-white">پایش</a></li>
+          <li><a href="/services/training" className="hover:text-white">آموزش</a></li>
+          <li><a href="/services/consulting-design" className="hover:text-white">مشاوره و طراحی</a></li>
+          <li><a href="/services/operations" className="hover:text-white">راهبری</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 className="font-bold mb-3">صفحات</h4>
+        <ul className="space-y-2 text-white/80">
+          <li><a href="/contact" className="hover:text-white">تماس با ما</a></li>
+          <li><a href="/about" className="hover:text-white">درباره ما</a></li>
+          <li><a href="/warranty" className="hover:text-white">استعلام گارانتی</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <hr className="border-white/10 my-6" />
+    <p className="text-center text-white/80 text-sm">
+      © {new Date().getFullYear()} ساتراس، همه حقوق محفوظ است
+    </p>
+  </div>
+</footer>

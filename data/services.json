@@ -1,41 +1,39 @@
 {
   "items": [
     {
-      "title": "آموزش",
-      "href": "/services/training",
-      "icon": "/icons/services/training.webp"
-    },
-    {
-      "title": "پایش",
-      "href": "/services/monitoring",
-      "icon": "/icons/services/monitoring.webp"
-    },
-    {
+      "slug": "install",
       "title": "نصب و راه‌اندازی",
-      "href": "/services/install",
-      "icon": "/icons/services/install.webp"
+      "icon": "/icons/services/install.webp",
+      "desc": "از پیش‌نیاز تا استیجینگ و کانفیگ استاندارد؛ ارتقای Firmware و هم‌ترازی با Best Practice.",
+      "desc2": "در صورت نیاز مهاجرت بدون وقفه و در پایان UAT و تحویل رسمی پروژه انجام می‌شود."
     },
     {
-      "title": "راهبری",
-      "href": "/services/operations",
-      "icon": "/icons/services/operations.webp"
+      "slug": "monitoring",
+      "title": "پایش",
+      "icon": "/icons/services/monitoring.webp",
+      "desc": "مانیتورینگ با آستانه‌های درست، داشبورد و هشدارهای عملیاتی + گزارش‌های SLA/ظرفیت/Performance.",
+      "desc2": "بازبینی سلامت و پیشنهادهای بهینه‌سازی دوره‌ای برای پایداری زیرساخت."
     },
     {
+      "slug": "training",
+      "title": "آموزش",
+      "icon": "/icons/services/training.webp",
+      "desc": "انتقال دانش سناریومحور: راهبری تا Troubleshooting + Lab/Runbook اختصاصی.",
+      "desc2": "پس از دوره، پشتیبانی پرسش‌وپاسخ و به‌روزرسانی جزوات داریم."
+    },
+    {
+      "slug": "consulting-design",
       "title": "مشاوره و طراحی",
-      "href": "/services/consulting-design",
-      "icon": "/icons/services/consulting.webp"
+      "icon": "/icons/services/consulting.webp",
+      "desc": "نیازسنجی، ظرفیت‌سنجی، HA/DR و انتخاب راهکار با نگاه TCO و رشد آتی.",
+      "desc2": "خروجی: دیاگرام، BOM و طرح مهاجرت + چند گزینهٔ فنی/مالی برای تصمیم شفاف."
     },
     {
-      "title": "Commvault",
-      "desc": "پیاده‌سازی و پشتیبانی بکاپ/ریکاوری سازمانی Commvault.",
-      "href": "/services/commvault",
-      "icon": "/avatars/commvault.webp"
-    },
-    {
-      "title": "NetBackup",
-      "desc": "طراحی و پشتیبانی Veritas NetBackup برای محیط‌های سازمانی.",
-      "href": "/services/netbackup",
-      "icon": "/avatars/netbackup.webp"
+      "slug": "operations",
+      "title": "راهبری",
+      "icon": "/icons/services/operations.webp",
+      "desc": "Managed Service: پچینگ، بکاپ‌وریفای، هاردنینگ، بررسی لاگ و رسیدگی به رخدادها طبق SLA.",
+      "desc2": "گزارش ماهانه سلامت/ظرفیت/ریسک + نشست CAB."
     }
   ]
 }

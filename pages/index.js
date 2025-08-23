@@ -19,7 +19,7 @@ const SERVICES = [
     title: "نصب و راه‌اندازی",
     desc1: "از پیش‌نیاز تا استیجینگ و کانفیگ استاندارد؛ ارتقای Firmware و هم‌ترازی با Best Practice.",
     desc2: "در صورت نیاز مهاجرت بدون وقفه و در پایان UAT و تحویل رسمی پروژه انجام می‌شود.",
-    icon: "/brand-art/install.webp", // اختیاری
+    icon: "public/brand-art/install.webp", // اختیاری
   },
   {
     slug: "monitoring",

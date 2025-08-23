@@ -25,7 +25,7 @@ export default function Header() {
     { href: "/tools", label: "ابزارها" },
     { href: "/downloads", label: "دانلودها" },
     { href: "/warranty", label: "گارانتی" },
-    { href: "/about", label: "درباره ما" },
+    { href: "/news", label: "تازه‌ها" },      // ← جایگزین «درباره ما»
     { href: "/contact", label: "تماس با ما" },
   ];
 

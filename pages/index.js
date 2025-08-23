@@ -420,6 +420,7 @@ export default function Home() {
                 <li><a href="/contact" className="hover:text-white">تماس با ما</a></li>
                 <li><a href="/about" className="hover:text-white">درباره ما</a></li>
                 <li><a href="/warranty" className="hover:text-white">استعلام گارانتی</a></li>
+                <li><a href="/news" className="hover:text-white">تازه‌ها <span className="text-white/60">(اخبار و مقالات)</span></a></li>
               </ul>
             </div>
           </div>

@@ -1,20 +1,18 @@
-import "../styles/globals.css";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
+// pages/_app.js
+import '../styles/globals.css';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+import { useRouter } from 'next/router';
 
-function MyApp({ Component, pageProps }) {
-  const hideHeader = Component.hideHeader === true;
-  const hideFooter = Component.hideFooter === true;
+export default function MyApp({ Component, pageProps }) {
+  const router = useRouter();
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {!hideHeader && <Header />}
-      <main className="flex-1">
-        <Component {...pageProps} />
-      </main>
-      {!hideFooter && <Footer />}
+    <div dir="rtl" lang="fa">
+      <Header />
+      <Component {...pageProps} />
+      {/* فوتر سراسری را همه‌جا نشان بده، به جز صفحهٔ خانه */}
+      {router.pathname !== '/' && <Footer />}
     </div>
   );
 }
-
-export default MyApp;

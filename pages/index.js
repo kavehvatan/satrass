@@ -188,12 +188,27 @@ function BrandCard({ title, slug, href, index, logo }) {
 }
 
 /* ---------- کارت «خدمات» با پس‌زمینه ۷۰٪ از دو رنگ برند ---------- */
-function ServiceCard({ title, desc1, desc2, icon, index = 0 }) {
+function ServiceCard({
+  title,
+  // هر نامی که ممکن است برای توضیحات استفاده شده باشد را می‌گیریم
+  desc,
+  desc1,
+  desc2,
+  p1,
+  p2,
+  p3,
+  index = 0,
+}) {
   const [border, setBorder] = useState("#e5e7eb");
   const [open, setOpen] = useState(false);
+
+  // رنگ پس‌زمینه ۷۰٪ همانی که قبلاً گذاشته بودیم
   const isTeal = index % 2 === 0;
-  const bg = isTeal ? "rgba(20,184,166,0.7)" : "rgba(244,194,31,0.7)"; // 70%
+  const bg = isTeal ? "rgba(20,184,166,0.7)" : "rgba(244,194,31,0.7)";
   const fg = isTeal ? "#fff" : "#000";
+
+  // هر کدام از فیلدها که مقدار داشته باشد در مودال نمایش داده شود
+  const paragraphs = [desc, desc1, desc2, p1, p2, p3].filter(Boolean);
 
   return (
     <>
@@ -210,21 +225,18 @@ function ServiceCard({ title, desc1, desc2, icon, index = 0 }) {
         aria-haspopup="dialog"
         aria-expanded={open}
       >
-        {icon ? (
-          <img
-            src={icon}
-            onError={(e)=>{ e.currentTarget.style.display="none"; }}
-            alt=""
-            className="w-10 h-10 object-contain"
-          />
-        ) : null}
+        {/* اگر آیکن داری */}
+        {/* {icon && (
+          <img src={icon} alt="" className="w-10 h-10 object-contain" />
+        )} */}
         <span className="font-semibold" style={{ color: fg }}>{title}</span>
       </div>
+
       <GlassModal
         open={open}
         onClose={() => setOpen(false)}
         title={title}
-        paragraphs={[desc1, desc2]}
+        paragraphs={paragraphs.length ? paragraphs : ["توضیحی ثبت نشده است."]}
       />
     </>
   );

@@ -52,8 +52,8 @@ export default function DownloadsPage() {
   };
 
   return (
-    <main className="min-h-screen font-sans">
-      <section className="max-w-6xl mx-auto px-4 py-10">
+    <main className="font-sans">
+      <section className="max-w-6xl mx-auto px-4 pt-10 pb-6">
         <h1 className="text-3xl md:text-4xl font-extrabold mb-2">دانلودها</h1>
         <p className="text-gray-600 mb-8">
           فایل‌ها را داخل <code className="mx-1 px-2 py-0.5 rounded bg-gray-100">public/downloads/</code> قرار بده؛
@@ -62,7 +62,10 @@ export default function DownloadsPage() {
 
         <div className="grid md:grid-cols-2 gap-6">
           {DOWNLOADS.map((d) => (
-            <article key={d.title} className="border bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition">
+            <article
+              key={d.title}
+              className="border bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition"
+            >
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h2 className="text-xl font-bold text-gray-900">{d.title}</h2>
@@ -72,6 +75,14 @@ export default function DownloadsPage() {
                 </div>
               </div>
 
+              {/* اگر دکمه/لینک دانلود دارید، همان کد قبلی‌تان را اینجا بگذارید */}
+            </article>
+          ))}
+        </div>
+      </section>
+    </main>
+  );
+}
               <p className="mt-3 text-gray-700 leading-7">{d.notes}</p>
 
               <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">

@@ -5,6 +5,52 @@ import { useEffect, useState } from "react";
 import vendors from "../data/vendors";            // داده‌های تجهیزات
 import services from "../data/services.json";     // داده‌های خدمات (با آیکون و توضیحات)
 
+// — SectionTitle: تیتر سکشن با آیکون و خط تزئینی
+function SectionTitle({ as: Tag = "h2", icon = "equipment", className = "", children }) {
+  const Icon = ({ className = "" }) => {
+    switch (icon) {
+      case "solutions": // پازل/ایده
+        return (
+          <svg viewBox="0 0 24 24" className={className} aria-hidden="true" fill="currentColor">
+            <path d="M10 3a2 2 0 1 1 4 0h3a2 2 0 0 1 2 2v3a2 2 0 1 0 0 4v3a2 2 0 0 1-2 2h-3a2 2 0 1 0-4 0H7a2 2 0 0 1-2-2v-3a2 2 0 1 0 0-4V5a2 2 0 0 1 2-2h3z"/>
+          </svg>
+        );
+      case "services": // آچار/چرخ‌دنده
+        return (
+          <svg viewBox="0 0 24 24" className={className} aria-hidden="true" fill="currentColor">
+            <path d="M21 14.35V19a2 2 0 0 1-2 2h-4.65a4.5 4.5 0 1 0-4.7 0H5a2 2 0 0 1-2-2v-4.65a4.5 4.5 0 1 0 0-4.7V5a2 2 0 0 1 2-2h4.65a4.5 4.5 0 1 0 4.7 0H19a2 2 0 0 1 2 2v4.65a4.5 4.5 0 1 0 0 4.7zM12 9a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 12a3 3 0 1 1 0-6 3 3 0 0 1 0 6zM3 12a3 3 0 1 1 6 0 3 3 0 0 1-6 0zm12 0a3 3 0 1 1 6 0 3 3 0 0 1-6 0z"/>
+          </svg>
+        );
+      case "equipment": // سرور/رک
+      default:
+        return (
+          <svg viewBox="0 0 24 24" className={className} aria-hidden="true" fill="currentColor">
+            <path d="M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5A2 2 0 0 1 3 8V5zm0 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3zm3-8h3v2H6V6zm0 9h3v2H6v-2zm10-9h2v2h-2V6zm0 9h2v2h-2v-2z"/>
+          </svg>
+        );
+    }
+  };
+
+  return (
+    <div className={`flex items-center gap-3 mb-6 ${className}`} dir="rtl">
+      {/* آیکون داخل چیپ گرادیانی هم‌خوان با رنگ‌های سایت */}
+      <span className="inline-flex items-center justify-center w-9 h-9 rounded-xl text-white
+                       bg-[conic-gradient(at_30%_30%,#14b8a6, #f4c21f)]
+                       ring-1 ring-black/5 shadow-md">
+        <Icon className="w-5 h-5" />
+      </span>
+
+      {/* تیتر */}
+      <Tag className="text-2xl font-extrabold tracking-tight text-slate-900">
+        {children}
+      </Tag>
+
+      {/* خط تزئینی ظریفِ کشیده */}
+      <span className="flex-1 h-px bg-gradient-to-l from-slate-200 to-transparent" />
+    </div>
+  );
+}
+
 // --- رنگ‌ها و کمک‌تابع‌ها
 const TEAL = "#14b8a6";
 const YELLOW = "#f4c21f";
@@ -350,7 +396,7 @@ export default function Home() {
 
       {/* تجهیزات */}
       <section id="vendors" className="relative py-12 max-w-6xl mx-auto px-4">
-        <h2 className="text-2xl font-extrabold mb-6 text-slate-900">تجهیزات</h2>
+        <SectionTitle as="h2" icon="equipment">تجهیزات</SectionTitle>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {safeVendors.map((v, i) => (
             <BrandCard
@@ -367,14 +413,14 @@ export default function Home() {
 
       {/* راهکارها + خدمات */}
       <section id="solutions" className="max-w-6xl mx-auto px-4 pb-10">
-        <h2 className="text-2xl font-bold mb-6">نرم افزارها</h2>
+        <SectionTitle as="h2" icon="solutions">راهکارها</SectionTitle>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center mb-10">
           {SOLUTIONS.map((s) => (
             <SolutionCard key={s.slug} {...s} />
           ))}
         </div>
 
-        <h3 className="text-xl font-bold mb-4">خدمات</h3>
+        <SectionTitle as="h3" icon="services" className="mb-4">خدمات</SectionTitle>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
           {serviceItems.map((s, i) => (
             <ServiceCard

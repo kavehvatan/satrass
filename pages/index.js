@@ -404,7 +404,7 @@ export default function Home() {
 
       {/* راهکارها + خدمات */}
       <section id="solutions" className="max-w-6xl mx-auto px-4 pb-10">
-        <SectionTitle as="h2" icon="solutions">راهکارها</SectionTitle>
+        <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center mb-10">
           {SOLUTIONS.map((s) => (<SolutionCard key={s.slug} {...s} />))}
         </div>
@@ -433,7 +433,7 @@ export default function Home() {
               <ul className="space-y-2 text-white/80">
                 <li><a href="#vendors" className="hover:text-white">تجهیزات</a></li>
                 <li><a href="#solutions" className="hover:text-white">راهکارها</a></li>
-                <li><a href="/tools" className="hover:text-white">ابزارها</a></li>
+                <a href="#solutions" className="hover:text-white">محافظت از داده</a>
               </ul>
             </div>
             <div>

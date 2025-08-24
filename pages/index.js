@@ -45,7 +45,7 @@ function SectionTitle({ as: Tag = "h2", icon = "equipment", className = "", chil
 
   return (
     <div className={`flex items-center gap-3 mb-6 ${className}`} dir="rtl">
-      <span className="inline-flex items-center justify-center w-9 h-9 rounded-xl ring-1 ring-black/5 shadow-md bg-white">
+      <span className="inline-flex items-center justify-center w-6 h-6">
         {useFallback ? (
           <FallbackIcon className="w-5 h-5" />
         ) : (

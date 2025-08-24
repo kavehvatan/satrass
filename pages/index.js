@@ -34,8 +34,8 @@ function SectionTitle({ as: Tag = "h2", icon = "equipment", className = "", chil
   return (
     <div className={`flex items-center gap-3 mb-6 ${className}`} dir="rtl">
       {/* آیکون داخل چیپ گرادیانی هم‌خوان با رنگ‌های سایت */}
-     <span className="inline-flex items-center justify-center w-9 h-9 rounded-xl ... ring-1 ring-black/5 shadow-md text-slate-900">
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">...</svg>
+     <span className="inline-flex items-center justify-center w-9 h-9 rounded-xl ring-1 ring-black/5 shadow-md">
+  <img src="/icons/sections/vendors.svg" alt="" className="w-5 h-5" aria-hidden="true" />
 </span>
 
       {/* تیتر */}

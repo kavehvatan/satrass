@@ -17,7 +17,9 @@ function SectionTitle({ as: Tag = "h2", icon = "equipment", className = "", chil
   const map = { equipment: "vendors", solutions: "solutions", services: "services" };
   const src = `/icons/sections/${map[icon] || icon}.webp`;
 
-  // SVGهای داخلی به‌عنوان fallback
+  // اگر تصویر لود نشد، فقط SVG را نشان بده
+  const [useFallback, setUseFallback] = useState(false);
+
   const FallbackIcon = ({ className = "" }) => {
     switch (icon) {
       case "solutions":
@@ -32,8 +34,7 @@ function SectionTitle({ as: Tag = "h2", icon = "equipment", className = "", chil
             <path d="M21 14.35V19a2 2 0 0 1-2 2h-4.65a4.5 4.5 0 1 0-4.7 0H5a2 2 0 0 1-2-2v-4.65a4.5 4.5 0 1 0 0-4.7V5a2 2 0 0 1 2-2h4.65a4.5 4.5 0 1 0 4.7 0H19a2 2 0 0 1 2 2v4.65a4.5 4.5 0 1 0 0 4.7zM12 9a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 12a3 3 0 1 1 0-6 3 3 0 0 1 0 6zM3 12a3 3 0 1 1 6 0 3 3 0 0 1-6 0zm12 0a3 3 0 1 1 6 0 3 3 0 0 1-6 0z"/>
           </svg>
         );
-      case "equipment":
-      default:
+      default: // equipment
         return (
           <svg viewBox="0 0 24 24" className={className} aria-hidden="true" fill="currentColor">
             <path d="M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5A2 2 0 0 1 3 8V5zm0 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3zm3-8h3v2H6V6zm0 9h3v2H6v-2zm10-9h2v2h-2V6zm0 9h2v2h-2v-2z"/>
@@ -44,31 +45,25 @@ function SectionTitle({ as: Tag = "h2", icon = "equipment", className = "", chil
 
   return (
     <div className={`flex items-center gap-3 mb-6 ${className}`} dir="rtl">
-      {/* چیپ آیکون با fallback */}
       <span className="inline-flex items-center justify-center w-9 h-9 rounded-xl ring-1 ring-black/5 shadow-md bg-white">
-        <img
-          src={src}
-          alt=""
-          className="w-5 h-5"
-          aria-hidden="true"
-          onError={(e) => {
-            e.currentTarget.style.display = "none";
-            // بعد از مخفی شدن img، SVG کنار آن دیده می‌شود
-          }}
-        />
-        {/* SVG داخلی فقط زمانی دیده می‌شود که IMG مخفی شود */}
-        <FallbackIcon className="w-5 h-5" />
+        {useFallback ? (
+          <FallbackIcon className="w-5 h-5" />
+        ) : (
+          <img
+            src={src}
+            alt=""
+            className="w-5 h-5"
+            aria-hidden="true"
+            onError={() => setUseFallback(true)}
+          />
+        )}
       </span>
 
-      {/* تیتر */}
       <Tag className="text-2xl font-extrabold tracking-tight text-slate-900">{children}</Tag>
-
-      {/* خط تزئینی ظریف */}
       <span className="flex-1 h-px bg-gradient-to-l from-slate-200 to-transparent" />
     </div>
   );
 }
-
 // --- رنگ‌ها و کمک‌تابع‌ها
 const TEAL = "#14b8a6";
 const YELLOW = "#f4c21f";

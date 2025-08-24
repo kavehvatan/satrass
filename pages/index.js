@@ -432,7 +432,7 @@ export default function Home() {
               <h4 className="font-bold mb-3">میان‌بُر</h4>
               <ul className="space-y-2 text-white/80">
                 <li><a href="#vendors" className="hover:text-white">تجهیزات</a></li>
-                <li><a href="#solutions" className="hover:text-white">راهکارها</a></li>
+                <li><a href="/tools" className="hover:text-white">ابزارها</a></li>
                 <a href="#solutions" className="hover:text-white">محافظت از داده</a>
               </ul>
             </div>

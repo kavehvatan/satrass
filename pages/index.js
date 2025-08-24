@@ -5,23 +5,34 @@ import { useEffect, useState } from "react";
 import vendors from "../data/vendors";            // داده‌های تجهیزات
 import services from "../data/services.json";     // داده‌های خدمات (با آیکون و توضیحات)
 
-// — SectionTitle: تیتر سکشن با آیکون و خط تزئینی
+/* ===================== SectionTitle =====================
+ * تیتر سکشن با آیکون و خط تزئینی
+ * آیکون از /public/icons/sections/*.webp خوانده می‌شود:
+ *    equipment -> vendors.webp
+ *    solutions -> solutions.webp
+ *    services  -> services.webp
+ * اگر لود نشد، SVG داخلی نمایش داده می‌شود.
+ * ======================================================= */
 function SectionTitle({ as: Tag = "h2", icon = "equipment", className = "", children }) {
-  const Icon = ({ className = "" }) => {
+  const map = { equipment: "vendors", solutions: "solutions", services: "services" };
+  const src = `/icons/sections/${map[icon] || icon}.webp`;
+
+  // SVGهای داخلی به‌عنوان fallback
+  const FallbackIcon = ({ className = "" }) => {
     switch (icon) {
-      case "solutions": // پازل/ایده
+      case "solutions":
         return (
           <svg viewBox="0 0 24 24" className={className} aria-hidden="true" fill="currentColor">
             <path d="M10 3a2 2 0 1 1 4 0h3a2 2 0 0 1 2 2v3a2 2 0 1 0 0 4v3a2 2 0 0 1-2 2h-3a2 2 0 1 0-4 0H7a2 2 0 0 1-2-2v-3a2 2 0 1 0 0-4V5a2 2 0 0 1 2-2h3z"/>
           </svg>
         );
-      case "services": // آچار/چرخ‌دنده
+      case "services":
         return (
           <svg viewBox="0 0 24 24" className={className} aria-hidden="true" fill="currentColor">
             <path d="M21 14.35V19a2 2 0 0 1-2 2h-4.65a4.5 4.5 0 1 0-4.7 0H5a2 2 0 0 1-2-2v-4.65a4.5 4.5 0 1 0 0-4.7V5a2 2 0 0 1 2-2h4.65a4.5 4.5 0 1 0 4.7 0H19a2 2 0 0 1 2 2v4.65a4.5 4.5 0 1 0 0 4.7zM12 9a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 12a3 3 0 1 1 0-6 3 3 0 0 1 0 6zM3 12a3 3 0 1 1 6 0 3 3 0 0 1-6 0zm12 0a3 3 0 1 1 6 0 3 3 0 0 1-6 0z"/>
           </svg>
         );
-      case "equipment": // سرور/رک
+      case "equipment":
       default:
         return (
           <svg viewBox="0 0 24 24" className={className} aria-hidden="true" fill="currentColor">
@@ -33,17 +44,26 @@ function SectionTitle({ as: Tag = "h2", icon = "equipment", className = "", chil
 
   return (
     <div className={`flex items-center gap-3 mb-6 ${className}`} dir="rtl">
-      {/* آیکون داخل چیپ گرادیانی هم‌خوان با رنگ‌های سایت */}
-     <span className="inline-flex items-center justify-center w-9 h-9 rounded-xl ring-1 ring-black/5 shadow-md">
-  <img src="/icons/sections/vendors.svg" alt="" className="w-5 h-5" aria-hidden="true" />
-</span>
+      {/* چیپ آیکون با fallback */}
+      <span className="inline-flex items-center justify-center w-9 h-9 rounded-xl ring-1 ring-black/5 shadow-md bg-white">
+        <img
+          src={src}
+          alt=""
+          className="w-5 h-5"
+          aria-hidden="true"
+          onError={(e) => {
+            e.currentTarget.style.display = "none";
+            // بعد از مخفی شدن img، SVG کنار آن دیده می‌شود
+          }}
+        />
+        {/* SVG داخلی فقط زمانی دیده می‌شود که IMG مخفی شود */}
+        <FallbackIcon className="w-5 h-5" />
+      </span>
 
       {/* تیتر */}
-      <Tag className="text-2xl font-extrabold tracking-tight text-slate-900">
-        {children}
-      </Tag>
+      <Tag className="text-2xl font-extrabold tracking-tight text-slate-900">{children}</Tag>
 
-      {/* خط تزئینی ظریفِ کشیده */}
+      {/* خط تزئینی ظریف */}
       <span className="flex-1 h-px bg-gradient-to-l from-slate-200 to-transparent" />
     </div>
   );
@@ -255,8 +275,8 @@ function ServiceCard({ title, desc1, desc2, icon, index = 0 }) {
       >
         {icon ? (
           <img
-            src={icon}
-            onError={(e) => { e.currentTarget.style.display = "none"; }}
+            src={icon}                // مثل: /icons/services/install.webp
+            onError={(e)=>{ e.currentTarget.style.display="none"; }}
             alt=""
             className="w-10 h-10 object-contain"
           />
@@ -354,10 +374,7 @@ export default function Home() {
                 href="/contact"
                 onClick={swap}
                 className="rounded-full px-5 py-2.5 font-bold transition"
-                style={{
-                  backgroundColor: primary,
-                  color: primaryIsYellow ? "#000" : "#fff",
-                }}
+                style={{ backgroundColor: primary, color: primaryIsYellow ? "#000" : "#fff" }}
               >
                 ارائه مشاوره
               </a>
@@ -366,28 +383,16 @@ export default function Home() {
                 href="/tools"
                 onClick={swap}
                 className="rounded-full px-5 py-2.5 font-semibold transition"
-                style={{
-                  border: `1px solid ${secondary}`,
-                  color: secondary,
-                  backgroundColor: "transparent",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor = `${secondary}1A`)
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor = "transparent")
-                }
+                style={{ border: `1px solid ${secondary}`, color: secondary, backgroundColor: "transparent" }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${secondary}1A`)}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
               >
                 مشاهده ابزارها
               </a>
             </div>
           </div>
           <div className="flex justify-center">
-            <img
-              src="/satrass-hero.webp"
-              alt="آواتار ساتراس"
-              className="w-[280px] md:w-[340px] lg:w-[400px] h-auto object-contain"
-            />
+            <img src="/satrass-hero.webp" alt="آواتار ساتراس" className="w-[280px] md:w-[340px] lg:w-[400px] h-auto object-contain" />
           </div>
         </div>
       </section>
@@ -397,14 +402,7 @@ export default function Home() {
         <SectionTitle as="h2" icon="equipment">تجهیزات</SectionTitle>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {safeVendors.map((v, i) => (
-            <BrandCard
-              key={v.href || v.slug || v.title || i}
-              title={v.title}
-              slug={v.slug}
-              href={v.href}
-              index={i}
-              logo={v.logo}
-            />
+            <BrandCard key={v.href || v.slug || v.title || i} title={v.title} slug={v.slug} href={v.href} index={i} logo={v.logo} />
           ))}
         </div>
       </section>
@@ -413,9 +411,7 @@ export default function Home() {
       <section id="solutions" className="max-w-6xl mx-auto px-4 pb-10">
         <SectionTitle as="h2" icon="solutions">راهکارها</SectionTitle>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center mb-10">
-          {SOLUTIONS.map((s) => (
-            <SolutionCard key={s.slug} {...s} />
-          ))}
+          {SOLUTIONS.map((s) => (<SolutionCard key={s.slug} {...s} />))}
         </div>
 
         <SectionTitle as="h3" icon="services" className="mb-4">خدمات</SectionTitle>
@@ -426,7 +422,7 @@ export default function Home() {
               title={s.title}
               desc1={s.desc}
               desc2={s.desc2}
-              icon={s.icon}             // مثل: "/icons/services/install.webp"
+              icon={s.icon}      // مثال: /icons/services/install.webp
               index={i}
             />
           ))}
@@ -436,7 +432,6 @@ export default function Home() {
       {/* Footer + Sitemap (وسط‌چین) */}
       <footer className="bg-black text-white">
         <div className="max-w-6xl mx-auto px-4 py-12">
-          {/* sitemap */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 justify-items-center text-center sm:text-right">
             <div>
               <h4 className="font-bold mb-3">میان‌بُر</h4>
@@ -446,7 +441,6 @@ export default function Home() {
                 <li><a href="/tools" className="hover:text-white">ابزارها</a></li>
               </ul>
             </div>
-
             <div>
               <h4 className="font-bold mb-3">خدمات</h4>
               <ul className="space-y-2 text-white/80">
@@ -457,7 +451,6 @@ export default function Home() {
                 <li><a href="/services/operations" className="hover:text-white">راهبری</a></li>
               </ul>
             </div>
-
             <div>
               <h4 className="font-bold mb-3">صفحات</h4>
               <ul className="space-y-2 text-white/80">

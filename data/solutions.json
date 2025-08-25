@@ -14,3 +14,11 @@
     }
   ]
 }
+{
+  "items": [
+    {
+      "title": "Veeam",
+      "logo": "/avatars/commvault.webp",
+      "desc": "Data Protection مدرن با Dedup/Compression و پالیسی‌های منعطف.",
+      "url": "/services/commvault"
+    },

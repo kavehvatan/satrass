@@ -9,11 +9,13 @@ export default function Monitoring() {
         به شما اطمینان خاطر می‌دهد که تجهیزاتتان همواره در بهترین وضعیت عملیاتی باقی می‌مانند.
       </p>
 
-      {/* اینجا بعداً آواتار اضافه میشه */}
+      {/* آواتار پایش */}
       <div className="flex justify-center mt-10">
-        <div className="w-40 h-40 rounded-full bg-gray-100 flex items-center justify-center shadow-md">
-          <span className="text-gray-400 text-sm">Avatar Placeholder</span>
-        </div>
+        <img
+          src="/avatars/monitoring.webp"
+          alt="Monitoring Avatar"
+          className="w-40 h-40 rounded-full shadow-md object-cover"
+        />
       </div>
     </div>
   );

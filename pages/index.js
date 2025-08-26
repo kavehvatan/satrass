@@ -247,21 +247,17 @@ function BrandCard({ title, slug, href, index, logo }) {
 
 // --- کارت «خدمات» با پس‌زمینهٔ ۷۰٪ از دو رنگ برند + توضیحات در مودال
 // قبلی ServiceCard را با این نسخه جایگزین کن
-import Link from "next/link"; // بالای فایل هست؛ اگر نبود اضافه باشه
 function ServiceCard({ title, icon, index = 0, href }) {
   const isTeal = index % 2 === 0;
   const bg = isTeal ? "rgba(20,184,166,0.7)" : "rgba(244,194,31,0.7)"; // 70%
   const fg = isTeal ? "#fff" : "#000";
+  const to = href || "#";
 
   return (
-    <Link
-      href={href}
-      className="block w-full max-w-[520px] mx-auto"
-      aria-label={title}
-    >
+    <Link href={to} className="group block w-full max-w-[520px] mx-auto">
       <div
         className="flex flex-col items-center justify-center gap-3 p-5 border rounded-lg hover:shadow-md transition text-center h-[120px] cursor-pointer select-none"
-        style={{ background: bg, color: fg, borderColor: "rgba(0,0,0,.08)" }}
+        style={{ borderColor: "#e5e7eb", background: bg, color: fg }}
       >
         {icon ? (
           <img

@@ -1,6 +1,6 @@
 export default function Monitoring() {
-  return (
-    <div className="max-w-4xl mx-auto py-12 text-center">
+ return (
+    <div className="max-w-4xl mx-auto py-12 px-4 text-center">
       <h1 className="text-3xl font-bold mb-6">پایش</h1>
       <p className="text-lg leading-8 text-gray-700 mb-12 text-right">
         پایش مداوم زیرساخت‌های ذخیره‌سازی و شبکه نقش مهمی در پیشگیری از خرابی‌ها و کاهش زمان

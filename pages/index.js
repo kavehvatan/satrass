@@ -176,6 +176,7 @@ function GlassModal({ open, onClose, title, paragraphs }) {
 
 // --- کارت برند «تجهیزات» (لوگو سمت چپ کارت)
 function BrandCard({ title, slug, href, index, logo }) {
+  const [border, setBorder] = useState("#e5e7eb");
   const link = href || `/products/${slug || (title || "").toLowerCase()}`;
   const base =
     logo
@@ -183,45 +184,61 @@ function BrandCard({ title, slug, href, index, logo }) {
       : (slug || (title || "")).toLowerCase();
 
   const webp = `/avatars/${base}.webp`;
-  const png = `/avatars/${base}.png`;
+  const png  = `/avatars/${base}.png`;
   const artWebp = `/brand-art/${base}.webp`;
-  const artPng = `/brand-art/${base}.png`;
+  const artPng  = `/brand-art/${base}.png`;
 
   return (
-    <Link href={link} className="group block w-full">
+    <Link href={link} className="group block">
       <div
         className="
           relative overflow-hidden rounded-2xl
-          bg-white/60 backdrop-blur-sm
-          border border-gray-200
-          transition duration-200
-          hover:-translate-y-0.5 hover:shadow-lg
-          h-32 flex items-center
+          border bg-white/70 supports-[backdrop-filter]:bg-white/35
+          backdrop-blur-xl
+          p-5 transition duration-200
+          hover:-translate-y-0.5 hover:shadow-xl
         "
+        style={{ borderColor: border, borderWidth: 1 }}
+        onMouseEnter={() =>
+          setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
+        }
+        onMouseLeave={() => setBorder("#e5e7eb")}
       >
-        {/* پس‌زمینه سرور (محدود به باکس) */}
-        <picture className="absolute inset-0 opacity-50">
+        {/* پس‌زمینه کارت برند */}
+        <picture className="pointer-events-none select-none absolute inset-0">
           <source srcSet={artWebp} type="image/webp" />
           <img
             src={artPng}
             alt=""
             aria-hidden="true"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover scale-[1.12] opacity-[.35] md:opacity-[.35] contrast-115 saturate-110"
             onError={(e) => (e.currentTarget.style.display = "none")}
           />
         </picture>
 
-        {/* لوگو درون کاشی سفید */}
-        <div className="relative z-10 ml-4 rtl:mr-4 bg-white rounded-xl shadow ring-1 ring-black/5 p-2 flex items-center justify-center w-14 h-14">
-          <picture>
-            <source srcSet={webp} type="image/webp" />
-            <img
-              src={png}
-              alt={title}
-              className="w-10 h-10 object-contain"
-              onError={(e) => (e.currentTarget.src = "/avatars/default.png")}
-            />
-          </picture>
+        {/* هایلایت رنگی آرام */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-30"
+          style={{
+            background: `radial-gradient(140% 120% at -10% -10%, ${colorOf(index)}33 0%, transparent 60%)`,
+          }}
+        />
+
+        {/* لوگو — سمت چپ فیزیکی */}
+        <div className="relative flex items-center ltr:justify-start rtl:justify-end">
+          <div className="w-14 h-14 shrink-0 rounded-xl bg-white ring-1 ring-black/5 shadow-sm grid place-items-center transition-transform duration-200 group-hover:scale-[1.03] overflow-hidden">
+            <picture>
+              <source srcSet={webp} type="image/webp" />
+              <img
+                src={png}
+                alt={title}
+                width={56}
+                height={56}
+                className="w-10 h-10 object-contain"
+                onError={(e) => (e.currentTarget.src = "/avatars/default.png")}
+              />
+            </picture>
+          </div>
         </div>
       </div>
     </Link>

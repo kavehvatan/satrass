@@ -352,7 +352,8 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 py-12 md:py-16 grid md:grid-cols-2 items-center gap-10">
           <div>
             <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">
-              زیرساخت هوشمند، با دقت مهندسی
+              زیرساخت هوشمند 
+دقت مهندسی
             </h1>
             <p className="mt-4 text-gray-300">از مشاوره تا پشتیبانی، درکنار شما.</p>
             <div className="mt-6 flex gap-3">

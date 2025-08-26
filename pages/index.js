@@ -177,10 +177,10 @@ function GlassModal({ open, onClose, title, paragraphs }) {
 // --- کارت برند «تجهیزات» (لوگو سمت چپ کارت)
 /* ---------- کارت برند «تجهیزات» (بدون باکس/بردر بیرونی) ---------- */
 /* بک‌گراند = تصویر سرور، لوگو = کاشی سفید روی بک‌گراند (سمت چپ فیزیکی) */
+/* ---------- کارت برند «تجهیزات» ظریف‌تر ---------- */
 function BrandCard({ title, slug, href, index, logo }) {
   const link = href || `/products/${slug || (title || "").toLowerCase()}`;
 
-  // نام فایل‌ها (public/avatars و public/brand-art)
   const base =
     logo
       ? logo.replace(/^\/?avatars\//, "").replace(/\.(png|webp)$/i, "")
@@ -191,13 +191,12 @@ function BrandCard({ title, slug, href, index, logo }) {
   const artWebp = `/brand-art/${base}.webp`;
   const artPng  = `/brand-art/${base}.png`;
 
-  // رنگ‌های آرام برای هیلایت پس‌زمینه
   const BRAND_COLORS = ["#00E5FF", "#2D5BFF"];
   const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
 
   return (
     <Link href={link} className="group block">
-      <div className="relative overflow-hidden rounded-2xl h-40 sm:h-44 lg:h-48">
+      <div className="relative overflow-hidden rounded-xl h-28 sm:h-32 lg:h-36">
         {/* بک‌گراند سرور */}
         <picture className="pointer-events-none select-none absolute inset-0">
           <source srcSet={artWebp} type="image/webp" />
@@ -205,7 +204,7 @@ function BrandCard({ title, slug, href, index, logo }) {
             src={artPng}
             alt=""
             aria-hidden="true"
-            className="w-full h-full object-cover opacity-60"
+            className="w-full h-full object-cover opacity-65"
             onError={(e) => (e.currentTarget.style.display = "none")}
           />
         </picture>
@@ -214,21 +213,21 @@ function BrandCard({ title, slug, href, index, logo }) {
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: `radial-gradient(140% 120% at -10% -10%, ${colorOf(index)}2b 0%, transparent 60%)`,
+            background: `radial-gradient(140% 120% at -10% -10%, ${colorOf(index)}22 0%, transparent 70%)`,
           }}
         />
 
-        {/* لوگو — سمت چپ فیزیکی (در RTL: end = چپ) */}
-        <div className="relative h-full flex items-center ltr:justify-start rtl:justify-end px-4">
-          <div className="w-14 h-14 shrink-0 rounded-xl bg-white ring-1 ring-black/5 shadow-sm grid place-items-center transition-transform duration-200 group-hover:scale-[1.03] overflow-hidden">
+        {/* لوگو — کاشی سفید کوچک روی بک‌گراند */}
+        <div className="relative h-full flex items-center ltr:justify-start rtl:justify-end px-3">
+          <div className="w-12 h-12 shrink-0 rounded-lg bg-white ring-1 ring-black/5 shadow-sm grid place-items-center transition-transform duration-200 group-hover:scale-105 overflow-hidden">
             <picture>
               <source srcSet={webp} type="image/webp" />
               <img
                 src={png}
                 alt={title}
-                width={56}
-                height={56}
-                className="w-10 h-10 object-contain"
+                width={48}
+                height={48}
+                className="w-9 h-9 object-contain"
                 onError={(e) => (e.currentTarget.src = "/avatars/default.png")}
               />
             </picture>

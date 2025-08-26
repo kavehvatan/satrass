@@ -1,10 +1,11 @@
 export default function Training() {
   return (
-    <div className="max-w-4xl mx-auto py-12 text-center">
+    <div className="max-w-4xl mx-auto py-12 text-center px-4">
       <h1 className="text-3xl font-bold mb-6">آموزش</h1>
       <p className="text-lg leading-8 text-gray-700 mb-12 text-justify">
-        آموزش تخصصی تجهیزات و نرم‌افزارهای سازمانی باعث افزایش بهره‌وری و کاهش خطاهای عملیاتی می‌شود. 
-        دوره‌های ما شامل آموزش سناریومحور، مستندات عملی و پشتیبانی پس از دوره است تا تیم شما همیشه آماده باشد.
+        آموزش‌های ما بر اساس سناریوهای واقعی طراحی شده‌اند. 
+        انتقال دانش شامل راهبری، عیب‌یابی (Troubleshooting) و استفاده از Lab و Runbook اختصاصی است.
+        همچنین پس از پایان دوره، پشتیبانی پرسش‌وپاسخ و به‌روزرسانی جزوات نیز ارائه می‌شود.
       </p>
 
       <div className="flex justify-center mt-10">

@@ -1,14 +1,22 @@
 export default function Operations() {
   return (
-    <div className="max-w-4xl mx-auto py-12">
+    <div className="max-w-4xl mx-auto py-12 text-center">
       <h1 className="text-3xl font-bold mb-6">راهبری</h1>
-      <p className="text-lg leading-8 text-gray-700">
-        خدمات راهبری ما تضمین می‌کند که زیرساخت‌های شما نه تنها راه‌اندازی شوند، بلکه در طول
-        زمان به‌روز، بهینه و بدون اختلال باقی بمانند. تیم پشتیبانی ما به‌صورت فعال در کنار
-        شماست تا عملیات روزانه، مدیریت ظرفیت، به‌روزرسانی‌ها و نگهداری را با کیفیت و امنیت
-        بالا انجام دهد. با این سرویس، دغدغه‌های فنی از دوش شما برداشته می‌شود تا روی کسب‌وکار
-        خود تمرکز کنید.
+      <p className="text-lg leading-8 text-gray-700 mb-12 text-right">
+        راهبری (Managed Services) به معنای سپردن مدیریت روزانه‌ی زیرساخت به تیم متخصص است.
+        ما در این سرویس وظایفی مانند پچینگ، بررسی لاگ‌ها، هاردنینگ امنیتی، صحت‌سنجی بکاپ‌ها
+        و رسیدگی به رخدادها را طبق SLA بر عهده می‌گیریم. همچنین گزارش‌های ماهانه از وضعیت
+        سلامت، ظرفیت و ریسک‌های احتمالی ارائه می‌شود تا تصمیم‌گیری‌های مدیریتی ساده‌تر شود.
       </p>
+
+      {/* آواتار راهبری */}
+      <div className="flex justify-center mt-10">
+        <img
+          src="/avatars/operations.webp"
+          alt="Operations Avatar"
+          className="w-56 h-56 rounded-full shadow-md object-cover"
+        />
+      </div>
     </div>
   );
 }

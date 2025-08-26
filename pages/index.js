@@ -246,49 +246,38 @@ function BrandCard({ title, slug, href, index, logo }) {
 }
 
 // --- کارت «خدمات» با پس‌زمینهٔ ۷۰٪ از دو رنگ برند + توضیحات در مودال
-function ServiceCard({ title, desc1, desc2, icon, index = 0 }) {
-  const [border, setBorder] = useState("#e5e7eb");
-  const [open, setOpen] = useState(false);
+// قبلی ServiceCard را با این نسخه جایگزین کن
+import Link from "next/link"; // بالای فایل هست؛ اگر نبود اضافه باشه
+function ServiceCard({ title, icon, index = 0, href }) {
   const isTeal = index % 2 === 0;
-  const bg = isTeal ? "rgba(20,184,166,0.7)" : "rgba(244,194,31,0.7)";
+  const bg = isTeal ? "rgba(20,184,166,0.7)" : "rgba(244,194,31,0.7)"; // 70%
   const fg = isTeal ? "#fff" : "#000";
 
   return (
-    <>
+    <Link
+      href={href}
+      className="block w-full max-w-[520px] mx-auto"
+      aria-label={title}
+    >
       <div
-        onMouseEnter={() =>
-          setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
-        }
-        onMouseLeave={() => setBorder("#e5e7eb")}
-        onClick={() => setOpen(true)}
-        className="flex flex-col items-center justify-center gap-3 p-5 border rounded-lg hover:shadow-md transition text-center w-full max-w-[520px] mx-auto h-[120px] cursor-pointer select-none"
-        style={{ borderColor: border, background: bg, color: fg }}
-        role="button"
-        tabIndex={0}
-        aria-haspopup="dialog"
-        aria-expanded={open}
+        className="flex flex-col items-center justify-center gap-3 p-5 border rounded-lg hover:shadow-md transition text-center h-[120px] cursor-pointer select-none"
+        style={{ background: bg, color: fg, borderColor: "rgba(0,0,0,.08)" }}
       >
         {icon ? (
           <img
-            src={icon}                // مثل: /icons/services/install.webp
-            onError={(e)=>{ e.currentTarget.style.display="none"; }}
+            src={icon}
             alt=""
             className="w-10 h-10 object-contain"
+            onError={(e) => (e.currentTarget.style.display = "none")}
           />
         ) : null}
-        <span className="font-semibold" style={{ color: fg }}>{title}</span>
+        <span className="font-semibold" style={{ color: fg }}>
+          {title}
+        </span>
       </div>
-
-      <GlassModal
-        open={open}
-        onClose={() => setOpen(false)}
-        title={title}
-        paragraphs={[desc1, desc2]}
-      />
-    </>
+    </Link>
   );
 }
-
 // --- راهکارها
 const SOLUTIONS = [
   {
@@ -416,19 +405,19 @@ export default function Home() {
           {SOLUTIONS.map((s) => (<SolutionCard key={s.slug} {...s} />))}
         </div>
 
-        <SectionTitle as="h3" icon="services" className="mb-4">خدمات</SectionTitle>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-          {serviceItems.map((s, i) => (
-            <ServiceCard
-              key={s.href || s.title || i}
-              title={s.title}
-              desc1={s.desc}
-              desc2={s.desc2}
-              icon={s.icon}      // مثال: /icons/services/install.webp
-              index={i}
-            />
-          ))}
-        </div>
+    {/* بخش خدمات در صفحه اصلی */}
+<SectionTitle as="h3" icon="services" className="mb-4">خدمات</SectionTitle>
+<div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+  {serviceItems.map((s, i) => (
+    <ServiceCard
+      key={s.href || s.slug || s.title || i}
+      title={s.title}
+      icon={s.icon}                     // مثل /icons/services/install.webp
+      index={i}
+      href={s.href || `/services/${s.slug}`}  // ← این خط مهم است
+    />
+  ))}
+</div>
       </section>
 
       {/* Footer + Sitemap (وسط‌چین) */}

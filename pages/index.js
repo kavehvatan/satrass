@@ -175,9 +175,12 @@ function GlassModal({ open, onClose, title, paragraphs }) {
 }
 
 // --- کارت برند «تجهیزات» (لوگو سمت چپ کارت)
+/* ---------- کارت برند «تجهیزات» (بدون باکس/بردر بیرونی) ---------- */
+/* بک‌گراند = تصویر سرور، لوگو = کاشی سفید روی بک‌گراند (سمت چپ فیزیکی) */
 function BrandCard({ title, slug, href, index, logo }) {
-  const [border, setBorder] = useState("#e5e7eb");
   const link = href || `/products/${slug || (title || "").toLowerCase()}`;
+
+  // نام فایل‌ها (public/avatars و public/brand-art)
   const base =
     logo
       ? logo.replace(/^\/?avatars\//, "").replace(/\.(png|webp)$/i, "")
@@ -188,44 +191,35 @@ function BrandCard({ title, slug, href, index, logo }) {
   const artWebp = `/brand-art/${base}.webp`;
   const artPng  = `/brand-art/${base}.png`;
 
+  // رنگ‌های آرام برای هیلایت پس‌زمینه
+  const BRAND_COLORS = ["#00E5FF", "#2D5BFF"];
+  const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
+
   return (
     <Link href={link} className="group block">
-      <div
-        className="
-          relative overflow-hidden rounded-2xl
-          border bg-white/70 supports-[backdrop-filter]:bg-white/35
-          backdrop-blur-xl
-          p-5 transition duration-200
-          hover:-translate-y-0.5 hover:shadow-xl
-        "
-        style={{ borderColor: border, borderWidth: 1 }}
-        onMouseEnter={() =>
-          setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
-        }
-        onMouseLeave={() => setBorder("#e5e7eb")}
-      >
-        {/* پس‌زمینه کارت برند */}
+      <div className="relative overflow-hidden rounded-2xl h-40 sm:h-44 lg:h-48">
+        {/* بک‌گراند سرور */}
         <picture className="pointer-events-none select-none absolute inset-0">
           <source srcSet={artWebp} type="image/webp" />
           <img
             src={artPng}
             alt=""
             aria-hidden="true"
-            className="w-full h-full object-cover scale-[1.12] opacity-[.35] md:opacity-[.35] contrast-115 saturate-110"
+            className="w-full h-full object-cover opacity-60"
             onError={(e) => (e.currentTarget.style.display = "none")}
           />
         </picture>
 
-        {/* هایلایت رنگی آرام */}
+        {/* هایلایت رنگی ملایم */}
         <div
-          className="absolute inset-0 pointer-events-none opacity-30"
+          className="absolute inset-0 pointer-events-none"
           style={{
-            background: `radial-gradient(140% 120% at -10% -10%, ${colorOf(index)}33 0%, transparent 60%)`,
+            background: `radial-gradient(140% 120% at -10% -10%, ${colorOf(index)}2b 0%, transparent 60%)`,
           }}
         />
 
-        {/* لوگو — سمت چپ فیزیکی */}
-        <div className="relative flex items-center ltr:justify-start rtl:justify-end">
+        {/* لوگو — سمت چپ فیزیکی (در RTL: end = چپ) */}
+        <div className="relative h-full flex items-center ltr:justify-start rtl:justify-end px-4">
           <div className="w-14 h-14 shrink-0 rounded-xl bg-white ring-1 ring-black/5 shadow-sm grid place-items-center transition-transform duration-200 group-hover:scale-[1.03] overflow-hidden">
             <picture>
               <source srcSet={webp} type="image/webp" />

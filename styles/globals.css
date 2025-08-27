@@ -1,239 +1,159 @@
-/* globals.css */
+/* ===========================
+   Tailwind layers
+   =========================== */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ——— پایه‌ی رندر و جهت‌دهی ——— */
-html, body {
-  direction: rtl;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-html, body, #__next { width: 100%; overflow-x: hidden; }
-*, *::before, *::after { box-sizing: border-box; }
-img, video { max-width: 100%; height: auto; }
-
-/* ——— رنگ‌های پیش‌فرض پروژه (قابل override با تم) ——— */
-:root{
-  /* لوگو/زرد پروژه */
-  --logo-teal:   #14b8a6;   /* teal-500 */
-  --logo-yellow: #f4c21f;
-
-  /* پالت اصلی (primary) – پیش‌فرض مثل amber صفحه اول */
-  --brand:     #f59e0b;   /* 500 */
-  --brand-600: #d97706;   /* 600 */
-  --brand-700: #b45309;   /* 700 */
-  --brand-50:  #fffbeb;   /* 50  برای فوکوس نرم */
-
-  /* پالت دوم (secondary) – برای .btn-secondary */
-  --brand2:     #0ea5e9;  /* sky-500 */
-  --brand2-600: #0284c7;  /* sky-600 */
-  --brand2-700: #0369a1;  /* sky-700 */
-  --brand2-50:  #f0f9ff;  /* sky-50 */
-
-  /* Outline (Specsheet) */
-  --outline-bg:     #ffffff;
-  --outline-text:   #0f172a;        /* slate-900 */
-  --outline-border: rgba(2,6,23,.10);
-}
-
-/* ——— تم‌ها (دو روش: با data-theme یا با کلاس theme-*) ——— */
-/* Dell */
-[data-theme="dell"], .theme-dell {
-  --brand:#f59e0b;  --brand-600:#d97706; --brand-700:#b45309; --brand-50:#fffbeb;
-  --brand2:#0ea5e9; --brand2-600:#0284c7; --brand2-700:#0369a1; --brand2-50:#f0f9ff;
-}
-/* HPE (سبز) */
-[data-theme="hpe"], .theme-hpe {
-  --brand:#22c55e;  --brand-600:#16a34a; --brand-700:#15803d; --brand-50:#f0fdf4;
-  --brand2:#14b8a6; --brand2-600:#0d9488; --brand2-700:#0f766e; --brand2-50:#f0fdfa;
-}
-/* Cisco (آبی) */
-[data-theme="cisco"], .theme-cisco {
-  --brand:#0ea5e9;  --brand-600:#0284c7; --brand-700:#0369a1; --brand-50:#f0f9ff;
-  --brand2:#22c55e; --brand2-600:#16a34a; --brand2-700:#15803d; --brand2-50:#f0fdf4;
-}
-/* Lenovo (قرمز) */
-[data-theme="lenovo"], .theme-lenovo {
-  --brand:#ef4444;  --brand-600:#dc2626; --brand-700:#b91c1c; --brand-50:#fef2f2;
-  --brand2:#0ea5e9; --brand2-600:#0284c7; --brand2-700:#0369a1; --brand2-50:#f0f9ff;
-}
-/* Commvault (بنفش) */
-[data-theme="commvault"], .theme-commvault {
-  --brand:#8b5cf6;  --brand-600:#7c3aed; --brand-700:#6d28d9; --brand-50:#f5f3ff;
-  --brand2:#22c55e; --brand2-600:#16a34a; --brand2-700:#15803d; --brand2-50:#f0fdf4;
-}
-/* Oracle (سرخ/رز) */
-[data-theme="oracle"], .theme-oracle {
-  --brand:#f43f5e;  --brand-600:#e11d48; --brand-700:#be123c; --brand-50:#fff1f2;
-  --brand2:#0ea5e9; --brand2-600:#0284c7; --brand2-700:#0369a1; --brand2-50:#f0f9ff;
-}
-/* Juniper / Fujitsu / Quantum … در صورت نیاز اضافه کن */
-
-/* ——— دکمه‌ها ——— */
-/* بدنه‌ی مشترک دکمه‌ها بدون تداخل با Tailwind */
-.btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
-  padding: .75rem 1.25rem;            /* py-3 px-5 */
-  border-radius: 1rem;                 /* rounded-2xl */
-  font-weight: 600; line-height: 1;
-  border: 1px solid transparent;
-  transition: background-color .2s ease, color .2s ease,
-              border-color .2s ease, box-shadow .2s ease, transform .1s ease;
-  box-shadow: 0 1px 2px rgba(2,6,23,.05);
-}
-.btn:hover   { box-shadow: 0 4px 12px rgba(2,6,23,.08); transform: translateY(-1px); }
-.btn:active  { transform: translateY(0); box-shadow: 0 1px 2px rgba(2,6,23,.05); }
-.btn:focus { outline: none; }
-.btn:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 4px var(--brand-50), 0 0 0 2px var(--brand);
-}
-.btn-sm { padding: .5rem .875rem;  border-radius: .75rem; }
-.btn-lg { padding: .875rem 1.5rem;  border-radius: 1.25rem; }
-
-/* primary — برای «درخواست مشاوره» */
-.btn-primary {
-  background-color: var(--brand); color: #fff;
-}
-.btn-primary:hover  { background-color: var(--brand-600); }
-.btn-primary:active { background-color: var(--brand-700); }
-
-/* secondary — اگر خواستی دکمه دوم رنگی داشته باشی */
-.btn-secondary {
-  background-color: var(--brand2); color: #fff;
-}
-.btn-secondary:hover  { background-color: var(--brand2-600); }
-.btn-secondary:active { background-color: var(--brand2-700); }
-
-/* outline — برای Specsheet */
-.btn-outline {
-  background-color: var(--outline-bg);
-  color: var(--outline-text);
-  border-color: var(--outline-border);
-}
-.btn-outline:hover {
-  background-color: var(--brand-50);
-  color: var(--brand-700);
-  border-color: var(--brand);
-}
-
-/* حالت غیرفعال */
-.btn[disabled], .btn:disabled {
-  opacity: .6; cursor: not-allowed; transform: none; box-shadow: none;
-}
-
-/* ——— کمک برای هم‌ارتفاع شدن کارت‌ها (اختیاری) ——— */
-.card-equal { display: grid; }
-.card-body-equal { display: flex; flex-direction: column; }
-.card-body-equal .card-actions { margin-top: auto; }
-
-
-/* ===== Buttons (Pill) ===== */
-:root{
-  /* رنگ‌های پیش‌فرض اگر تم ست نشود */
-  --c-primary: #14b8a6;     /* teal-500 */
-  --c-primary-600: #0d9488; /* teal-600 */
-  --c-accent:  #f59e0b;     /* amber-500 */
-  --c-accent-600:#d97706;   /* amber-600 */
-}
-
-[data-theme="dell"]{
-  --c-primary:#14b8a6; --c-primary-600:#0d9488; /* teal */
-  --c-accent:#f59e0b;  --c-accent-600:#d97706;  /* amber */
-}
-[data-theme="hpe"]{
-  --c-primary:#22c55e; --c-primary-600:#16a34a; /* green */
-  --c-accent:#f59e0b;  --c-accent-600:#d97706;
-}
-/* اگر برای برندهای دیگر هم خواستی، مشابه بالا اضافه کن */
-
-.btn{
-  display:inline-flex; align-items:center; justify-content:center;
-  border-radius:9999px; /* قرصی */
-  padding:0.55rem 1.1rem;
-  font-size:0.95rem; font-weight:600;
-  transition:all .15s ease-in-out;
-  line-height:1;
-}
-
-/* پررنگ (Filled) – مشاوره */
-.btn-primary{
-  background:var(--c-primary);
-  color:#fff;
-  box-shadow:0 0 0 1px rgba(255,255,255,0.05) inset;
-}
-.btn-primary:hover{
-  background:var(--c-primary-600);
-  transform:translateY(-1px);
-}
-
-/* دورخطی (Outline) – Specsheet */
-.btn-outline{
-  background:transparent;
-  color:var(--c-accent);
-  border:2px solid var(--c-accent);
-}
-.btn-outline:hover{
-  background:var(--c-accent);
-  color:#111827; /* slate-900 */
-  transform:translateY(-1px);
-}
-
-
-/* ==== Glass Card with brand glow ==== */
-.glass-card {
-  position: relative;
-  border-radius: 1.25rem;                 /* ≈ rounded-2xl */
-  background: rgba(255, 255, 255, 0.06);  /* شیشه‌ای کم‌رنگ */
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(10px) saturate(120%);
-  -webkit-backdrop-filter: blur(10px) saturate(120%);
-  transition: transform .25s ease, box-shadow .25s ease, background .25s ease;
-  overflow: hidden;
-}
-
-/* هاله گرادیانی پشت کارت (با رنگ‌های متغیر) */
-.glass-card::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  inset: -2px;
-  border-radius: inherit;
-  background: conic-gradient(from 140deg, var(--c1), var(--c2), var(--c1));
-  filter: blur(18px);
-  opacity: .32;
-  transition: opacity .25s ease, filter .25s ease;
-}
-
-/* نور رویی ملایم */
-.glass-card::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,0) 60%);
-  pointer-events: none;
-}
-
-.glass-card:hover {
-  transform: translateY(-2px);
-}
-
-.glass-card:hover::before {
-  opacity: .55;
-  filter: blur(26px);
-}
+/* ===========================
+   Font: BNazanin
+   مسیر فایل‌ها:
+   /public/fonts/bnazanin/BNazanin.woff2
+   /public/fonts/bnazanin/BNazanin.woff
+   =========================== */
 @font-face {
-  font-family: 'BNazanin';
-  src: url('/fonts/bnazanin/BNazanin.woff2') format('woff2'),
-       url('/fonts/bnazanin/BNazanin.woff') format('woff');
-  font-weight: normal;
+  font-family: "BNazanin";
+  src:
+    url("/fonts/bnazanin/BNazanin.woff2") format("woff2"),
+    url("/fonts/bnazanin/BNazanin.woff") format("woff");
+  font-weight: 100 900;
   font-style: normal;
   font-display: swap;
 }
 
-/* کل سایت BNazanin بشه */
-html, body {
-  font-family: 'BNazanin', sans-serif;
+/* ===========================
+   CSS Variables (Colors)
+   =========================== */
+:root {
+  /* برند */
+  --c-teal:   #14b8a6; /* TEAL */
+  --c-teal-600: #0d9488;
+  --c-yellow: #f4c21f; /* YELLOW */
+  --c-yellow-600: #d4a61a;
+
+  /* متن/پس‌زمینه */
+  --bg-page: #f8fafc;   /* slate-50 */
+  --txt-main: #0f172a;  /* slate-900 */
+  --txt-sub:  #334155;  /* slate-700 */
 }
+
+/* ===========================
+   Base
+   =========================== */
+html, body {
+  height: 100%;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: "BNazanin", ui-sans-serif, system-ui, -apple-system, Segoe UI,
+               Roboto, "Noto Naskh Arabic", "IRANSans", "Vazirmatn", sans-serif;
+  color: var(--txt-main);
+  background-color: var(--bg-page);
+  line-height: 1.6;
+}
+
+/* تصاویر بلاک و ریسپانسیو‌تر */
+img, svg, video, canvas {
+  display: block;
+  max-width: 100%;
+}
+
+/* لینک‌های عمومی */
+a {
+  text-decoration: none;
+}
+
+/* تیترها کمی فشرده‌تر */
+h1, h2, h3, h4 {
+  letter-spacing: -0.01em;
+}
+
+/* ===========================
+   Buttons (Pill)
+   =========================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+
+  border-radius: 9999px;        /* pill */
+  padding: 0.55rem 1.1rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1;
+  transition: all .15s ease-in-out;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+/* Filled: Teal */
+.btn-primary {
+  background: var(--c-teal);
+  color: #fff;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.06) inset,
+              0 10px 18px -10px rgba(0,0,0,.25);
+}
+.btn-primary:hover {
+  background: var(--c-teal-600);
+  transform: translateY(-1px);
+}
+
+/* Outlined: Yellow */
+.btn-outline {
+  background: transparent;
+  color: var(--c-yellow);
+  border: 2px solid var(--c-yellow);
+}
+.btn-outline:hover {
+  background: var(--c-yellow);
+  color: #111827;
+  transform: translateY(-1px);
+}
+
+/* دکمه Ghost (در صورت نیاز) */
+.btn-ghost {
+  background: transparent;
+  color: inherit;
+}
+.btn-ghost:hover {
+  background: rgba(0,0,0,.04);
+}
+
+/* ===========================
+   Helper classes (اختیاری)
+   =========================== */
+
+/* کارت نیمه‌شفاف شیشه‌ای لطیف */
+.soft-glass {
+  background: rgba(255,255,255,.45);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: 1rem;
+  box-shadow: 0 20px 60px -15px rgba(0,0,0,.25);
+}
+
+/* خط تزئینی ملایم (می‌توان کنار تیترها استفاده کرد) */
+.rule-soft {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(to left, rgba(15,23,42,.08), transparent);
+}
+
+/* برای جلوگیری از لگ رندر برخی ترنزیشن‌ها */
+.gpu {
+  transform: translateZ(0);
+}
+
+/* ===========================
+   RTL احترام به دایرکشن
+   (اگر در _app.js dir="rtl" ست شده، نیازی نیست)
+   =========================== */
+/* body { direction: rtl; } */

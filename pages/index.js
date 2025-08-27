@@ -43,26 +43,26 @@ function SectionTitle({ as: Tag = "h2", icon = "equipment", className = "", chil
     }
   };
 
+ function SectionTitle({ as: Tag = "h2", icon, children }) {
   return (
-    <div className={`flex items-center gap-3 mb-6 ${className}`} dir="rtl">
-      <span className="inline-flex items-center justify-center w-6 h-6">
-        {useFallback ? (
-          <FallbackIcon className="w-5 h-5" />
-        ) : (
+    <div className="flex items-center gap-4 mb-6">
+      {/* خط سمت راست */}
+      <span className="flex-1 h-px bg-gradient-to-r from-yellow-200 via-teal-200 to-transparent" />
+
+      {/* تیتر */}
+      <Tag className="text-2xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
+        {icon && (
           <img
-            src={src}
+            src={`/icons/${icon}.webp`}
             alt=""
-            className="w-5 h-5"
-            aria-hidden="true"
-            onError={() => setUseFallback(true)}
+            className="w-6 h-6 object-contain inline-block"
           />
         )}
-      </span>
+        {children}
+      </Tag>
 
-      <Tag className="text-2xl font-extrabold tracking-tight text-slate-900">{children}</Tag>
-      <span className="flex-1 h-px bg-gradient-to-r from-slate-200 to-transparent" />
-      <Tag className="text-2xl font-extrabold tracking-tight text-slate-900">{children}</Tag>
-      <span className="flex-1 h-px bg-gradient-to-l from-slate-200 to-transparent" />
+      {/* خط سمت چپ */}
+      <span className="flex-1 h-px bg-gradient-to-l from-teal-200 via-yellow-200 to-transparent" />
     </div>
   );
 }

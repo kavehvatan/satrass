@@ -472,46 +472,53 @@ export default function Home() {
 </div>
       </section>
 
-      {/* Footer + Sitemap (وسط‌چین) */}
-      <footer className="bg-black text-white">
-        <div className="max-w-6xl mx-auto px-4 py-12">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 justify-items-center text-center sm:text-right">
-            <div>
-  <h4 className="font-bold mb-3">میان‌بُر</h4>
-  <ul className="space-y-3 text-white/80">
-    <li><a href="#vendors" className="hover:text-white">تجهیزات</a></li>
-    <li><a href="/tools" className="hover:text-white">ابزارها</a></li>
-    <li><a href="#solutions" className="hover:text-white">محافظت از داده</a></li>
-  </ul>
-</div>
-<div>
-  <h4 className="font-bold mb-3">خدمات و راهکارها</h4>
-  <ul className="space-y-3 text-white/80">
-    <li><a href="/services/install" className="hover:text-white">نصب و راه‌اندازی</a></li>
-    <li><a href="/services/monitoring" className="hover:text-white">پایش</a></li>
-    <li><a href="/services/training" className="hover:text-white">آموزش</a></li>
-    <li><a href="/services/consulting-design" className="hover:text-white">مشاوره و طراحی</a></li>
-    <li><a href="/services/operations" className="hover:text-white">راهبری</a></li>
-  </ul>
-</div>
-</div>
-<div>
-  <h4 className="font-bold mb-3">صفحات</h4>
-  <ul className="space-y-3 text-white/80">
-    <li><a href="/contact" className="hover:text-white">تماس با ما</a></li>
-    <li><a href="/about" className="hover:text-white">درباره ما</a></li>
-    <li><a href="/warranty" className="hover:text-white">استعلام گارانتی</a></li>
-    <li><a href="/news" className="hover:text-white">تازه‌ها <span className="text-white/60">(اخبار و مقالات)</span></a></li>
-  </ul>
-</div>
-          </div>
+{/* Footer + Sitemap (وسط‌چین) */}
+<footer className="bg-black text-white">
+  <div className="max-w-6xl mx-auto px-4 py-10">
+    <div className="grid md:grid-cols-3 gap-8 items-start">
+      {/* ستون 1: میان‌بُر */}
+      <div>
+        <h4 className="font-bold mb-3">میان‌بُر</h4>
+        <ul className="space-y-2 text-white/80">
+          <li><a href="#vendors" className="hover:text-white">تجهیزات</a></li>
+          <li><a href="/tools" className="hover:text-white">ابزارها</a></li>
+          <li><a href="#solutions" className="hover:text-white">خدمات و راهکارها</a></li>
+        </ul>
+      </div>
 
-          <hr className="border-white/10 my-6" />
-          <p className="text-center text-white/80 text-sm">
-            © {new Date().getFullYear()} ساتراس، همه حقوق محفوظ است
-          </p>
-        </div>
-      </footer>
+      {/* ستون 2: خدمات */}
+      <div>
+        <h4 className="font-bold mb-3">خدمات و راهکارها</h4>
+        <ul className="space-y-2 text-white/80">
+          <li><a href="/services/install" className="hover:text-white">نصب و راه‌اندازی</a></li>
+          <li><a href="/services/monitoring" className="hover:text-white">پایش</a></li>
+          <li><a href="/services/training" className="hover:text-white">آموزش</a></li>
+          <li><a href="/services/consulting-design" className="hover:text-white">مشاوره و طراحی</a></li>
+          <li><a href="/services/operations" className="hover:text-white">راهبری</a></li>
+        </ul>
+      </div>
+
+      {/* ستون 3: صفحات */}
+      <div>
+        <h4 className="font-bold mb-3">صفحات</h4>
+        <ul className="space-y-2 text-white/80">
+          <li><a href="/contact" className="hover:text-white">تماس با ما</a></li>
+          <li><a href="/about" className="hover:text-white">درباره ما</a></li>
+          <li><a href="/warranty" className="hover:text-white">استعلام گارانتی</a></li>
+          <li><a href="/news" className="hover:text-white">
+            تازه‌ها <span className="text-white/60">(اخبار و مقالات)</span>
+          </a></li>
+        </ul>
+      </div>
+    </div>
+
+    <hr className="my-8 border-white/10" />
+
+    <p className="text-center text-white/80 text-sm">
+      © {new Date().getFullYear()} ساتراس، همه حقوق محفوظ است
+    </p>
+  </div>
+</footer>
     </main>
   );
 }

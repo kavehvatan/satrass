@@ -316,32 +316,30 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
         }
         onMouseLeave={() => setBorder("#e5e7eb")}
         onClick={() => setOpen(true)}
-        className="group flex flex-col items-center justify-center gap-4 p-5 border rounded-2xl hover:shadow-lg transition text-center w-full max-w-[520px] mx-auto h-[140px] cursor-pointer select-none"
+        className="group flex flex-col items-center justify-center gap-4 p-5 border rounded-2xl hover:shadow-lg transition text-center w-full max-w-[520px] mx-auto h-[160px] cursor-pointer select-none"
         style={{ borderColor: border, background: bg, color: fg }}
         role="button"
         tabIndex={0}
         aria-haspopup="dialog"
         aria-expanded={open}
       >
-        {/* فقط لوگو — کمی بزرگ‌تر با حس عمق */}
+        {/* لوگو — بزرگ‌تر و بدون لبه سیاه */}
         <div
-  className="
-    rounded-2xl
-    shadow-[0_12px_24px_-6px_rgba(0,0,0,.25)]
-    px-4 py-3 transition-transform duration-200
-    group-hover:scale-105 group-hover:-translate-y-0.5
-  "
-  style={{ transform: "translateZ(0)", backgroundColor: "transparent" }}
->
-  <img
-    src={`/avatars/${slug}.webp`}
-    onError={(e) => (e.currentTarget.src = `/avatars/${slug}.png`)}
-    alt={name}
-    className="w-16 h-16 md:w-18 md:h-18 object-contain"
-  />
-</div>
-
-        {/* نام برند حذف شد */}
+          className="
+            rounded-xl
+            shadow-[0_8px_20px_-4px_rgba(0,0,0,.25)]
+            p-2 transition-transform duration-200
+            group-hover:scale-110 group-hover:-translate-y-1
+          "
+          style={{ transform: "translateZ(0)", backgroundColor: "transparent" }}
+        >
+          <img
+            src={`/avatars/${slug}.webp`}
+            onError={(e) => (e.currentTarget.src = `/avatars/${slug}.png`)}
+            alt={name}
+            className="w-20 h-20 md:w-24 md:h-24 object-contain"
+          />
+        </div>
       </div>
 
       {/* توضیحات قبلی همچنان در مودال */}
@@ -354,7 +352,6 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
     </>
   );
 }
-
 // --- صفحه
 export default function Home() {
   const { primary, secondary, swap } = useAlternatingBrandPair();

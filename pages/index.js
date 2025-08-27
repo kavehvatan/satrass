@@ -405,8 +405,8 @@ export default function Home() {
       return true;
     }
   });
-  const filledColor = isConsultFilled ? YELLOW : TEAL;
-  const outlinedColor = isConsultFilled ? TEAL : YELLOW;
+  const filledColor = isConsultFilled ? TEAL : YELLOW;
+  const outlinedColor = isConsultFilled ? YELLOW : TEAL;
   const flipCtas = () => {
     setIsConsultFilled((v) => {
       const nv = !v;

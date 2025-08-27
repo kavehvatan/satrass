@@ -353,9 +353,9 @@ import { useEffect, useState } from "react";
 
 // --- Animated headline (typewriter with pause)
 function AnimatedHeadline({
-  phrases = ["زیرساخت هوشمند", "دقت مهندس"],
-  typeSpeed = 90,   // سرعت تایپ آرام‌تر
-  holdTime = 1100,  // مکث کوتاه پس از تکمیل هر عبارت
+  phrases = ["زیرساخت هوشمند", "دقت مهندسی"],
+  typeSpeed = 120,   // سرعت تایپ آرام‌تر
+  holdTime = 2100,  // مکث کوتاه پس از تکمیل هر عبارت
 }) {
   const [idx, setIdx] = useState(0);        // کدام عبارت
   const [shown, setShown] = useState("");   // متن تایپ‌شده فعلی

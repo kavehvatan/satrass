@@ -305,7 +305,7 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
   const [open, setOpen] = useState(false);
 
   // پس‌زمینه‌ی زرد نیمه‌شفاف برای محافظت از داده
-  const bg = "rgba(244,194,31,0.7)"; // YELLOW 70%
+  const bg = "rgba(244,194,31,0.40)"; // YELLOW 40%
   const fg = "#000";
 
   return (

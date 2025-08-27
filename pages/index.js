@@ -433,27 +433,36 @@ export default function Home() {
 </h1>
             <p className="mt-4 text-gray-300">از مشاوره تا پشتیبانی، درکنار شما.</p>
             <div className="mt-6 flex gap-3">
-              {/* ارائه مشاوره — Filled */}
-              <a
-                href="/contact"
-                onClick={swap}
-                className="rounded-full px-5 py-2.5 font-bold transition"
-                style={{ backgroundColor: primary, color: primaryIsYellow ? "#000" : "#fff" }}
-              >
-                ارائه مشاوره
-              </a>
-              {/* مشاهده ابزارها — Outlined */}
-              <a
-                href="/tools"
-                onClick={swap}
-                className="px-6 py-2.5 rounded-full font-bold bg-teal-500 text-black shadow-md hover:bg-teal-400 transition"
-                style={{ border: `1px solid ${secondary}`, color: secondary, backgroundColor: "transparent" }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${secondary}1A`)}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-              >
-                مشاهده ابزارها
-              </a>
-            </div>
+  {/* ارائه مشاوره — یکی از این دو همیشه Filled است */}
+  <a
+    href="/contact"
+    onClick={flipCtas}
+    className="rounded-full px-5 py-2.5 font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-yellow-400"
+    style={{
+      backgroundColor: filledColor,
+      color: filledColor === YELLOW ? "#000" : "#fff",
+      border: "1px solid transparent",
+    }}
+  >
+    ارائه مشاوره
+  </a>
+
+  {/* مشاهده ابزارها — یکی از این دو همیشه Outlined است */}
+  <a
+    href="/tools"
+    onClick={flipCtas}
+    className="rounded-full px-5 py-2.5 font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-teal-400"
+    style={{
+      border: `1px solid ${outlinedColor}`,
+      color: outlinedColor,
+      backgroundColor: "transparent",
+    }}
+    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${outlinedColor}1A`)}
+    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+  >
+    مشاهده ابزارها
+  </a>
+</div>
           </div>
           <div className="flex justify-center">
             <img src="/satrass-hero.webp" alt="آواتار ساتراس" className="w-[280px] md:w-[340px] lg:w-[400px] h-auto object-contain" />

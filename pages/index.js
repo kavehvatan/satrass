@@ -397,7 +397,28 @@ export default function Home() {
   const safeVendors = Array.isArray(vendors) ? vendors : [];
   const serviceItems = Array.isArray(services?.items) ? services.items : [];
 
+  // 👇 این تیکه رو اضافه کن
+  const [isConsultFilled, setIsConsultFilled] = useState(() => {
+    try {
+      return (localStorage.getItem("cta_swap") || "consult") === "consult";
+    } catch {
+      return true;
+    }
+  });
+  const filledColor = isConsultFilled ? YELLOW : TEAL;
+  const outlinedColor = isConsultFilled ? TEAL : YELLOW;
+  const flipCtas = () => {
+    setIsConsultFilled((v) => {
+      const nv = !v;
+      try {
+        localStorage.setItem("cta_swap", nv ? "consult" : "tools");
+      } catch {}
+      return nv;
+    });
+  };
+
   return (
+    // ...
     <main className="min-h-screen font-sans">
       {/* Hero (بنر مشکی بالا) */}
       <section className="bg-[linear-gradient(135deg,#000_0%,#0a0a0a_60%,#111_100%)] text-white">

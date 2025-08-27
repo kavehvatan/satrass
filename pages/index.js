@@ -227,17 +227,18 @@ export default function Home() {
       </section>
 
       {/* محافظت از داده */}
-      <section id="solutions" className="max-w-6xl mx-auto px-4 pb-10 text-center">
-        <div className="h-px bg-gradient-to-r from-slate-200 via-slate-300 to-slate-200 mb-6"></div>
-        <h2 className="text-2xl font-bold mb-6">محافظت از داده</h2>
-        <div className="h-px bg-gradient-to-r from-slate-200 via-slate-300 to-slate-200 mb-10"></div>
+     {/* محافظت از داده (تیتر با باکس نرم/کپسولی) */}
+<section id="solutions" className="max-w-6xl mx-auto px-4 pb-10 text-center">
+  <h2 className="inline-block px-6 py-2 rounded-full bg-gradient-to-r from-slate-100 to-slate-200 text-2xl font-bold mb-10 shadow-sm">
+    محافظت از داده
+  </h2>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-          {SOLUTIONS.map((s) => (
-            <SolutionCard key={s.slug} {...s} />
-          ))}
-        </div>
-      </section>
+  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+    {SOLUTIONS.map((s) => (
+      <SolutionCard key={s.slug} {...s} />
+    ))}
+  </div>
+</section>
 
       {/* خدمات */}
       <section id="services" className="max-w-6xl mx-auto px-4 pb-12">

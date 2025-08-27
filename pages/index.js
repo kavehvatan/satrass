@@ -396,15 +396,37 @@ export default function Home() {
       </section>
 
       {/* راهکارها + خدمات */}
-   <section id="solutions" className="max-w-6xl mx-auto px-4 pb-10">
-  <div className="rounded-2xl bg-white/60 backdrop-blur-xl ring-1 ring-black/5 shadow-md p-6 md:p-10">
-    <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
-    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center mb-10">
+  {/* محافظت از داده — باکس نرم + خطوط تمام‌عرض */}
+<section id="solutions" className="max-w-6xl mx-auto px-4 pb-10">
+  {/* خط بالایی تمام‌عرض */}
+  <div className="h-px w-screen bg-slate-200/70 relative left-1/2 -translate-x-1/2 mb-6" />
+
+  {/* باکس نرم */}
+  <div className="rounded-2xl ring-1 ring-black/5 shadow-sm
+                  bg-[rgba(20,184,166,0.06)]  /* ته‌رنگ لطیف هماهنگ */
+                  backdrop-blur-xl p-6 md:p-10">
+
+    {/* عنوان سفارشی بدون خطوط کناری */}
+    <h2 className="flex items-center gap-3 text-2xl font-extrabold text-slate-900 mb-6">
+      <img
+        src="/icons/solutions.webp" /* اگر آیکون داری؛ اختیاری */
+        alt=""
+        className="w-7 h-7 object-contain"
+        onError={(e) => (e.currentTarget.style.display = 'none')}
+      />
+      <span>محافظت از داده</span>
+    </h2>
+
+    {/* کارت‌ها */}
+    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
       {SOLUTIONS.map((s) => (<SolutionCard key={s.slug} {...s} />))}
     </div>
   </div>
 
-  {/* خدمات خارج از باکس نرم باقی بمونه */}
+  {/* خط پایینی تمام‌عرض */}
+  <div className="h-px w-screen bg-slate-200/70 relative left-1/2 -translate-x-1/2 mt-6" />
+
+  {/* --- بخش خدمات دست‌نخورده بماند --- */}
   <SectionTitle as="h3" icon="services" className="mt-12 mb-4">خدمات</SectionTitle>
   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
     {serviceItems.map((s, i) => (

@@ -397,10 +397,40 @@ export default function Home() {
 
       {/* راهکارها + خدمات */}
       <section id="solutions" className="max-w-6xl mx-auto px-4 pb-10">
-        <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center mb-10">
-          {SOLUTIONS.map((s) => (<SolutionCard key={s.slug} {...s} />))}
-        </div>
+  <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
+
+  {/* باکس نرم پشتِ «محافظت از داده» */}
+  <div
+    className="
+      rounded-3xl
+      bg-gradient-to-b from-white to-slate-50/80
+      ring-1 ring-black/5 shadow-sm
+      px-4 sm:px-6 md:px-10
+      py-6 sm:py-8 md:py-10
+      mb-10
+    "
+  >
+    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+      {SOLUTIONS.map((s) => (
+        <SolutionCard key={s.slug} {...s} />
+      ))}
+    </div>
+  </div>
+
+  {/* از اینجا به بعد بخش «خدمات» همان قبلی بماند */}
+  <SectionTitle as="h3" icon="services">خدمات</SectionTitle>
+  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+    {serviceItems.map((s, i) => (
+      <ServiceCard
+        key={s.href || s.slug || s.title || i}
+        title={s.title}
+        icon={s.icon}
+        index={i}
+        href={s.href || (s.slug ? `/services/${s.slug}` : "#")}
+      />
+    ))}
+  </div>
+</section>
 
     {/* بخش خدمات در صفحه اصلی */}
 <SectionTitle as="h3" icon="services" className="mb-4">خدمات</SectionTitle>

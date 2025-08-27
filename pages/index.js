@@ -250,7 +250,7 @@ function ServiceCard({ title, icon, index = 0, href }) {
   const [border, setBorder] = useState("#e5e7eb");
 
   // همیشه Teal
-  const bg = "rgba(20,184,166,0.7)"; // TEAL 70%
+  const bg = "rgba(20,184,166,0.6)"; // TEAL 70%
   const fg = "#fff"; // نوشته سفید
 
   return (
@@ -309,7 +309,7 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
   const [open, setOpen] = useState(false);
 
   // پس‌زمینه‌ی زرد نیمه‌شفاف مخصوص «محافظت از داده»
-  const bg = "rgba(244,194,31,0.7)"; // YELLOW 70%
+  const bg = "rgba(244,194,31,0.6)"; // YELLOW 70%
   const fg = "#000";
 
   return (
@@ -458,7 +458,7 @@ export default function Home() {
         </div>
 
     {/* بخش خدمات در صفحه اصلی */}
-<SectionTitle as="h3" icon="services" className="mb-4">خدمات</SectionTitle>
+<SectionTitle as="h3" icon="services" className="mb-4">خدمات و راهکارها</SectionTitle>
 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
   {serviceItems.map((s, i) => (
     <ServiceCard
@@ -485,7 +485,7 @@ export default function Home() {
   </ul>
 </div>
 <div>
-  <h4 className="font-bold mb-3">خدمات</h4>
+  <h4 className="font-bold mb-3">خدمات و راهکارها</h4>
   <ul className="space-y-3 text-white/80">
     <li><a href="/services/install" className="hover:text-white">نصب و راه‌اندازی</a></li>
     <li><a href="/services/monitoring" className="hover:text-white">پایش</a></li>
@@ -493,6 +493,7 @@ export default function Home() {
     <li><a href="/services/consulting-design" className="hover:text-white">مشاوره و طراحی</a></li>
     <li><a href="/services/operations" className="hover:text-white">راهبری</a></li>
   </ul>
+</div>
 </div>
 <div>
   <h4 className="font-bold mb-3">صفحات</h4>

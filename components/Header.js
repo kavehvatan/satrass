@@ -51,7 +51,7 @@ export default function Header() {
     "text-brand-600 font-bold";
 
   return (
-    <header dir="rtl" className="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-black/5">
+    <header dir="rtl" className=" z-40 bg-white/85 backdrop-blur-md border-b border-black/5">
       <div className="max-w-screen-xl mx-auto px-4">
         <div className="h-16 flex items-center justify-between">
 

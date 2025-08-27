@@ -384,33 +384,50 @@ export default function Home() {
       </section>
 
       {/* ---------------- Vendors ---------------- */}
-      <section id="vendors" className="relative py-12 max-w-6xl mx-auto px-4">
-        <div className="flex items-center gap-3 mb-6">
-          <h2 className="text-2xl font-extrabold text-slate-900">تجهیزات</h2>
-          <img src="/icons/sections/vendors.webp" alt="" className="w-10 h-10 rounded-2xl shadow-md" onError={(e)=> (e.currentTarget.style.display="none")} />
-        </div>
+   {/* تجهیزات */}
+<section id="vendors" className="relative py-12 max-w-6xl mx-auto px-4">
+  <div className="flex items-center gap-3 mb-6 justify-end">
+  <img
+    src="/icons/sections/vendors.webp"
+    alt=""
+    className="w-10 h-10 rounded-2xl shadow-md"
+    onError={(e) => (e.currentTarget.style.display = "none")}
+  />
+      <h2 className="text-2xl font-extrabold text-slate-900">تجهیزات</h2>
+      <img
+        src="/icons/sections/vendors.webp"
+        alt=""
+        className="w-10 h-10 rounded-2xl shadow-md"
+        onError={(e) => (e.currentTarget.style.display = "none")}
+      />
+    </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {safeVendors.map((v, i) => (
-            <BrandCard
-              key={v.href || v.slug || v.title || i}
-              title={v.title}
-              slug={v.slug}
-              href={v.href}
-              index={i}
-              logo={v.logo}
-            />
-          ))}
-        </div>
-      </section>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-8">
+      {safeVendors.map((v, i) => (
+        <BrandCard
+          key={v.href || v.slug || v.title || i}
+          title={v.title}
+          slug={v.slug}
+          href={v.href}
+          index={i}
+          logo={v.logo}
+        />
+      ))}
+    </div>
+  </div>
+</section>
 
       {/* ---------------- Data Protection (inside a soft container) ---------------- */}
       <section id="solutions" className="max-w-6xl mx-auto px-4 pb-10">
-        <div className="rounded-2xl bg-white/55 supports-[backdrop-filter]:bg-white/40 backdrop-blur-xl ring-1 ring-black/5 shadow-[0_20px_60px_-24px_rgba(0,0,0,.25)] px-4 md:px-6 py-6 md:py-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold">محافظت از داده</h2>
-            <img src="/icons/sections/solutions.webp" alt="" className="w-9 h-9 rounded-2xl shadow" onError={(e)=> (e.currentTarget.style.display="none")} />
-          </div>
+        <div className="flex items-center gap-3 mb-6 justify-end">
+  <img
+    src="/icons/sections/solutions.webp"
+    alt=""
+    className="w-9 h-9 rounded-xl shadow"
+    onError={(e) => (e.currentTarget.style.display = 'none')}
+  />
+  <h2 className="text-2xl font-extrabold text-slate-900">محافظت از داده</h2>
+</div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
             {SOLUTIONS.map((s) => (
@@ -421,24 +438,36 @@ export default function Home() {
       </section>
 
       {/* ---------------- Services ---------------- */}
-      <section className="max-w-6xl mx-auto px-4 pb-12">
-        <div className="flex items-center gap-3 mb-4">
-          <h3 className="text-xl font-bold">خدمات</h3>
-          <img src="/icons/sections/services.webp" alt="" className="w-8 h-8 rounded-xl shadow" onError={(e)=> (e.currentTarget.style.display="none")} />
-        </div>
+     {/* خدمات */}
+<section className="max-w-6xl mx-auto px-4 pb-12">
+  <div className="flex items-center gap-3 mb-4 justify-end">
+  <img
+    src="/icons/sections/services.webp"
+    alt=""
+    className="w-8 h-8 rounded-xl shadow"
+    onError={(e) => (e.currentTarget.style.display = "none")}
+      <h3 className="text-xl font-bold">خدمات</h3>
+      <img
+        src="/icons/sections/services.webp"
+        alt=""
+        className="w-8 h-8 rounded-xl shadow"
+        onError={(e) => (e.currentTarget.style.display = "none")}
+      />
+    </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-          {serviceItems.map((s, i) => (
-            <ServiceCard
-              key={s.href || s.slug || s.title || i}
-              title={s.title}
-              icon={s.icon}                                // e.g. /icons/services/install.webp
-              index={i}
-              href={s.href || (s.slug ? `/services/${s.slug}` : "#")}
-            />
-          ))}
-        </div>
-      </section>
+    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
+      {serviceItems.map((s, i) => (
+        <ServiceCard
+          key={s.href || s.slug || s.title || i}
+          title={s.title}
+          icon={s.icon}
+          index={i}
+          href={s.href || (s.slug ? `/services/${s.slug}` : "#")}
+        />
+      ))}
+    </div>
+  </div>
+</section>
 
       {/* ---------------- Footer + Sitemap ---------------- */}
       <footer className="bg-black text-white">

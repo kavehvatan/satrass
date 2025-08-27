@@ -19,3 +19,12 @@ module.exports = {
   darkMode: ["class"], // اختیاری، بد نیست داشته باشیم
   plugins: [],
 };
+module.exports = {
+  theme: {
+    extend: {
+      fontFamily: {
+        bnazanin: ['BNazanin', 'sans-serif'],
+      },
+    },
+  },
+};

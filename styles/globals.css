@@ -224,3 +224,16 @@ img, video { max-width: 100%; height: auto; }
   opacity: .55;
   filter: blur(26px);
 }
+@font-face {
+  font-family: 'BNazanin';
+  src: url('/fonts/bnazanin/BNazanin.woff2') format('woff2'),
+       url('/fonts/bnazanin/BNazanin.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* کل سایت BNazanin بشه */
+html, body {
+  font-family: 'BNazanin', sans-serif;
+}

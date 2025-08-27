@@ -325,20 +325,21 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
       >
         {/* فقط لوگو — کمی بزرگ‌تر با حس عمق */}
         <div
-          className="
-            rounded-2xl bg-white/90 ring-1 ring-black/5 shadow-[0_12px_24px_-6px_rgba(0,0,0,.25)]
-            px-4 py-3 transition-transform duration-200
-            group-hover:scale-105 group-hover:-translate-y-0.5
-          "
-          style={{ transform: "translateZ(0)" }}  // برای رندر نرم‌تر
-        >
-          <img
-            src={`/avatars/${slug}.webp`}
-            onError={(e) => (e.currentTarget.src = `/avatars/${slug}.png`)}
-            alt={name}
-            className="w-16 h-16 md:w-18 md:h-18 object-contain"
-          />
-        </div>
+  className="
+    rounded-2xl
+    shadow-[0_12px_24px_-6px_rgba(0,0,0,.25)]
+    px-4 py-3 transition-transform duration-200
+    group-hover:scale-105 group-hover:-translate-y-0.5
+  "
+  style={{ transform: "translateZ(0)", backgroundColor: "transparent" }}
+>
+  <img
+    src={`/avatars/${slug}.webp`}
+    onError={(e) => (e.currentTarget.src = `/avatars/${slug}.png`)}
+    alt={name}
+    className="w-16 h-16 md:w-18 md:h-18 object-contain"
+  />
+</div>
 
         {/* نام برند حذف شد */}
       </div>

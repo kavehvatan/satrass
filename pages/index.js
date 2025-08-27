@@ -396,37 +396,22 @@ export default function Home() {
       </section>
 
       {/* راهکارها + خدمات */}
-  <section id="solutions" className="max-w-6xl mx-auto px-4 pb-10">
-  <div className="
-    rounded-2xl border border-slate-200/70
-    bg-white/70 supports-[backdrop-filter]:bg-white/30
-    backdrop-blur-xl shadow-sm
-    p-6 md:p-8
-  ">
+   <section id="solutions" className="max-w-6xl mx-auto px-4 pb-10">
+  <div className="rounded-2xl bg-white/60 backdrop-blur-xl ring-1 ring-black/5 shadow-md p-6 md:p-10">
     <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
-
-    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-      {SOLUTIONS.map((s) => (
-        <SolutionCard key={s.slug} {...s} />
-      ))}
+    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center mb-10">
+      {SOLUTIONS.map((s) => (<SolutionCard key={s.slug} {...s} />))}
     </div>
   </div>
-</section>
 
-    {/* بخش خدمات در صفحه اصلی */}
-<SectionTitle as="h3" icon="services" className="mb-4">خدمات</SectionTitle>
-<div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-  {serviceItems.map((s, i) => (
-    <ServiceCard
-      key={s.href || s.slug || s.title || i}
-      title={s.title}
-      icon={s.icon}                     // مثل /icons/services/install.webp
-      index={i}
-      href={s.href || `/services/${s.slug}`}  // ← این خط مهم است
-    />
-  ))}
-</div>
-      </section>
+  {/* خدمات خارج از باکس نرم باقی بمونه */}
+  <SectionTitle as="h3" icon="services" className="mt-12 mb-4">خدمات</SectionTitle>
+  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+    {serviceItems.map((s, i) => (
+      <ServiceCard key={s.slug || i} {...s} />
+    ))}
+  </div>
+</section>
 
       {/* Footer + Sitemap (وسط‌چین) */}
       <footer className="bg-black text-white">

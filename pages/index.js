@@ -447,21 +447,19 @@ export default function Home() {
     ارائه مشاوره
   </a>
 
-  {/* مشاهده ابزارها — یکی از این دو همیشه Outlined است */}
-  <a
-    href="/tools"
-    onClick={flipCtas}
-    className="rounded-full px-5 py-2.5 font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-teal-400"
-    style={{
-      border: `1px solid ${outlinedColor}`,
-      color: outlinedColor,
-      backgroundColor: "transparent",
-    }}
-    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${outlinedColor}1A`)}
-    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-  >
-    مشاهده ابزارها
-  </a>
+{/* مشاهده ابزارها */}
+<a
+  href="/tools"
+  onClick={flipCtas}
+  className="rounded-full px-5 py-2.5 font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-teal-400"
+  style={{
+    backgroundColor: outlinedColor,
+    color: outlinedColor === YELLOW ? "#000" : "#fff",
+    border: "1px solid transparent",
+  }}
+>
+  مشاهده ابزارها
+</a>
 </div>
           </div>
           <div className="flex justify-center">

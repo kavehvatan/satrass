@@ -425,7 +425,7 @@ export default function Home() {
               <a
                 href="/tools"
                 onClick={swap}
-                className="rounded-full px-5 py-2.5 font-semibold transition"
+                className="px-6 py-2.5 rounded-full font-bold bg-teal-500 text-black shadow-md hover:bg-teal-400 transition"
                 style={{ border: `1px solid ${secondary}`, color: secondary, backgroundColor: "transparent" }}
                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${secondary}1A`)}
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}

@@ -304,7 +304,8 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
   const [border, setBorder] = useState("#e5e7eb");
   const [open, setOpen] = useState(false);
 
-  const bg = "rgba(244,194,31,0.7)"; // YELLOW با 70% شفافیت
+  // پس‌زمینه‌ی زرد نیمه‌شفاف برای محافظت از داده
+  const bg = "rgba(244,194,31,0.7)"; // YELLOW 70%
   const fg = "#000";
 
   return (
@@ -315,22 +316,34 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
         }
         onMouseLeave={() => setBorder("#e5e7eb")}
         onClick={() => setOpen(true)}
-        className="flex flex-col items-center justify-center gap-3 p-5 border rounded-lg hover:shadow-md transition text-center w-full max-w-[520px] mx-auto h-[120px] cursor-pointer select-none"
+        className="group flex flex-col items-center justify-center gap-4 p-5 border rounded-2xl hover:shadow-lg transition text-center w-full max-w-[520px] mx-auto h-[140px] cursor-pointer select-none"
         style={{ borderColor: border, background: bg, color: fg }}
         role="button"
         tabIndex={0}
         aria-haspopup="dialog"
         aria-expanded={open}
       >
-        <img
-          src={`/avatars/${slug}.webp`}
-          onError={(e) => (e.currentTarget.src = `/avatars/${slug}.png`)}
-          alt={name}
-          className="w-12 h-12 object-contain"
-        />
-        <div className="font-bold" style={{ color: fg }}>{name}</div>
+        {/* فقط لوگو — کمی بزرگ‌تر با حس عمق */}
+        <div
+          className="
+            rounded-2xl bg-white/90 ring-1 ring-black/5 shadow-[0_12px_24px_-6px_rgba(0,0,0,.25)]
+            px-4 py-3 transition-transform duration-200
+            group-hover:scale-105 group-hover:-translate-y-0.5
+          "
+          style={{ transform: "translateZ(0)" }}  // برای رندر نرم‌تر
+        >
+          <img
+            src={`/avatars/${slug}.webp`}
+            onError={(e) => (e.currentTarget.src = `/avatars/${slug}.png`)}
+            alt={name}
+            className="w-16 h-16 md:w-18 md:h-18 object-contain"
+          />
+        </div>
+
+        {/* نام برند حذف شد */}
       </div>
 
+      {/* توضیحات قبلی همچنان در مودال */}
       <GlassModal
         open={open}
         onClose={() => setOpen(false)}

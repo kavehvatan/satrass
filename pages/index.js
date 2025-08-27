@@ -247,16 +247,21 @@ function BrandCard({ title, slug, href, index, logo }) {
 // --- کارت «خدمات» با پس‌زمینهٔ ۷۰٪ از دو رنگ برند + توضیحات در مودال
 // قبلی ServiceCard را با این نسخه جایگزین کن
 function ServiceCard({ title, icon, index = 0, href }) {
-  const isTeal = index % 2 === 0;
-  const bg = isTeal ? "rgba(20,184,166,0.7)" : "rgba(244,194,31,0.7)"; // 70%
-  const fg = isTeal ? "#fff" : "#000";
-  const to = href || "#";
+  const [border, setBorder] = useState("#e5e7eb");
+
+  // همیشه Teal
+  const bg = "rgba(20,184,166,0.7)"; // TEAL 70%
+  const fg = "#fff"; // نوشته سفید
 
   return (
-    <Link href={to} className="group block w-full max-w-[520px] mx-auto">
+    <Link href={href} className="w-full max-w-[520px]">
       <div
-        className="flex flex-col items-center justify-center gap-3 p-5 border rounded-lg hover:shadow-md transition text-center h-[120px] cursor-pointer select-none"
-        style={{ borderColor: "#e5e7eb", background: bg, color: fg }}
+        onMouseEnter={() =>
+          setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
+        }
+        onMouseLeave={() => setBorder("#e5e7eb")}
+        className="flex flex-col items-center justify-center gap-3 p-5 border rounded-lg hover:shadow-md transition text-center w-full mx-auto h-[120px] cursor-pointer select-none"
+        style={{ borderColor: border, background: bg, color: fg }}
       >
         {icon ? (
           <img

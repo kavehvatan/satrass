@@ -60,6 +60,8 @@ function SectionTitle({ as: Tag = "h2", icon = "equipment", className = "", chil
       </span>
 
       <Tag className="text-2xl font-extrabold tracking-tight text-slate-900">{children}</Tag>
+      <span className="flex-1 h-px bg-gradient-to-r from-slate-200 to-transparent" />
+      <Tag className="text-2xl font-extrabold tracking-tight text-slate-900">{children}</Tag>
       <span className="flex-1 h-px bg-gradient-to-l from-slate-200 to-transparent" />
     </div>
   );
@@ -352,7 +354,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 py-12 md:py-16 grid md:grid-cols-2 items-center gap-10">
           <div>
             <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">
-              زیرساخت هوشمند 
+              زیرساخت هوشمند     
 دقت مهندسی
             </h1>
             <p className="mt-4 text-gray-300">از مشاوره تا پشتیبانی، درکنار شما.</p>

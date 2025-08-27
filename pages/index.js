@@ -1,7 +1,6 @@
 // pages/index.js
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
 import vendors from "../data/vendors";            // داده‌های تجهیزات
 import services from "../data/services.json";     // داده‌های خدمات (با آیکون و توضیحات)
 
@@ -352,25 +351,24 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
 // --- Animated headline (typewriter with pause)
 import { useEffect, useState } from "react";
 
+// --- Animated headline (typewriter with pause)
 function AnimatedHeadline({
   phrases = ["زیرساخت هوشمند", "دقت مهندس"],
   typeSpeed = 90,   // سرعت تایپ آرام‌تر
-  holdTime = 1100,  // مکث روی هر عبارت (میلی‌ثانیه)
+  holdTime = 1100,  // مکث کوتاه پس از تکمیل هر عبارت
 }) {
   const [idx, setIdx] = useState(0);        // کدام عبارت
-  const [shown, setShown] = useState("");   // متنِ تایپ‌شده فعلی
+  const [shown, setShown] = useState("");   // متن تایپ‌شده فعلی
 
   useEffect(() => {
     let timer;
     const target = phrases[idx];
 
-    // اگر هنوز کامل تایپ نشده، یک کاراکتر دیگر اضافه کن
     if (shown.length < target.length) {
       timer = setTimeout(() => {
         setShown(target.slice(0, shown.length + 1));
       }, typeSpeed);
     } else {
-      // بعد از تایپ کامل، کمی مکث کن و برو سراغ عبارت بعدی
       timer = setTimeout(() => {
         setShown("");
         setIdx((i) => (i + 1) % phrases.length);

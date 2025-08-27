@@ -1,119 +1,71 @@
 // components/Header.js
 import Link from "next/link";
-import Image from "next/image";
-import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import { useState, useEffect } from "react";
+
+const TEAL = "#14b8a6";
+const YELLOW = "#f4c21f";
 
 export default function Header() {
-  const [open, setOpen] = useState(false);
   const router = useRouter();
-
-  // قفل اسکرول صفحه وقتی منوی موبایل باز است
-  useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    const onEsc = (e) => e.key === "Escape" && setOpen(false);
-    window.addEventListener("keydown", onEsc);
-    return () => window.removeEventListener("keydown", onEsc);
-  }, [open]);
 
   const nav = [
     { href: "/", label: "خانه" },
     { href: "/tools", label: "ابزارها" },
-    { href: "/downloads", label: "دانلودها" },
-    { href: "/warranty", label: "گارانتی" },
-    { href: "/news", label: "تازه‌ها" },      // ← جایگزین «درباره ما»
+    { href: "/about", label: "درباره ما" },
     { href: "/contact", label: "تماس با ما" },
   ];
 
   const isActive = (href) =>
-    href === "/"
-      ? router.pathname === "/"
-      : router.pathname.startsWith(href);
+    href === "/" ? router.pathname === href : router.pathname.startsWith(href);
 
   const itemClass =
-    "px-1 py-1 rounded-md hover:text-brand-600 hover:opacity-90 transition";
-  const activeClass =
-    "text-brand-600 font-bold";
+    "relative text-sm font-semibold transition hover:text-teal-600";
+  const activeClass = "text-teal-600";
+
+  // ✨ تغییر جدید: رنگ متناوب برای «ابزارها»
+  const [toolsColor, setToolsColor] = useState(TEAL);
+  useEffect(() => {
+    const id = setInterval(() => {
+      setToolsColor((c) => (c === TEAL ? YELLOW : TEAL));
+    }, 1000); // هر ثانیه
+    return () => clearInterval(id);
+  }, []);
 
   return (
-    <header dir="rtl" className="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-black/5">
-      <div className="max-w-screen-xl mx-auto px-4">
-        <div className="h-16 flex items-center justify-between">
+    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-slate-200">
+      <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+        {/* لوگو */}
+        <Link href="/" className="flex items-center gap-2">
+          <img
+            src="/logo-satrass.png"
+            alt="Satrass"
+            className="w-8 h-8 object-contain"
+          />
+          <span className="font-extrabold text-slate-900">ساتراس</span>
+        </Link>
 
-          {/* لوگو */}
-          <div className="shrink-0 flex items-center">
-            <Link href="/" aria-label="Satrass">
-              <Image
-                src="/logo-satrass.png"
-                alt="Satrass"
-                width={132}
-                height={40}
-                priority
-              />
+        {/* منو دسکتاپ */}
+        <nav className="hidden md:flex items-center gap-7 text-slate-900">
+          {nav.map((n) => (
+            <Link
+              key={n.href}
+              href={n.href}
+              className={`${itemClass} ${isActive(n.href) ? activeClass : ""}`}
+              aria-current={isActive(n.href) ? "page" : undefined}
+              // ⬇️ فقط برای «ابزارها» رنگ متناوب اعمال شود
+              style={n.href === "/tools" ? { color: toolsColor } : undefined}
+            >
+              {n.label}
             </Link>
-          </div>
+          ))}
+        </nav>
 
-          {/* منوی دسکتاپ */}
-          <nav className="hidden md:flex items-center gap-7 text-slate-900">
-            {nav.map((n) => (
-              <Link
-                key={n.href}
-                href={n.href}
-                className={`${itemClass} ${isActive(n.href) ? activeClass : ""}`}
-                aria-current={isActive(n.href) ? "page" : undefined}
-              >
-                {n.label}
-              </Link>
-            ))}
-          </nav>
-
-          {/* دکمه همبرگری موبایل */}
-          <button
-            className="md:hidden inline-flex items-center justify-center w-11 h-11 rounded-xl border border-black/10 bg-white/70 hover:bg-white transition"
-            aria-label="باز کردن منو"
-            aria-expanded={open}
-            onClick={() => setOpen((v) => !v)}
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
-            </svg>
-          </button>
+        {/* منو موبایل (اختیاری) */}
+        <div className="md:hidden">
+          {/* اگر بعداً نیاز داشتی، اینجا دکمه‌ی منو موبایل اضافه میشه */}
         </div>
       </div>
-
-      {/* لایه و دراور موبایل */}
-      {open && (
-        <>
-          <div
-            className="fixed inset-0 z-40 bg-black/35 backdrop-blur-sm md:hidden"
-            onClick={() => setOpen(false)}
-          />
-          <div className="fixed z-50 top-16 inset-x-3 md:hidden">
-            <div className="rounded-2xl border border-white/30 bg-white/95 shadow-2xl p-3 text-right">
-              <ul className="divide-y divide-black/5">
-                {nav.map((n) => (
-                  <li key={n.href}>
-                    <Link
-                      href={n.href}
-                      onClick={() => setOpen(false)}
-                      className={`block px-3 py-3 rounded-xl hover:bg-black/5 transition ${
-                        isActive(n.href) ? "text-brand-600 font-bold" : "text-slate-900"
-                      }`}
-                      aria-current={isActive(n.href) ? "page" : undefined}
-                    >
-                      {n.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </>
-      )}
     </header>
   );
 }

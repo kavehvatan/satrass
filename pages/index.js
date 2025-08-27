@@ -500,10 +500,10 @@ export default function Home() {
 </div>
       </section>
 
-{/* Footer + Sitemap (وسط‌چین) */}
+{/* Footer + Sitemap (وسط‌چین روی موبایل، راست‌چین روی دسکتاپ) */}
 <footer className="bg-black text-white">
   <div className="max-w-6xl mx-auto px-4 py-10">
-    <div className="grid md:grid-cols-3 gap-8 items-start">
+    <div className="grid md:grid-cols-3 gap-8 items-start text-center md:text-right">
       {/* ستون 1: میان‌بُر */}
       <div>
         <h4 className="font-bold mb-3">میان‌بُر</h4>
@@ -514,7 +514,7 @@ export default function Home() {
         </ul>
       </div>
 
-      {/* ستون 2: خدمات */}
+      {/* ستون 2: خدمات و راهکارها */}
       <div>
         <h4 className="font-bold mb-3">خدمات و راهکارها</h4>
         <ul className="space-y-2 text-white/80">
@@ -533,9 +533,11 @@ export default function Home() {
           <li><a href="/contact" className="hover:text-white">تماس با ما</a></li>
           <li><a href="/about" className="hover:text-white">درباره ما</a></li>
           <li><a href="/warranty" className="hover:text-white">استعلام گارانتی</a></li>
-          <li><a href="/news" className="hover:text-white">
-            تازه‌ها <span className="text-white/60">(اخبار و مقالات)</span>
-          </a></li>
+          <li>
+            <a href="/news" className="hover:text-white">
+              تازه‌ها <span className="text-white/60">(اخبار و مقالات)</span>
+            </a>
+          </li>
         </ul>
       </div>
     </div>

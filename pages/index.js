@@ -248,9 +248,8 @@ function BrandCard({ title, slug, href, index, logo }) {
 // --- کارت «خدمات» با پس‌زمینهٔ ۷۰٪ از دو رنگ برند + توضیحات در مودال
 // قبلی ServiceCard را با این نسخه جایگزین کن
 function ServiceCard({ title, icon, index = 0, href }) {
-  const isTeal = index % 2 === 0;
-  const bg = isTeal ? "rgba(20,184,166,0.7)" : "rgba(244,194,31,0.7)"; // 70%
-  const fg = isTeal ? "#fff" : "#000";
+  const bg = "rgba(20,184,166,0.7)"; // TEAL با 70% شفافیت
+  const fg = "#fff";
   const to = href || "#";
 
   return (
@@ -300,9 +299,14 @@ const SOLUTIONS = [
 ];
 
 // --- کارت راهکار
+// فقط استایل ظرف داخلی SolutionCard را عوض کن
 function SolutionCard({ name, slug, p1, p2, p3 }) {
   const [border, setBorder] = useState("#e5e7eb");
   const [open, setOpen] = useState(false);
+
+  const bg = "rgba(244,194,31,0.7)"; // YELLOW با 70% شفافیت
+  const fg = "#000";
+
   return (
     <>
       <div
@@ -311,8 +315,8 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
         }
         onMouseLeave={() => setBorder("#e5e7eb")}
         onClick={() => setOpen(true)}
-        className="flex flex-col items-center justify-center gap-3 p-5 bg-white border rounded-lg hover:shadow-md transition text-center w-full max-w-[520px] mx-auto h-[120px] cursor-pointer select-none"
-        style={{ borderColor: border }}
+        className="flex flex-col items-center justify-center gap-3 p-5 border rounded-lg hover:shadow-md transition text-center w-full max-w-[520px] mx-auto h-[120px] cursor-pointer select-none"
+        style={{ borderColor: border, background: bg, color: fg }}
         role="button"
         tabIndex={0}
         aria-haspopup="dialog"
@@ -324,7 +328,7 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
           alt={name}
           className="w-12 h-12 object-contain"
         />
-        <div className="font-bold text-gray-900">{name}</div>
+        <div className="font-bold" style={{ color: fg }}>{name}</div>
       </div>
 
       <GlassModal
@@ -396,44 +400,26 @@ export default function Home() {
       </section>
 
       {/* راهکارها + خدمات */}
-  {/* محافظت از داده — باکس نرم + خطوط تمام‌عرض */}
-<section id="solutions" className="max-w-6xl mx-auto px-4 pb-10">
-  {/* خط بالایی تمام‌عرض */}
-  <div className="h-px w-screen bg-slate-200/70 relative left-1/2 -translate-x-1/2 mb-6" />
+      <section id="solutions" className="max-w-6xl mx-auto px-4 pb-10">
+        <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center mb-10">
+          {SOLUTIONS.map((s) => (<SolutionCard key={s.slug} {...s} />))}
+        </div>
 
-  {/* باکس نرم */}
-  <div className="rounded-2xl ring-1 ring-black/5 shadow-sm
-                  bg-[rgba(20,184,166,0.06)]  /* ته‌رنگ لطیف هماهنگ */
-                  backdrop-blur-xl p-6 md:p-10">
-
-    {/* عنوان سفارشی بدون خطوط کناری */}
-    <h2 className="flex items-center gap-3 text-2xl font-extrabold text-slate-900 mb-6">
-      <img
-        src="/icons/solutions.webp" /* اگر آیکون داری؛ اختیاری */
-        alt=""
-        className="w-7 h-7 object-contain"
-        onError={(e) => (e.currentTarget.style.display = 'none')}
-      />
-      <span>محافظت از داده</span>
-    </h2>
-
-    {/* کارت‌ها */}
-    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-      {SOLUTIONS.map((s) => (<SolutionCard key={s.slug} {...s} />))}
-    </div>
-  </div>
-
-  {/* خط پایینی تمام‌عرض */}
-  <div className="h-px w-screen bg-slate-200/70 relative left-1/2 -translate-x-1/2 mt-6" />
-
-  {/* --- بخش خدمات دست‌نخورده بماند --- */}
-  <SectionTitle as="h3" icon="services" className="mt-12 mb-4">خدمات</SectionTitle>
-  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-    {serviceItems.map((s, i) => (
-      <ServiceCard key={s.slug || i} {...s} />
-    ))}
-  </div>
-</section>
+    {/* بخش خدمات در صفحه اصلی */}
+<SectionTitle as="h3" icon="services" className="mb-4">خدمات</SectionTitle>
+<div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+  {serviceItems.map((s, i) => (
+    <ServiceCard
+      key={s.href || s.slug || s.title || i}
+      title={s.title}
+      icon={s.icon}                     // مثل /icons/services/install.webp
+      index={i}
+      href={s.href || `/services/${s.slug}`}  // ← این خط مهم است
+    />
+  ))}
+</div>
+      </section>
 
       {/* Footer + Sitemap (وسط‌چین) */}
       <footer className="bg-black text-white">

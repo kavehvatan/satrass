@@ -396,7 +396,7 @@ export default function Home() {
       </section>
 
       {/* راهکارها + خدمات */}
-      <section id="solutions" className="max-w-6xl mx-auto px-4 pb-10">
+<section id="solutions" className="max-w-6xl mx-auto px-4 pb-10">
   <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
 
   {/* باکس نرم پشتِ «محافظت از داده» */}

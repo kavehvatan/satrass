@@ -400,9 +400,9 @@ export default function Home() {
           <div>
          <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">
   <AnimatedHeadline
-    phrases={["زیرساخت هوشمند", "دقت مهندس"]}
-    typeSpeed={90}   // کندتر از قبل
-    holdTime={1100}  // کمی مکث روی هر عبارت
+    phrases={["زیرساخت هوشمند", "دقت مهندسی"]}
+    typeSpeed={140}   // کندتر از قبل
+    holdTime={1700}  // کمی مکث روی هر عبارت
   />
 </h1>
             <p className="mt-4 text-gray-300">از مشاوره تا پشتیبانی، درکنار شما.</p>

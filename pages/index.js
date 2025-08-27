@@ -192,7 +192,6 @@ function BrandCard({ title, slug, href, index, logo }) {
 
 // ---------------- Service card (links to its page). All TEAL 70%.
 function ServiceCard({ title, icon, index = 0, href }) {
-  // همهٔ خدمات Teal
   const bg = "rgba(20,184,166,0.7)";
   const fg = "#fff";
 
@@ -215,7 +214,7 @@ function ServiceCard({ title, icon, index = 0, href }) {
   );
 }
 
-// ---------------- Data protection (solutions) — YELLOW 70%, logo-only, inside soft box
+// ---------------- Data protection (solutions) — YELLOW 70%, logo-only
 const SOLUTIONS = [
   {
     name: "Veeam",
@@ -243,7 +242,6 @@ const SOLUTIONS = [
 function SolutionCard({ name, slug, p1, p2, p3 }) {
   const [open, setOpen] = useState(false);
 
-  // پس‌زمینه زرد ۷۰٪
   const bg = "rgba(244,194,31,0.7)";
   const fg = "#000";
 
@@ -258,7 +256,6 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
         aria-haspopup="dialog"
         aria-expanded={open}
       >
-        {/* لوگو بزرگ، بدون حاشیه مشکی */}
         <div
           className="
             rounded-2xl
@@ -340,34 +337,21 @@ export default function Home() {
             </h1>
             <p className="mt-4 text-gray-300">از مشاوره تا پشتیبانی، درکنار شما.</p>
             <div className="mt-6 flex gap-3">
-              {/* ارائه مشاوره — Filled */}
               <a
                 href="/contact"
                 onClick={swap}
                 className="rounded-full px-5 py-2.5 font-bold transition"
-                style={{
-                  backgroundColor: primary,
-                  color: primaryIsYellow ? "#000" : "#fff",
-                }}
+                style={{ backgroundColor: primary, color: primaryIsYellow ? "#000" : "#fff" }}
               >
                 ارائه مشاوره
               </a>
-              {/* مشاهده ابزارها — Outlined */}
               <a
                 href="/tools"
                 onClick={swap}
                 className="rounded-full px-5 py-2.5 font-semibold transition"
-                style={{
-                  border: `1px solid ${secondary}`,
-                  color: secondary,
-                  backgroundColor: "transparent",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor = `${secondary}1A`)
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor = "transparent")
-                }
+                style={{ border: `1px solid ${secondary}`, color: secondary, backgroundColor: "transparent" }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${secondary}1A`)}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
               >
                 مشاهده ابزارها
               </a>
@@ -384,90 +368,86 @@ export default function Home() {
       </section>
 
       {/* ---------------- Vendors ---------------- */}
-   {/* تجهیزات */}
-<section id="vendors" className="relative py-12 max-w-6xl mx-auto px-4">
-  <div className="flex items-center gap-3 mb-6 justify-end">
-  <img
-    src="/icons/sections/vendors.webp"
-    alt=""
-    className="w-10 h-10 rounded-2xl shadow-md"
-    onError={(e) => (e.currentTarget.style.display = "none")}
-  />
-      <h2 className="text-2xl font-extrabold text-slate-900">تجهیزات</h2>
-      <img
-        src="/icons/sections/vendors.webp"
-        alt=""
-        className="w-10 h-10 rounded-2xl shadow-md"
-        onError={(e) => (e.currentTarget.style.display = "none")}
-      />
-    </div>
+      <section id="vendors" className="relative py-12 max-w-6xl mx-auto px-4">
+        <div className="flex items-center gap-3 mb-6 justify-end">
+          <img
+            src="/icons/sections/vendors.webp"
+            alt=""
+            className="w-10 h-10 rounded-2xl shadow-md"
+            onError={(e) => (e.currentTarget.style.display = "none")}
+          />
+          <h2 className="text-2xl font-extrabold text-slate-900">تجهیزات</h2>
+          <img
+            src="/icons/sections/vendors.webp"
+            alt=""
+            className="w-10 h-10 rounded-2xl shadow-md"
+            onError={(e) => (e.currentTarget.style.display = "none")}
+          />
+        </div>
 
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-8">
-      {safeVendors.map((v, i) => (
-        <BrandCard
-          key={v.href || v.slug || v.title || i}
-          title={v.title}
-          slug={v.slug}
-          href={v.href}
-          index={i}
-          logo={v.logo}
-        />
-      ))}
-    </div>
-  </div>
-</section>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-8">
+          {safeVendors.map((v, i) => (
+            <BrandCard
+              key={v.href || v.slug || v.title || i}
+              title={v.title}
+              slug={v.slug}
+              href={v.href}
+              index={i}
+              logo={v.logo}
+            />
+          ))}
+        </div>
+      </section>
 
-      {/* ---------------- Data Protection (inside a soft container) ---------------- */}
+      {/* ---------------- Data Protection ---------------- */}
       <section id="solutions" className="max-w-6xl mx-auto px-4 pb-10">
         <div className="flex items-center gap-3 mb-6 justify-end">
-  <img
-    src="/icons/sections/solutions.webp"
-    alt=""
-    className="w-9 h-9 rounded-xl shadow"
-    onError={(e) => (e.currentTarget.style.display = 'none')}
-  />
-  <h2 className="text-2xl font-extrabold text-slate-900">محافظت از داده</h2>
-</div>
+          <img
+            src="/icons/sections/solutions.webp"
+            alt=""
+            className="w-9 h-9 rounded-xl shadow"
+            onError={(e) => (e.currentTarget.style.display = "none")}
+          />
+          <h2 className="text-2xl font-extrabold text-slate-900">محافظت از داده</h2>
+        </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-            {SOLUTIONS.map((s) => (
-              <SolutionCard key={s.slug} {...s} />
-            ))}
-          </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+          {SOLUTIONS.map((s) => (
+            <SolutionCard key={s.slug} {...s} />
+          ))}
         </div>
       </section>
 
       {/* ---------------- Services ---------------- */}
-     {/* خدمات */}
-<section className="max-w-6xl mx-auto px-4 pb-12">
-  <div className="flex items-center gap-3 mb-4 justify-end">
-  <img
-    src="/icons/sections/services.webp"
-    alt=""
-    className="w-8 h-8 rounded-xl shadow"
-    onError={(e) => (e.currentTarget.style.display = "none")}
-      <h3 className="text-xl font-bold">خدمات</h3>
-      <img
-        src="/icons/sections/services.webp"
-        alt=""
-        className="w-8 h-8 rounded-xl shadow"
-        onError={(e) => (e.currentTarget.style.display = "none")}
-      />
-    </div>
+      <section className="max-w-6xl mx-auto px-4 pb-12">
+        <div className="flex items-center gap-3 mb-4 justify-end">
+          <img
+            src="/icons/sections/services.webp"
+            alt=""
+            className="w-8 h-8 rounded-xl shadow"
+            onError={(e) => (e.currentTarget.style.display = "none")}
+          />
+          <h3 className="text-xl font-bold">خدمات</h3>
+          <img
+            src="/icons/sections/services.webp"
+            alt=""
+            className="w-8 h-8 rounded-xl shadow"
+            onError={(e) => (e.currentTarget.style.display = "none")}
+          />
+        </div>
 
-    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
-      {serviceItems.map((s, i) => (
-        <ServiceCard
-          key={s.href || s.slug || s.title || i}
-          title={s.title}
-          icon={s.icon}
-          index={i}
-          href={s.href || (s.slug ? `/services/${s.slug}` : "#")}
-        />
-      ))}
-    </div>
-  </div>
-</section>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
+          {serviceItems.map((s, i) => (
+            <ServiceCard
+              key={s.href || s.slug || s.title || i}
+              title={s.title}
+              icon={s.icon}
+              index={i}
+              href={s.href || (s.slug ? `/services/${s.slug}` : "#")}
+            />
+          ))}
+        </div>
+      </section>
 
       {/* ---------------- Footer + Sitemap ---------------- */}
       <footer className="bg-black text-white">

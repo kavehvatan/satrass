@@ -432,34 +432,36 @@ export default function Home() {
   />
 </h1>
             <p className="mt-4 text-gray-300">از مشاوره تا پشتیبانی، درکنار شما.</p>
-            <div className="mt-6 flex gap-3">
-  {/* ارائه مشاوره — یکی از این دو همیشه Filled است */}
+          <div className="mt-6 flex gap-3">
+  {/* ارائه مشاوره */}
   <a
     href="/contact"
     onClick={flipCtas}
-    className="rounded-full px-5 py-2.5 font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-yellow-400"
+    className="rounded-full px-5 py-2.5 font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
     style={{
       backgroundColor: filledColor,
       color: filledColor === YELLOW ? "#000" : "#fff",
-      border: "1px solid transparent",
+      border: `1px solid ${filledColor}`,   // ✅ مرز هم‌رنگ خودش
     }}
   >
     ارائه مشاوره
   </a>
 
-{/* مشاهده ابزارها */}
-<a
-  href="/tools"
-  onClick={flipCtas}
-  className="rounded-full px-5 py-2.5 font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-teal-400"
-  style={{
-    backgroundColor: outlinedColor,
-    color: outlinedColor === YELLOW ? "#000" : "#fff",
-    border: "1px solid transparent",
-  }}
->
-  مشاهده ابزارها
-</a>
+  {/* مشاهده ابزارها */}
+  <a
+    href="/tools"
+    onClick={flipCtas}
+    className="rounded-full px-5 py-2.5 font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+    style={{
+      border: `1px solid ${outlinedColor}`,
+      color: outlinedColor,
+      backgroundColor: "transparent",
+    }}
+    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${outlinedColor}1A`)}
+    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+  >
+    مشاهده ابزارها
+  </a>
 </div>
           </div>
           <div className="flex justify-center">

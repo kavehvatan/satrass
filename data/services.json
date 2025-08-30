@@ -29,13 +29,6 @@
       "desc2": "خروجی: دیاگرام، BOM و طرح مهاجرت + چند گزینهٔ فنی/مالی برای تصمیم شفاف."
     },
     {
-      "slug": "operations",
-      "title": "راهبری",
-      "icon": "/icons/services/operations.webp",
-      "desc": "Managed Service: پچینگ، بکاپ‌وریفای، هاردنینگ، بررسی لاگ و رسیدگی به رخدادها طبق SLA.",
-      "desc2": "گزارش ماهانه سلامت/ظرفیت/ریسک + نشست CAB."
-    },
-    {
       "title": "دسکتاپ مجازی",
       "slug": "virtual-desktop",
       "icon": "/icons/services/virtual-desktop.webp",

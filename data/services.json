@@ -35,5 +35,39 @@
       "desc": "Managed Service: پچینگ، بکاپ‌وریفای، هاردنینگ، بررسی لاگ و رسیدگی به رخدادها طبق SLA.",
       "desc2": "گزارش ماهانه سلامت/ظرفیت/ریسک + نشست CAB."
     }
+    {
+      "title": "دسکتاپ مجازی",
+      "slug": "virtual-desktop",
+      "icon": "/icons/services/virtual-desktop.webp",
+      "href": "/services/virtual-desktop"
+    },
+    {
+      "title": "رایانش کاربر نهایی",
+      "slug": "end-user-computing",
+      "icon": "/icons/services/end-user-computing.webp",
+      "href": "/services/end-user-computing"
+    },
+    {
+      "title": "مجازی سازی و ابر",
+      "slug": "virtualization-cloud",
+      "icon": "/icons/services/virtualization-cloud.webp",
+      "href": "/services/virtualization-cloud"
+    },
+    {
+      "title": "تداوم کسب و کار",
+      "slug": "business-continuity",
+      "icon": "/icons/services/business-continuity.webp",
+      "href": "/services/business-continuity"
+    },
+    {
+      "title": "هوش مصنوعی",
+      "slug": "ai",
+      "icon": "/icons/services/ai.webp",
+      "href": "/services/ai"
+    }
   ]
 }
+
+
+
+

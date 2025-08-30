@@ -48,3 +48,32 @@ a {
 * {
   box-sizing: border-box;
 }
+
+:root{
+  --teal:#14b8a6;
+  --yellow:#f4c21f;
+}
+
+/* پایه‌ی دکمه */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  padding:.5rem 1rem;
+  border-radius:9999px;
+  font-weight:700; font-size:.875rem;
+  transition:all .2s ease;
+}
+
+/* دورخط Teal */
+.btn-outline-teal{
+  border:1px solid var(--teal);
+  color:var(--teal);
+  background:transparent;
+}
+.btn-outline-teal:hover{ background:color-mix(in srgb, var(--teal) 10%, transparent); }
+
+/* پر زرد */
+.btn-filled-yellow{
+  background:var(--yellow);
+  color:#000; border:1px solid transparent;
+}
+.btn-filled-yellow:hover{ filter:brightness(0.95); }

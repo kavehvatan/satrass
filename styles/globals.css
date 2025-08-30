@@ -1,159 +1,98 @@
-/* ===========================
+/* =========================================
    Tailwind layers
-   =========================== */
+   ========================================= */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ===========================
-   Font: BNazanin
-   مسیر فایل‌ها:
-   /public/fonts/bnazanin/BNazanin.woff2
-   /public/fonts/bnazanin/BNazanin.woff
-   =========================== */
+/* =========================================
+   Font face: BNazanin
+   - قرار دهید در: public/fonts/BNazanin.woff2 / .woff
+   ========================================= */
 @font-face {
   font-family: "BNazanin";
-  src:
-    url("/fonts/bnazanin/BNazanin.woff2") format("woff2"),
-    url("/fonts/bnazanin/BNazanin.woff") format("woff");
-  font-weight: 100 900;
+  src: url("/fonts/BNazanin.woff2") format("woff2"),
+       url("/fonts/BNazanin.woff") format("woff");
+  font-weight: 300 900;
   font-style: normal;
   font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+200C-200F, U+FB50-FDFF, U+FE70-FEFF, U+0030-0039, U+0041-005A, U+0061-007A;
 }
 
-/* ===========================
-   CSS Variables (Colors)
-   =========================== */
-:root {
-  /* برند */
-  --c-teal:   #14b8a6; /* TEAL */
-  --c-teal-600: #0d9488;
-  --c-yellow: #f4c21f; /* YELLOW */
-  --c-yellow-600: #d4a61a;
-
-  /* متن/پس‌زمینه */
-  --bg-page: #f8fafc;   /* slate-50 */
-  --txt-main: #0f172a;  /* slate-900 */
-  --txt-sub:  #334155;  /* slate-700 */
-}
-
-/* ===========================
-   Base
-   =========================== */
-html, body {
-  height: 100%;
-}
-
+/* =========================================
+   Base resets & typography
+   ========================================= */
 html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
 }
 
-body {
-  font-family: "BNazanin", ui-sans-serif, system-ui, -apple-system, Segoe UI,
-               Roboto, "Noto Naskh Arabic", "IRANSans", "Vazirmatn", sans-serif;
-  color: var(--txt-main);
-  background-color: var(--bg-page);
+:root {
+  /* اگر بعداً نیاز شد، رنگ‌های برند اینجاست */
+  --brand-teal: #14b8a6;
+  --brand-yellow: #f4c21f;
+}
+
+body,
+button,
+input,
+select,
+textarea {
+  font-family: "BNazanin", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans Arabic",
+    "Vazirmatn", sans-serif !important;
+  color: #0f172a; /* slate-900 */
+  background-color: #ffffff;
   line-height: 1.6;
 }
 
-/* تصاویر بلاک و ریسپانسیو‌تر */
-img, svg, video, canvas {
-  display: block;
-  max-width: 100%;
+/* تیترها هم قطعاً BNazanin بگیرن */
+h1, h2, h3, h4, h5, h6 {
+  font-family: "BNazanin", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans Arabic",
+    "Vazirmatn", sans-serif !important;
+  color: #0f172a;
 }
 
-/* لینک‌های عمومی */
+/* هر جایی در پروژه که از font-sans استفاده شده هم به BNazanin سوییچ می‌کنه */
+.font-sans {
+  font-family: "BNazanin", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans Arabic",
+    "Vazirmatn", sans-serif !important;
+}
+
+/* لینک‌ها—ظاهر پیش‌فرض */
 a {
   text-decoration: none;
-}
-
-/* تیترها کمی فشرده‌تر */
-h1, h2, h3, h4 {
-  letter-spacing: -0.01em;
-}
-
-/* ===========================
-   Buttons (Pill)
-   =========================== */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: .5rem;
-
-  border-radius: 9999px;        /* pill */
-  padding: 0.55rem 1.1rem;
-  font-size: 0.95rem;
-  font-weight: 700;
-  line-height: 1;
-  transition: all .15s ease-in-out;
-  cursor: pointer;
-  user-select: none;
-  white-space: nowrap;
-}
-
-/* Filled: Teal */
-.btn-primary {
-  background: var(--c-teal);
-  color: #fff;
-  box-shadow: 0 0 0 1px rgba(255,255,255,.06) inset,
-              0 10px 18px -10px rgba(0,0,0,.25);
-}
-.btn-primary:hover {
-  background: var(--c-teal-600);
-  transform: translateY(-1px);
-}
-
-/* Outlined: Yellow */
-.btn-outline {
-  background: transparent;
-  color: var(--c-yellow);
-  border: 2px solid var(--c-yellow);
-}
-.btn-outline:hover {
-  background: var(--c-yellow);
-  color: #111827;
-  transform: translateY(-1px);
-}
-
-/* دکمه Ghost (در صورت نیاز) */
-.btn-ghost {
-  background: transparent;
   color: inherit;
 }
-.btn-ghost:hover {
-  background: rgba(0,0,0,.04);
+
+/* انتخاب متن */
+::selection {
+  background: rgba(20, 184, 166, 0.25); /* teal/25 */
 }
 
-/* ===========================
-   Helper classes (اختیاری)
-   =========================== */
-
-/* کارت نیمه‌شفاف شیشه‌ای لطیف */
-.soft-glass {
-  background: rgba(255,255,255,.45);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,.25);
-  border-radius: 1rem;
-  box-shadow: 0 20px 60px -15px rgba(0,0,0,.25);
+/* تصاویر واکنش‌گرا */
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
 }
 
-/* خط تزئینی ملایم (می‌توان کنار تیترها استفاده کرد) */
-.rule-soft {
-  height: 1px;
-  width: 100%;
-  background: linear-gradient(to left, rgba(15,23,42,.08), transparent);
+/* فوکوس قابل‌مشاهده برای دسترس‌پذیری بهتر */
+:focus-visible {
+  outline: 2px solid rgba(20, 184, 166, 0.6);
+  outline-offset: 2px;
 }
 
-/* برای جلوگیری از لگ رندر برخی ترنزیشن‌ها */
-.gpu {
-  transform: translateZ(0);
+/* کانتینر‌ها—اگر لازم شد */
+.container {
+  margin-inline: auto;
+  padding-inline: 1rem;
 }
 
-/* ===========================
-   RTL احترام به دایرکشن
-   (اگر در _app.js dir="rtl" ست شده، نیازی نیست)
-   =========================== */
-/* body { direction: rtl; } */
+/* جهت RTL اگر جایی لازم شد */
+html[dir="rtl"] {
+  direction: rtl;
+}

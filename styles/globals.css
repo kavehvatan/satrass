@@ -7,10 +7,10 @@
 
 /* فونت BNazanin */
 @font-face {
-  font-family: "BNazanin";
-  src: url("/fonts/bnazanin/BNazanin.woff2") format("woff2"),
-       url("/fonts/bnazanin/BNazanin.woff") format("woff");
-  font-weight: 400;
+  font-family: 'BNazanin';
+  src: url('/fonts/bnazanin/BNazanin.woff2') format('woff2'),
+       url('/fonts/bnazanin/BNazanin.woff') format('woff');
+  font-weight: normal;
   font-style: normal;
   font-display: swap;
 }

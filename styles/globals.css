@@ -1,61 +1,50 @@
+/* styles/globals.css */
+
+/* Tailwind base layers */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* =========================
-   BNazanin font (self-host)
-   ========================= */
+/* فونت BNazanin */
 @font-face {
   font-family: "BNazanin";
-  src: url("/fonts/BNazanin.woff2") format("woff2"),
-       url("/fonts/BNazanin.woff") format("woff");
-  font-weight: 300 900;
+  src: url("/fonts/bnazanin/BNazanin.woff2") format("woff2"),
+       url("/fonts/bnazanin/BNazanin.woff") format("woff");
+  font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
-/* =========
-   Base font
-   ========= */
+/* ریست ساده برای کل سایت */
 html, body {
-  /* پیش‌فرض کل سایت BNazanin */
-  font-family: "BNazanin", ui-sans-serif, system-ui, -apple-system,
-               "Segoe UI", Roboto, "Helvetica Neue", Arial,
-               "Noto Sans Arabic", "Vazirmatn", sans-serif;
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  padding: 0;
+  margin: 0;
+  font-family: "BNazanin", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  direction: rtl;
+  text-align: right;
+  background-color: #fff;
+  color: #111;
 }
 
-/* اگر جایی از Tailwind کلاس font-sans داده شده بود، باز هم BNazanin اعمال شود */
-.font-sans {
-  font-family: "BNazanin", ui-sans-serif, system-ui, -apple-system,
-               "Segoe UI", Roboto, "Helvetica Neue", Arial,
-               "Noto Sans Arabic", "Vazirmatn", sans-serif !important;
+/* مطمئن شو همه تیترها هم از BNazanin میگیرن */
+h1, h2, h3, h4, h5, h6 {
+  font-family: "BNazanin", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-weight: bold;
+  line-height: 1.4;
 }
 
-/* تیترها و پاراگراف‌ها هم از همین فونت تبعیت کنند (بدون اجبار رنگ) */
-h1, h2, h3, h4, h5, h6,
-p, li, blockquote, figcaption {
-  font-family: "BNazanin", ui-sans-serif, system-ui, -apple-system,
-               "Segoe UI", Roboto, "Helvetica Neue", Arial,
-               "Noto Sans Arabic", "Vazirmatn", sans-serif;
+/* پاراگراف و متن‌های عمومی */
+p, span, li, a, button, input, textarea {
+  font-family: "BNazanin", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
-/* ابزار کمکی: هرجا مشکلی دیدی این کلاس را هم اضافه کن */
-.font-bnazanin {
-  font-family: "BNazanin", ui-sans-serif, system-ui, -apple-system,
-               "Segoe UI", Roboto, "Helvetica Neue", Arial,
-               "Noto Sans Arabic", "Vazirmatn", sans-serif !important;
+/* لینک‌ها */
+a {
+  color: inherit;
+  text-decoration: none;
 }
 
-/* متن‌های جهت‌دار فارسی که با حروف‌لاتین آمیخته‌اند معمولاً بهتره ligatureها خاموش باشند */
-.liga-off {
-  font-variant-ligatures: none;
-}
-
-/* از نظر دسترس‌پذیری: فوکوس‌ها واضح باشند (با Tailwind همخوان) */
-:focus-visible {
-  outline: 2px solid #14b8a6;
-  outline-offset: 2px;
+/* باکس‌بورد پیش‌فرض */
+* {
+  box-sizing: border-box;
 }

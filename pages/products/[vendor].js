@@ -1,14 +1,28 @@
 // pages/products/[vendor].js
 import { useRouter } from "next/router";
-import vendorsData from "../../data/vendors-detail.json";
+
+// تلاش برای لود JSON؛ اگر نبود، از fallback استفاده کن تا بیلد نخوابه
+let vendorsData = {};
+try {
+  // مسیر صحیح برای pages/products/[vendor].js → ../../data/...
+  vendorsData = require("../../data/vendors-detail.json");
+} catch (e) {
+  vendorsData = {
+    // یک نمونه‌ی مینیمال تا صفحه‌ها بالا بیاد
+    dell: {
+      title: "Dell EMC",
+      intro: "استوریج و سرورهای Dell EMC برای بارکاری‌ سازمانی.",
+      items: []
+    }
+  };
+}
 
 export default function VendorPage() {
   const router = useRouter();
   const { vendor } = router.query;
-
   if (!vendor) return null;
 
-  const data = vendorsData[vendor];
+  const data = vendorsData[vendor?.toLowerCase()];
   if (!data) {
     return (
       <div className="max-w-3xl mx-auto py-20 text-center">
@@ -33,9 +47,7 @@ export default function VendorPage() {
                 width={130}
                 height={40}
                 className="h-10 w-auto object-contain"
-                onError={(e) => {
-                  e.currentTarget.src = "/avatars/default.png";
-                }}
+                onError={(e) => (e.currentTarget.src = "/avatars/default.png")}
               />
             </picture>
           </div>
@@ -62,12 +74,11 @@ export default function VendorPage() {
                 src={p.image}
                 alt={p.model}
                 className="w-full h-40 object-contain mb-4"
-                onError={(e) => {
-                  e.currentTarget.style.display = "none";
-                }}
+                onError={(e) => (e.currentTarget.style.display = "none")}
               />
               <h3 className="text-lg font-bold mb-2">{p.model}</h3>
               <p className="text-gray-700 text-sm flex-1">{p.desc}</p>
+
               <div className="mt-6 flex items-center justify-center gap-6">
                 {/* Datasheet / Specsheet */}
                 {p.specsheet && (

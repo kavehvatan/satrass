@@ -34,5 +34,12 @@
   "juniper": { "title": "Juniper", "items": [] },
   "oracle": { "title": "Oracle", "items": [] },
   "fujitsu": { "title": "Fujitsu", "items": [] },
-  "quantum": { "title": "Quantum", "items": [] }
+  "quantum": { "title": "Quantum", "items": []
+  "brocade":  { "title": "Brocade",  "intro": "", "items": [] },
+  "hitachi":  { "title": "Hitachi",  "intro": "", "items": [] },
+  "paloalto": { "title": "PaloAlto","intro": "", "items": [] },
+  "f5":       { "title": "F5",       "intro": "", "items": [] },
+  "fortinet": { "title": "Fortinet", "intro": "", "items": [] },
+  "oracle":   { "title": "Oracle",   "intro": "", "items": [] }
+}
 }

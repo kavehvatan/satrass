@@ -3,63 +3,58 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo } from "react";
-import vendorsData from "../../data/vendors"; // مسیر نسبی از داخل /pages/products
+import vendorsData from "../../data/vendors";
 
-// کمکی امن برای lowercase
+// --- helpers
 const lower = (s) => (typeof s === "string" ? s.toLowerCase() : "");
+// اسلاگ یکدست: فقط حروف/اعداد؛ بقیه حذف می‌شوند (فاصله، خط تیره، ...)
+const norm = (s) => lower(s).replace(/[^a-z0-9]+/g, "");
 
-// --- SSG: تمام مسیرهای استاتیک را از روی vendors می‌سازیم
+// --- SSG paths
 export async function getStaticPaths() {
   const list = Array.isArray(vendorsData) ? vendorsData : [];
   const paths = list
-    .map((v) => lower(v?.slug || v?.title))
+    .map((v) => norm(v?.slug || v?.title || v?.name || ""))
     .filter(Boolean)
     .map((slug) => ({ params: { vendor: slug } }));
 
   return { paths, fallback: false };
 }
 
-// --- SSG: داده‌ی صفحه برای هر vendor
+// --- SSG props
 export async function getStaticProps({ params }) {
   const all = Array.isArray(vendorsData) ? vendorsData : [];
-  const vendSlug = lower(params?.vendor);
-  const vendor = all.find((v) => lower(v?.slug || v?.title) === vendSlug);
+  const req = norm(params?.vendor);
 
-  if (!vendor) {
-    return { notFound: true };
-  }
+  const vendor = all.find(
+    (v) => norm(v?.slug || v?.title || v?.name || "") === req
+  );
+
+  if (!vendor) return { notFound: true };
 
   return {
     props: {
       vendor: {
         title: vendor.title || vendor.name || vendor.slug || "",
-        slug: vendor.slug || vendor.title || "",
+        slug: norm(vendor.slug || vendor.title || vendor.name || ""),
         href: vendor.href || null,
         desc: vendor.desc || vendor.description || "",
         products: Array.isArray(vendor.products) ? vendor.products : [],
-        // مسیرهای احتمالی آرت/آواتار
-        artBase: lower(vendor.slug || vendor.title || ""),
+        artBase: norm(vendor.slug || vendor.title || vendor.name || ""),
       },
     },
   };
 }
 
 export default function VendorPage({ vendor }) {
-  const {
-    title,
-    slug,
-    desc,
-    products,
-    artBase,
-  } = vendor || {};
+  const { title, slug, desc, products, artBase } = vendor || {};
 
-  // منابع تصویری (در صورت وجود)
+  // تصاویر (در صورت وجود)
   const logoPng = `/avatars/${slug}.png`;
   const logoWebp = `/avatars/${slug}.webp`;
   const artPng = `/brand-art/${artBase}.png`;
   const artWebp = `/brand-art/${artBase}.webp`;
 
-  // محصولات امن
   const items = useMemo(
     () => (Array.isArray(products) ? products : []),
     [products]
@@ -75,7 +70,6 @@ export default function VendorPage({ vendor }) {
       <main dir="rtl" className="min-h-screen">
         {/* هدر برند */}
         <section className="relative">
-          {/* بک‌گراند هنری محو؛ اگر نبود، مخفی می‌شود */}
           <picture className="pointer-events-none select-none absolute inset-0">
             <source srcSet={artWebp} type="image/webp" />
             <img
@@ -162,7 +156,6 @@ export default function VendorPage({ vendor }) {
             </div>
           )}
 
-          {/* بازگشت */}
           <div className="mt-10 text-center">
             <Link
               href="/"

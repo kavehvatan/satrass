@@ -25,36 +25,52 @@ function useScrollY() {
   return y;
 }
 
-/* ===================== تعیین فاز اسکرول برای تغییر رنگ بک‌گراند ===================== */
+/* ===================== فازهای اسکرول برای تغییر تم پس‌زمینه ===================== */
 function useScrollPhase() {
-  const y = useScrollY();
-  const [phase, setPhase] = useState(0);
+  const [scrollY, setScrollY] = useState(0);
+  const [vh, setVh] = useState(0);
 
   useEffect(() => {
-    const next = y < 600 ? 0 : y < 1200 ? 1 : 2;
-    if (next !== phase) setPhase(next);
-  }, [y, phase]);
+    const onScroll = () => setScrollY(window.scrollY || 0);
+    const onResize = () => setVh(window.innerHeight || 0);
+    onResize();
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
+    };
+  }, []);
 
-  return { scrollY: y, phase };
+  // حدود تقریبی: شروع تجهیزات و شروع محافظت از داده
+  const vendorStart = vh * 0.75;
+  const solutionsStart = vh * 1.9;
+
+  let phase = 0;
+  if (scrollY >= solutionsStart) phase = 2;
+  else if (scrollY >= vendorStart) phase = 1;
+
+  return { scrollY, phase };
 }
 
 /* ===================== لایه پس‌زمینه متحرک (پارالاکس) ===================== */
 function BackgroundLayer() {
   const { scrollY, phase } = useScrollPhase();
 
-  // جابجایی عمودی نرم بک‌گراند
+  // حرکت عمودی پس‌زمینه؛ حس «آمدن بنر به پشت سکشن‌ها»
   const translate = Math.min(scrollY * 0.45, 2400);
 
   // تم‌های گرادینت برای فازهای مختلف
   const themes = [
-    "from-[#0a0a0a] via-[#101010] to-[#171717]", // فاز 0
-    "from-[#0b1220] via-[#0e1a2b] to-[#122033]", // فاز 1
-    "from-[#071b18] via-[#0a2421] to-[#0d2c29]", // فاز 2
+    "from-[#0a0a0a] via-[#101010] to-[#171717]", // هیرو (مشکی)
+    "from-[#0b1220] via-[#0e1a2b] to-[#122033]", // پشت تجهیزات (ته‌رنگ آبی)
+    "from-[#071b18] via-[#0a2421] to-[#0d2c29]", // پشت محافظت از داده و خدمات (ته‌رنگ سبز)
   ];
 
   return (
     <div
-      className="fixed inset-0 z-0 will-change-transform"
+      className="fixed inset-0 -z-10 will-change-transform"
       style={{ transform: `translateY(${translate}px)` }}
       aria-hidden="true"
     >
@@ -76,7 +92,7 @@ function useHeroFade(max = 320) {
   const y = useScrollY();
   const ratio = Math.max(0, Math.min(1, 1 - y / max));
   const opacity = ratio;
-  const translateY = (1 - ratio) * -12; // حرکت عمودی ریز
+  const translateY = (1 - ratio) * -14; // کمی به بالا برای فلر نرم
   return { opacity, transform: `translateY(${translateY}px)` };
 }
 
@@ -122,13 +138,13 @@ function SectionTitle({ as: Tag = "h2", icon = "equipment", className = "", chil
       case "solutions":
         return (
           <svg viewBox="0 0 24 24" className={className} aria-hidden="true" fill="currentColor">
-            <path d="M10 3a2 2 0 1 1 4 0h3a2 2 0 0 1 2 2v3a2 2 0 1 0 0 4v3a2 2 0 0 1-2 2h-3a2 2 0 1 0-4 0H7a2 2 0 0 1-2-2v-3a4 4 0 1 0 0-8V5a2 2 0 0 1 2-2h3z"/>
+            <path d="M10 3a2 2 0 1 1 4 0h3a2 2 0 0 1 2 2v3a2 2 0 1 0 0 4v3a2 2 0 0 1-2 2h-3a2 2 0 1 0-4 0H7a2 2 0 0 1-2-2v-3a2 2 0 1 0 0-4V5a2 2 0 0 1 2-2h3z"/>
           </svg>
         );
       case "services":
         return (
           <svg viewBox="0 0 24 24" className={className} aria-hidden="true" fill="currentColor">
-            <path d="M21 14.35V19a2 2 0 0 1-2 2h-4.65a4.5 4.5 0 1 0-4.7 0H5a2 2 0 0 1-2-2v-4.65a4.5 4.5 0 1 0 0-4.7V5a2 2 0 0 1 2-2h4.65a4.5 4.5 0 1 0 4.7 0H19a2 2 0 0 1 2 2v4.65a4.5 4.5 0 1 0 0 4.7z"/>
+            <path d="M21 14.35V19a2 2 0 0 1-2 2h-4.65a4.5 4.5 0 1 0-4.7 0H5a2 2 0 0 1-2-2v-4.65a4.5 4.5 0 1 0 0-4.7V5a2 2 0 0 1 2-2h4.65a4.5 4.5 0 1 0 4.7 0H19a2 2 0 0 1 2 2v4.65a4.5 4.5 0 1 0 0 4.7zM12 9a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 12a3 3 0 1 1 0-6 3 3 0 0 1 0 6zM3 12a3 3 0 1 1 6 0 3 3 0 0 1-6 0zm12 0a3 3 0 1 1 6 0 3 3 0 0 1-6 0z"/>
           </svg>
         );
       default:
@@ -435,7 +451,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen font-sans relative z-10">
-      {/* لایهٔ پس‌زمینهٔ متحرک */}
+      {/* لایهٔ پس‌زمینهٔ متحرک (پارالاکس) */}
       <BackgroundLayer />
 
       {/* Hero – محتوای قابل محو شدن */}
@@ -536,7 +552,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer + Sitemap (داخل خود صفحهٔ خانه) */}
+      {/* Footer + Sitemap (داخل صفحهٔ خانه) */}
       <footer className="bg-black text-white">
         <div className="max-w-6xl mx-auto px-4 py-10">
           <div className="grid md:grid-cols-3 gap-8 items-start">

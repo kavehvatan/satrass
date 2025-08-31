@@ -400,32 +400,27 @@ export default function Home() {
   // 👇 این تیکه رو اضافه کن
   // 👇 جابجایی حالت توپر/خطی بین دو دکمه
 c// 👇 فقط یک‌بار، قبل از return
+// 👇 بالای return در Home فقط این نسخه بمونه
 const [isConsultFilled, setIsConsultFilled] = useState(() => {
-  try { return (localStorage.getItem("cta_swap") || "consult") === "consult"; }
-  catch { return true; }
+  try {
+    return (localStorage.getItem("cta_swap") || "consult") === "consult";
+  } catch {
+    return true;
+  }
 });
 
 const filledColor   = isConsultFilled ? YELLOW : TEAL;
 const outlinedColor = isConsultFilled ? TEAL   : YELLOW;
 
 const flipCtas = () => {
-  setIsConsultFilled(v => {
+  setIsConsultFilled((v) => {
     const nv = !v;
-    try { localStorage.setItem("cta_swap", nv ? "consult" : "tools"); } catch {}
+    try {
+      localStorage.setItem("cta_swap", nv ? "consult" : "tools");
+    } catch {}
     return nv;
   });
 };
-  const filledColor = isConsultFilled ? TEAL : YELLOW;
-  const outlinedColor = isConsultFilled ? YELLOW : TEAL;
-  const flipCtas = () => {
-    setIsConsultFilled((v) => {
-      const nv = !v;
-      try {
-        localStorage.setItem("cta_swap", nv ? "consult" : "tools");
-      } catch {}
-      return nv;
-    });
-  };
 
   return (
     // ...

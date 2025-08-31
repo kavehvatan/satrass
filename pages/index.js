@@ -13,23 +13,38 @@ const BRAND_COLORS = ["#00E5FF", "#2D5BFF"];
 const LOGO_COLORS = [TEAL, YELLOW];
 const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
 
-// ===== لایهٔ پس‌زمینهٔ ثابت + محو شدن هیرو با اسکرول =====
-function BackgroundLayer() {
+// ===== لایهٔ پس‌زمینهٔ ثابت + محو شدن هیرو با اسکرول ====function BackgroundLayer({ scrollY = 0 }) {
+  // چرخهٔ رنگ مثل قبل
   const [phase, setPhase] = useState(0);
-
   useEffect(() => {
     const id = setInterval(() => setPhase((p) => (p + 1) % 3), 4000);
     return () => clearInterval(id);
   }, []);
 
+  // تم‌های گرادیان مثل قبل
   const themes = [
     "from-black via-slate-900 to-emerald-700",
     "from-zinc-900 via-slate-800 to-cyan-700",
     "from-slate-900 via-neutral-800 to-teal-700",
   ];
+function useScrollY() {
+  const [y, setY] = useState(0);
+  useEffect(() => {
+    const onScroll = () => setY(window.scrollY || 0);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  return y;
+}
+
+  // پارالاکس: هرچه اسکرول بیشتر، بنر کمی پایین‌تر می‌رود
+  // فاکتور 0.45 حس نرم می‌دهد؛ و محدودیت برای جلوگیری از حرکت بی‌نهایت
+  const translate = Math.min(scrollY * 0.45, 2400);
 
   return (
-    <div className="fixed inset-0 -z-10">
+    <div className="fixed inset-0 -z-10 will-change-transform"
+         style={{ transform: `translateY(${translate}px)` }}>
       <div
         className={`absolute inset-0 bg-gradient-to-b transition-colors duration-[1200ms] ${themes[phase]}`}
       />
@@ -421,13 +436,15 @@ export default function Home() {
   const { primary, secondary } = useAlternatingBrandPair();
   const fade = useHeroFade(320);
 
-  const safeVendors = Array.isArray(vendors) ? vendors : [];
-  const serviceItems = Array.isArray(services?.items) ? services.items : [];
+  // 👇 جدید
+  const scrollY = useScrollY();
 
+  // ...
   return (
     <main className="min-h-screen font-sans">
-      {/* پس‌زمینهٔ ثابتِ شیشه‌ای و گرادیانی */}
-      <BackgroundLayer />
+      {/* پس‌زمینهٔ ثابتِ شیشه‌ای و گرادیانی با حرکت پارالاکس */}
+      <BackgroundLayer scrollY={scrollY} />
+      {/* بقیهٔ کد بدون تغییر */}
 
       {/* هیرو (با محو شدن تدریجی) */}
       <section

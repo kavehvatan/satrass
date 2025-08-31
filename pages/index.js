@@ -398,13 +398,21 @@ export default function Home() {
   const serviceItems = Array.isArray(services?.items) ? services.items : [];
 
   // 👇 این تیکه رو اضافه کن
-  const [isConsultFilled, setIsConsultFilled] = useState(() => {
-    try {
-      return (localStorage.getItem("cta_swap") || "consult") === "consult";
-    } catch {
-      return true;
-    }
+  // 👇 جابجایی حالت توپر/خطی بین دو دکمه
+const [isConsultFilled, setIsConsultFilled] = useState(() => {
+  try { return (localStorage.getItem("cta_swap") || "consult") === "consult"; }
+  catch { return true; }
+});
+const filledColor = isConsultFilled ? TEAL : YELLOW;
+const outlinedColor = isConsultFilled ? YELLOW : TEAL;
+
+const flipCtas = () => {
+  setIsConsultFilled(v => {
+    const nv = !v;
+    try { localStorage.setItem("cta_swap", nv ? "consult" : "tools"); } catch {}
+    return nv;
   });
+};
   const filledColor = isConsultFilled ? TEAL : YELLOW;
   const outlinedColor = isConsultFilled ? YELLOW : TEAL;
   const flipCtas = () => {
@@ -432,8 +440,8 @@ export default function Home() {
   />
 </h1>
             <p className="mt-4 text-gray-300">از مشاوره تا پشتیبانی، درکنار شما.</p>
-          <div className="mt-6 flex gap-3">
-  {/* ارائه مشاوره */}
+       <div className="mt-6 flex gap-3">
+  {/* ارائه مشاوره — یکی از این دو همیشه Filled است */}
   <a
     href="/contact"
     onClick={flipCtas}
@@ -441,13 +449,13 @@ export default function Home() {
     style={{
       backgroundColor: filledColor,
       color: filledColor === YELLOW ? "#000" : "#fff",
-      border: `1px solid ${filledColor}`,   // ✅ مرز هم‌رنگ خودش
+      border: `1px solid ${filledColor}`, // مرز هم‌رنگ خودش
     }}
   >
     ارائه مشاوره
   </a>
 
-  {/* مشاهده ابزارها */}
+  {/* مشاهده ابزارها — یکی از این دو همیشه Outlined است */}
   <a
     href="/tools"
     onClick={flipCtas}

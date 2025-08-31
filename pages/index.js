@@ -399,12 +399,14 @@ export default function Home() {
 
   // 👇 این تیکه رو اضافه کن
   // 👇 جابجایی حالت توپر/خطی بین دو دکمه
+c// 👇 فقط یک‌بار، قبل از return
 const [isConsultFilled, setIsConsultFilled] = useState(() => {
   try { return (localStorage.getItem("cta_swap") || "consult") === "consult"; }
   catch { return true; }
 });
-const filledColor = isConsultFilled ? TEAL : YELLOW;
-const outlinedColor = isConsultFilled ? YELLOW : TEAL;
+
+const filledColor   = isConsultFilled ? YELLOW : TEAL;
+const outlinedColor = isConsultFilled ? TEAL   : YELLOW;
 
 const flipCtas = () => {
   setIsConsultFilled(v => {
@@ -442,34 +444,33 @@ const flipCtas = () => {
             <p className="mt-4 text-gray-300">از مشاوره تا پشتیبانی، درکنار شما.</p>
        <div className="mt-6 flex gap-3">
   {/* ارائه مشاوره — یکی از این دو همیشه Filled است */}
-  <a
-    href="/contact"
-    onClick={flipCtas}
-    className="rounded-full px-5 py-2.5 font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-    style={{
-      backgroundColor: filledColor,
-      color: filledColor === YELLOW ? "#000" : "#fff",
-      border: `1px solid ${filledColor}`, // مرز هم‌رنگ خودش
-    }}
-  >
-    ارائه مشاوره
-  </a>
+<a
+  href="/contact"
+  onClick={flipCtas}
+  className="rounded-full px-5 py-2.5 font-bold transition"
+  style={{
+    backgroundColor: filledColor,
+    color: filledColor === YELLOW ? "#000" : "#fff",
+    border: `1px solid ${filledColor}`,
+  }}
+>
+  ارائه مشاوره
+</a>
 
-  {/* مشاهده ابزارها — یکی از این دو همیشه Outlined است */}
-  <a
-    href="/tools"
-    onClick={flipCtas}
-    className="rounded-full px-5 py-2.5 font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-    style={{
-      border: `1px solid ${outlinedColor}`,
-      color: outlinedColor,
-      backgroundColor: "transparent",
-    }}
-    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${outlinedColor}1A`)}
-    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-  >
-    مشاهده ابزارها
-  </a>
+<a
+  href="/tools"
+  onClick={flipCtas}
+  className="rounded-full px-5 py-2.5 font-semibold transition"
+  style={{
+    border: `1px solid ${outlinedColor}`,
+    color: outlinedColor,
+    backgroundColor: "transparent",
+  }}
+  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${outlinedColor}1A`)}
+  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+>
+  مشاهده ابزارها
+</a>
 </div>
           </div>
           <div className="flex justify-center">

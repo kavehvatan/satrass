@@ -2,21 +2,86 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import vendors from "../data/vendors";            // داده‌های تجهیزات
-import services from "../data/services.json";     // داده‌های خدمات (با آیکون و توضیحات)
 
-/* ===================== SectionTitle =====================
- * تیتر سکشن با آیکون و خط تزئینی
- * آیکون از /public/icons/sections/*.webp خوانده می‌شود:
- *    equipment -> vendors.webp
- *    solutions -> solutions.webp
- *    services  -> services.webp
- * اگر لود نشد، SVG داخلی نمایش داده می‌شود.
- * ======================================================= */
+import vendors from "../data/vendors";        // داده‌های تجهیزات
+import services from "../data/services.json"; // داده‌های خدمات (icon + slug + href)
+
+// ===== رنگ‌ها و کمک‌تابع‌ها =====
+const TEAL = "#14b8a6";
+const YELLOW = "#f4c21f";
+const BRAND_COLORS = ["#00E5FF", "#2D5BFF"];
+const LOGO_COLORS = [TEAL, YELLOW];
+const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
+
+// ===== لایهٔ پس‌زمینهٔ ثابت + محو شدن هیرو با اسکرول =====
+function BackgroundLayer() {
+  const [phase, setPhase] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => setPhase((p) => (p + 1) % 3), 4000);
+    return () => clearInterval(id);
+  }, []);
+
+  const themes = [
+    "from-black via-slate-900 to-emerald-700",
+    "from-zinc-900 via-slate-800 to-cyan-700",
+    "from-slate-900 via-neutral-800 to-teal-700",
+  ];
+
+  return (
+    <div className="fixed inset-0 -z-10">
+      <div
+        className={`absolute inset-0 bg-gradient-to-b transition-colors duration-[1200ms] ${themes[phase]}`}
+      />
+      <div className="absolute inset-0 bg-white/5 backdrop-blur-[2px]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_100%_0%,rgba(255,255,255,.06),transparent_60%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_55%_at_0%_100%,rgba(0,0,0,.12),transparent_60%)]" />
+    </div>
+  );
+}
+
+function useHeroFade(max = 320) {
+  const [opacity, setOpacity] = useState(1);
+  useEffect(() => {
+    const onScroll = () => {
+      const y = window.scrollY || 0;
+      setOpacity(Math.max(0, 1 - y / max));
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [max]);
+  return opacity;
+}
+
+// ===== جابه‌جایی نوبتی رنگ دکمه‌های هیرو =====
+function useAlternatingBrandPair() {
+  const [primary, setPrimary] = useState(YELLOW);   // Filled
+  const [secondary, setSecondary] = useState(TEAL); // Outlined
+  useEffect(() => {
+    try {
+      const lastIsTeal = localStorage.getItem("satrass_btn_pair") === "1";
+      const nextIsTeal = !lastIsTeal;
+      localStorage.setItem("satrass_btn_pair", nextIsTeal ? "1" : "0");
+      if (nextIsTeal) { setPrimary(TEAL); setSecondary(YELLOW); }
+      else { setPrimary(YELLOW); setSecondary(TEAL); }
+    } catch {}
+  }, []);
+  const swap = () => {
+    setPrimary((p) => {
+      const np = p === TEAL ? YELLOW : TEAL;
+      setSecondary(np === TEAL ? YELLOW : TEAL);
+      try { localStorage.setItem("satrass_btn_pair", np === TEAL ? "1" : "0"); } catch {}
+      return np;
+    });
+  };
+  return { primary, secondary, swap };
+}
+
+// ===== تیتر سکشن با آیکون و خط تزئینی =====
 function SectionTitle({ as: Tag = "h2", icon = "equipment", className = "", children }) {
   const map = { equipment: "vendors", solutions: "solutions", services: "services" };
   const src = `/icons/sections/${map[icon] || icon}.webp`;
-
   const [useFallback, setUseFallback] = useState(false);
 
   const FallbackIcon = ({ className = "" }) => {
@@ -33,7 +98,7 @@ function SectionTitle({ as: Tag = "h2", icon = "equipment", className = "", chil
             <path d="M21 14.35V19a2 2 0 0 1-2 2h-4.65a4.5 4.5 0 1 0-4.7 0H5a2 2 0 0 1-2-2v-4.65a4.5 4.5 0 1 0 0-4.7V5a2 2 0 0 1 2-2h4.65a4.5 4.5 0 1 0 4.7 0H19a2 2 0 0 1 2 2v4.65a4.5 4.5 0 1 0 0 4.7zM12 9a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 12a3 3 0 1 1 0-6 3 3 0 0 1 0 6zM3 12a3 3 0 1 1 6 0 3 3 0 0 1-6 0zm12 0a3 3 0 1 1 6 0 3 3 0 0 1-6 0z"/>
           </svg>
         );
-      default: // equipment
+      default:
         return (
           <svg viewBox="0 0 24 24" className={className} aria-hidden="true" fill="currentColor">
             <path d="M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5A2 2 0 0 1 3 8V5zm0 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3zm3-8h3v2H6V6zm0 9h3v2H6v-2zm10-9h2v2h-2V6zm0 9h2v2h-2v-2z"/>
@@ -64,14 +129,7 @@ function SectionTitle({ as: Tag = "h2", icon = "equipment", className = "", chil
   );
 }
 
-// رنگ‌ها و کمک‌تابع‌ها
-const TEAL = "#14b8a6";
-const YELLOW = "#f4c21f";
-const BRAND_COLORS = ["#00E5FF", "#2D5BFF"];
-const LOGO_COLORS = [TEAL, YELLOW];
-const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
-
-/* ---------- مودال شیشه‌ای ---------- */
+// ===== مودال شیشه‌ای (برای توضیحات) =====
 function GlassModal({ open, onClose, title, paragraphs }) {
   const [closing, setClosing] = useState(false);
 
@@ -150,7 +208,7 @@ function GlassModal({ open, onClose, title, paragraphs }) {
   );
 }
 
-/* ---------- کارت برند «تجهیزات» ---------- */
+// ===== کارت برند «تجهیزات» =====
 function BrandCard({ title, slug, href, index, logo }) {
   const [border, setBorder] = useState("#e5e7eb");
   const link = href || `/products/${slug || (title || "").toLowerCase()}`;
@@ -180,7 +238,7 @@ function BrandCard({ title, slug, href, index, logo }) {
         }
         onMouseLeave={() => setBorder("#e5e7eb")}
       >
-        {/* تصویر پس‌زمینه کارت برند */}
+        {/* پس‌زمینه کارت برند */}
         <picture className="pointer-events-none select-none absolute inset-0">
           <source srcSet={artWebp} type="image/webp" />
           <img
@@ -200,7 +258,7 @@ function BrandCard({ title, slug, href, index, logo }) {
           }}
         />
 
-        {/* لوگو—سمت چپ */}
+        {/* لوگو — سمت چپ فیزیکی (در RTL سمت راست دیده می‌شود) */}
         <div className="relative flex items-center ltr:justify-start rtl:justify-end">
           <div className="w-14 h-14 shrink-0 rounded-xl bg-white ring-1 ring-black/5 shadow-sm grid place-items-center transition-transform duration-200 group-hover:scale-[1.03] overflow-hidden">
             <picture>
@@ -221,7 +279,7 @@ function BrandCard({ title, slug, href, index, logo }) {
   );
 }
 
-/* ---------- کارت «خدمات» (Teal) ---------- */
+// ===== کارت «خدمات» (Teal) =====
 function ServiceCard({ title, icon, index = 0, href }) {
   const [border, setBorder] = useState("#e5e7eb");
   const bg = "rgba(20,184,166,0.6)"; // TEAL
@@ -253,7 +311,7 @@ function ServiceCard({ title, icon, index = 0, href }) {
   );
 }
 
-/* ---------- راهکارها ---------- */
+// ===== لیست راهکارها (محافظت از داده) =====
 const SOLUTIONS = [
   {
     name: "Commvault",
@@ -273,16 +331,17 @@ const SOLUTIONS = [
     name: "Veeam",
     slug: "Veeam",
     p1: "راهکار قدرتمند بکاپ و ریکاوری برای محیط‌های مجازی، فیزیکی و کلود.",
-    p2: "تمرکز روی Backup & Replication سریع با Instant Recovery و حفاظت از VM/DB/M365.",
-    p3: "ویژگی‌ها: Dedup/Compression، پشتیبانی چندپلتفرمی و DR ساده.",
+    p2: "تمرکز اصلی روی B&R سریع و مطمئن با Instant Recovery؛ پوشش VM/DB/M365 و کلود.",
+    p3: "ویژگی‌ها: Dedup/Compression، انعطاف‌پذیری بالا، DR ساده.",
   },
 ];
 
-/* ---------- کارت راهکار (زرد) ---------- */
+// ===== کارت راهکار (زرد) =====
 function SolutionCard({ name, slug, p1, p2, p3 }) {
   const [border, setBorder] = useState("#e5e7eb");
   const [open, setOpen] = useState(false);
-  const bg = "rgba(244,194,31,0.6)"; // YELLOW
+
+  const bg = "rgba(244,194,31,0.6)"; // زرد
   const fg = "#000";
 
   return (
@@ -300,6 +359,7 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
         aria-haspopup="dialog"
         aria-expanded={open}
       >
+        {/* فقط لوگو؛ بدون قاب سفید */}
         <img
           src={`/avatars/${slug}.webp`}
           onError={(e) => (e.currentTarget.src = `/avatars/${slug}.png`)}
@@ -314,16 +374,21 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
         />
       </div>
 
-      <GlassModal open={open} onClose={() => setOpen(false)} title={name} paragraphs={[p1, p2, p3]} />
+      <GlassModal
+        open={open}
+        onClose={() => setOpen(false)}
+        title={name}
+        paragraphs={[p1, p2, p3]}
+      />
     </>
   );
 }
 
-/* ---------- Animated headline (typewriter with pause) ---------- */
+// ===== تیتر متحرک هیرو =====
 function AnimatedHeadline({
   phrases = ["زیرساخت هوشمند", "دقت مهندسی"],
-  typeSpeed = 120,
-  holdTime = 2100,
+  typeSpeed = 140,
+  holdTime = 1700,
 }) {
   const [idx, setIdx] = useState(0);
   const [shown, setShown] = useState("");
@@ -331,6 +396,7 @@ function AnimatedHeadline({
   useEffect(() => {
     let timer;
     const target = phrases[idx];
+
     if (shown.length < target.length) {
       timer = setTimeout(() => setShown(target.slice(0, shown.length + 1)), typeSpeed);
     } else {
@@ -350,157 +416,115 @@ function AnimatedHeadline({
   );
 }
 
-/* ---------- بنر متحرکِ شیشه‌ایِ پس‌زمینه ---------- */
-function useScrollStage() {
-  const [stage, setStage] = useState(0); // 0=hero, 1=vendors, 2=solutions, 3=services
-  useEffect(() => {
-    const handler = () => {
-      const y = window.scrollY;
-      if (y < 400) setStage(0);
-      else if (y < 1000) setStage(1);
-      else if (y < 1600) setStage(2);
-      else setStage(3);
-    };
-    handler();
-    window.addEventListener("scroll", handler, { passive: true });
-    return () => window.removeEventListener("scroll", handler);
-  }, []);
-  return stage;
-}
-
-/* ---------- صفحه اصلی ---------- */
+// ===== صفحه اصلی =====
 export default function Home() {
-  // CTA های هدر هیرو (حالت جابه‌جایی نقش دکمه‌ها)
-  const [isConsultFilled, setIsConsultFilled] = useState(() => {
-    try {
-      return (localStorage.getItem("cta_swap") || "consult") === "consult";
-    } catch {
-      return true;
-    }
-  });
-  const filledColor   = isConsultFilled ? YELLOW : TEAL;
-  const outlinedColor = isConsultFilled ? TEAL   : YELLOW;
-  const flipCtas = () => {
-    setIsConsultFilled((v) => {
-      const nv = !v;
-      try { localStorage.setItem("cta_swap", nv ? "consult" : "tools"); } catch {}
-      return nv;
-    });
-  };
+  const { primary, secondary } = useAlternatingBrandPair();
+  const fade = useHeroFade(320);
 
-  const safeVendors  = Array.isArray(vendors) ? vendors : [];
+  const safeVendors = Array.isArray(vendors) ? vendors : [];
   const serviceItems = Array.isArray(services?.items) ? services.items : [];
 
-  // بنر متحرک
-  const stage = useScrollStage();
-
   return (
-    <main className="min-h-screen font-sans relative">
-      {/* لایهٔ ثابت: بنر متحرک (می‌آید پشت سکشن‌ها) */}
+    <main className="min-h-screen font-sans">
+      {/* پس‌زمینهٔ ثابتِ شیشه‌ای و گرادیانی */}
+      <BackgroundLayer />
+
+      {/* هیرو (با محو شدن تدریجی) */}
       <section
-        className={`
-          fixed top-0 left-0 w-full h-[60vh] z-0
-          transition-all duration-700
-          ${stage === 0 ? "bg-[linear-gradient(135deg,#000_0%,#0a0a0a_60%,#111_100%)] text-white" : ""}
-          ${stage === 1 ? "bg-[rgba(20,184,166,0.35)] backdrop-blur-md text-white" : ""}
-          ${stage === 2 ? "bg-[rgba(244,194,31,0.35)] backdrop-blur-lg text-black" : ""}
-          ${stage === 3 ? "bg-[rgba(15,23,42,0.35)] backdrop-blur-xl text-white" : ""}
-        `}
-        aria-hidden="true"
+        className="bg-[linear-gradient(135deg,#000_0%,#0a0a0a_60%,#111_100%)] text-white"
+        style={{ opacity: fade }}
       >
-        <div className="max-w-6xl mx-auto px-4 h-full flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 py-12 md:py-16 grid md:grid-cols-2 items-center gap-10">
           <div>
             <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">
-              <AnimatedHeadline phrases={["زیرساخت هوشمند", "دقت مهندسی"]} typeSpeed={140} holdTime={1700} />
+              <AnimatedHeadline />
             </h1>
-            <p className="mt-4 text-white/80">از مشاوره تا پشتیبانی، درکنار شما.</p>
+            <p className="mt-4 text-gray-300">از مشاوره تا پشتیبانی، در کنار شما.</p>
 
-            {/* CTA ها */}
             <div className="mt-6 flex gap-3">
+              {/* Filled */}
               <a
                 href="/contact"
-                onClick={flipCtas}
-                className="rounded-full px-5 py-2.5 font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-yellow-400"
+                className="rounded-full px-5 py-2.5 font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
                 style={{
-                  backgroundColor: filledColor,
-                  color: filledColor === YELLOW ? "#000" : "#fff",
+                  backgroundColor: primary,
+                  color: primary === YELLOW ? "#000" : "#fff",
                   border: "1px solid transparent",
                 }}
               >
                 ارائه مشاوره
               </a>
+              {/* Outlined */}
               <a
                 href="/tools"
-                onClick={flipCtas}
-                className="rounded-full px-5 py-2.5 font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-teal-400"
+                className="rounded-full px-5 py-2.5 font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
                 style={{
-                  border: `1px solid ${outlinedColor}`,
-                  color: outlinedColor,
+                  border: `1px solid ${secondary}`,
+                  color: secondary,
                   backgroundColor: "transparent",
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${outlinedColor}1A`)}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${secondary}1A`)}
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
               >
                 مشاهده ابزارها
               </a>
             </div>
           </div>
-          <div className="hidden md:flex justify-center">
+
+          <div className="flex justify-center">
             <img
               src="/satrass-hero.webp"
               alt="آواتار ساتراس"
-              className="w-[340px] lg:w-[400px] h-auto object-contain drop-shadow-xl"
+              className="w-[280px] md:w-[340px] lg:w-[400px] h-auto object-contain"
             />
           </div>
         </div>
       </section>
 
-      {/* محتوای صفحه: از زیر بنر شروع می‌شود */}
-      <div className="relative z-10 pt-[60vh]">
-        {/* تجهیزات */}
-        <section id="vendors" className="relative py-12 max-w-6xl mx-auto px-4">
-          <SectionTitle as="h2" icon="equipment">تجهیزات</SectionTitle>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {safeVendors.map((v, i) => (
-              <BrandCard
-                key={v.href || v.slug || v.title || i}
-                title={v.title}
-                slug={v.slug}
-                href={v.href}
-                index={i}
-                logo={v.logo}
-              />
-            ))}
-          </div>
-        </section>
+      {/* تجهیزات */}
+      <section id="vendors" className="relative py-12 max-w-6xl mx-auto px-4">
+        <SectionTitle as="h2" icon="equipment">تجهیزات</SectionTitle>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {safeVendors.map((v, i) => (
+            <BrandCard
+              key={v.href || v.slug || v.title || i}
+              title={v.title}
+              slug={v.slug}
+              href={v.href}
+              index={i}
+              logo={v.logo}
+            />
+          ))}
+        </div>
+      </section>
 
-        {/* محافظت از داده + خدمات */}
-        <section id="solutions" className="max-w-6xl mx-auto px-4 pb-10">
-          <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center mb-10">
-            {SOLUTIONS.map((s) => (<SolutionCard key={s.slug} {...s} />))}
-          </div>
+      {/* محافظت از داده */}
+      <section id="solutions" className="max-w-6xl mx-auto px-4 pb-10">
+        <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center mb-10">
+          {SOLUTIONS.map((s) => (<SolutionCard key={s.slug} {...s} />))}
+        </div>
 
-          <SectionTitle as="h3" icon="services" className="mb-4">خدمات و راهکارها</SectionTitle>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-            {serviceItems.map((s, i) => (
-              <ServiceCard
-                key={s.href || s.slug || s.title || i}
-                title={s.title}
-                icon={s.icon}
-                index={i}
-                href={s.href || `/services/${s.slug}`}
-              />
-            ))}
-          </div>
-        </section>
-      </div>
+        {/* خدمات و راهکارها */}
+        <SectionTitle as="h3" icon="services" className="mb-4">خدمات و راهکارها</SectionTitle>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+          {serviceItems.map((s, i) => (
+            <ServiceCard
+              key={s.href || s.slug || s.title || i}
+              title={s.title}
+              icon={s.icon} // مثل /icons/services/install.webp
+              index={i}
+              href={s.href || `/services/${s.slug}`}
+            />
+          ))}
+        </div>
+      </section>
 
-      {/* Footer + Sitemap (وسط‌چین) */}
+      {/* Footer + Sitemap */}
       <footer className="bg-black text-white">
         <div className="max-w-6xl mx-auto px-4 py-10">
           <div className="grid md:grid-cols-3 gap-8 items-start">
-            {/* ستون 1: میان‌بُر */}
+            {/* میان‌بُر */}
             <div>
               <h4 className="font-bold mb-3">میان‌بُر</h4>
               <ul className="space-y-2 text-white/80">
@@ -510,7 +534,7 @@ export default function Home() {
               </ul>
             </div>
 
-            {/* ستون 2: خدمات */}
+            {/* خدمات */}
             <div>
               <h4 className="font-bold mb-3">خدمات و راهکارها</h4>
               <ul className="space-y-2 text-white/80">
@@ -522,7 +546,7 @@ export default function Home() {
               </ul>
             </div>
 
-            {/* ستون 3: صفحات */}
+            {/* صفحات */}
             <div>
               <h4 className="font-bold mb-3">صفحات</h4>
               <ul className="space-y-2 text-white/80">
@@ -539,7 +563,6 @@ export default function Home() {
           </div>
 
           <hr className="my-8 border-white/10" />
-
           <p className="text-center text-white/80 text-sm">
             © {new Date().getFullYear()} ساتراس، همه حقوق محفوظ است
           </p>

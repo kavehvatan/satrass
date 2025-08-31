@@ -45,14 +45,12 @@ function BackgroundLayer({ scrollY = 0 }) {
 
   return (
     <div
-      className="fixed inset-0 -z-10 will-change-transform"
-      style={{ transform: `translateY(${translate}px)` }}
+<div className="fixed inset-0 z-0 will-change-transform"      style={{ transform: `translateY(${translate}px)` }}
     >
       <div
         className={`absolute inset-0 bg-gradient-to-b transition-colors duration-[1200ms] ${themes[phase]}`}
       />
-      <div className="absolute inset-0 bg-white/5 backdrop-blur-[2px]" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_100%_0%,rgba(255,255,255,.06),transparent_60%)]" />
+<div className="absolute inset-0 bg-white/3 backdrop-blur-[2px]" />      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_100%_0%,rgba(255,255,255,.06),transparent_60%)]" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_55%_at_0%_100%,rgba(0,0,0,.12),transparent_60%)]" />
     </div>
   );
@@ -423,7 +421,7 @@ export default function Home() {
   const serviceItems = Array.isArray(services?.items) ? services.items : [];
 
   return (
-    <main className="min-h-screen font-sans relative">
+<main className="min-h-screen font-sans relative z-10">
       {/* لایهٔ پس‌زمینهٔ متحرک */}
       <BackgroundLayer scrollY={scrollY} />
 

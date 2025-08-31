@@ -26,31 +26,34 @@ function useScrollY() {
 }
 
 /* ===================== لایه پس‌زمینه متحرک (پارالاکس) ===================== */
-function BackgroundLayer({ scrollY = 0 }) {
-  const [phase, setPhase] = useState(0);
+// لایه‌ی پس‌زمینه‌ی متحرک (ثابت، پشت محتوا)
+function BackgroundLayer() {
+  const { scrollY, phase } = useScrollPhase();
 
-  useEffect(() => {
-    const id = setInterval(() => setPhase((p) => (p + 1) % 3), 4000);
-    return () => clearInterval(id);
-  }, []);
-
-  const themes = [
-    "from-black via-slate-900 to-emerald-700",
-    "from-zinc-900 via-slate-800 to-cyan-700",
-    "from-slate-900 via-neutral-800 to-teal-700",
-  ];
-
-  // پارالاکس عمودی ملایم
+  // مقدار جابجایی نرمِ عمودی
   const translate = Math.min(scrollY * 0.45, 2400);
+
+  // تم‌های گرادینت برای فازهای مختلف
+  const themes = [
+    "from-[#0a0a0a] via-[#101010] to-[#171717]", // فاز 0
+    "from-[#0b1220] via-[#0e1a2b] to-[#122033]", // فاز 1
+    "from-[#071b18] via-[#0a2421] to-[#0d2c29]", // فاز 2
+  ];
 
   return (
     <div
-<div className="fixed inset-0 z-0 will-change-transform"      style={{ transform: `translateY(${translate}px)` }}
+      className="fixed inset-0 z-0 will-change-transform"
+      style={{ transform: `translateY(${translate}px)` }}
+      aria-hidden="true"
     >
+      {/* گرادینت زمینه که رنگش با فاز تغییر می‌کند */}
       <div
         className={`absolute inset-0 bg-gradient-to-b transition-colors duration-[1200ms] ${themes[phase]}`}
       />
-<div className="absolute inset-0 bg-white/3 backdrop-blur-[2px]" />      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_100%_0%,rgba(255,255,255,.06),transparent_60%)]" />
+      {/* شیشه‌ای کم */}
+      <div className="absolute inset-0 bg-white/5 backdrop-blur-[2px]" />
+      {/* های‌لایت‌های ملایم */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_100%_0%,rgba(255,255,255,.06),transparent_60%)]" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_55%_at_0%_100%,rgba(0,0,0,.12),transparent_60%)]" />
     </div>
   );

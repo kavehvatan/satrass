@@ -12,30 +12,37 @@ const YELLOW = "#f4c21f";
 const BRAND_COLORS = ["#00E5FF", "#2D5BFF"];
 const LOGO_COLORS = [TEAL, YELLOW];
 const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
-
-// ===== لایهٔ پس‌زمینهٔ ثابت + محو شدن هیرو با اسکرول ====function BackgroundLayer({ scrollY = 0 }) {
-  // چرخهٔ رنگ مثل قبل
+function BackgroundLayer({ scrollY = 0 }) {
+  // فاز رنگِ گرادیان
   const [phase, setPhase] = useState(0);
   useEffect(() => {
-    const id = setInterval(() => setPhase((p) => (p + 1) % 3), 4000);
+    const id = setInterval(() => setPhase((p) => (p + 1) % 3, 4000));
     return () => clearInterval(id);
   }, []);
 
-  // تم‌های گرادیان مثل قبل
+  // تم‌های گرادیان
   const themes = [
     "from-black via-slate-900 to-emerald-700",
     "from-zinc-900 via-slate-800 to-cyan-700",
     "from-slate-900 via-neutral-800 to-teal-700",
   ];
-function useScrollY() {
-  const [y, setY] = useState(0);
-  useEffect(() => {
-    const onScroll = () => setY(window.scrollY || 0);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-  return y;
+
+  // پارالاکس عمودی ملایم
+  const translate = Math.min(scrollY * 0.45, 2400);
+
+  return (
+    <div
+      className="fixed inset-0 -z-10 will-change-transform"
+      style={{ transform: `translateY(${translate}px)` }}
+    >
+      <div
+        className={`absolute inset-0 bg-gradient-to-b transition-colors duration-[1200ms] ${themes[phase]}`}
+      />
+      <div className="absolute inset-0 bg-white/5 backdrop-blur-[2px]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_100%_0%,rgba(255,255,255,.06),transparent_60%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_55%_at_0%_100%,rgba(0,0,0,.12),transparent_60%)]" />
+    </div>
+  );
 }
 
   // پارالاکس: هرچه اسکرول بیشتر، بنر کمی پایین‌تر می‌رود
@@ -437,8 +444,7 @@ export default function Home() {
   const fade = useHeroFade(320);
 
   // 👇 جدید
-  const scrollY = useScrollY();
-
+const scrollY = useScrollY();
   // ...
   return (
     <main className="min-h-screen font-sans">

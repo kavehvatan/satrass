@@ -25,12 +25,24 @@ function useScrollY() {
   return y;
 }
 
+/* ===================== تعیین فاز اسکرول برای تغییر رنگ بک‌گراند ===================== */
+function useScrollPhase() {
+  const y = useScrollY();
+  const [phase, setPhase] = useState(0);
+
+  useEffect(() => {
+    const next = y < 600 ? 0 : y < 1200 ? 1 : 2;
+    if (next !== phase) setPhase(next);
+  }, [y, phase]);
+
+  return { scrollY: y, phase };
+}
+
 /* ===================== لایه پس‌زمینه متحرک (پارالاکس) ===================== */
-// لایه‌ی پس‌زمینه‌ی متحرک (ثابت، پشت محتوا)
 function BackgroundLayer() {
   const { scrollY, phase } = useScrollPhase();
 
-  // مقدار جابجایی نرمِ عمودی
+  // جابجایی عمودی نرم بک‌گراند
   const translate = Math.min(scrollY * 0.45, 2400);
 
   // تم‌های گرادینت برای فازهای مختلف
@@ -64,8 +76,7 @@ function useHeroFade(max = 320) {
   const y = useScrollY();
   const ratio = Math.max(0, Math.min(1, 1 - y / max));
   const opacity = ratio;
-  // حرکت عمودی ریز برای حس Flare-out
-  const translateY = (1 - ratio) * -12;
+  const translateY = (1 - ratio) * -12; // حرکت عمودی ریز
   return { opacity, transform: `translateY(${translateY}px)` };
 }
 
@@ -111,13 +122,13 @@ function SectionTitle({ as: Tag = "h2", icon = "equipment", className = "", chil
       case "solutions":
         return (
           <svg viewBox="0 0 24 24" className={className} aria-hidden="true" fill="currentColor">
-            <path d="M10 3a2 2 0 1 1 4 0h3a2 2 0 0 1 2 2v3a2 2 0 1 0 0 4v3a2 2 0 0 1-2 2h-3a2 2 0 1 0-4 0H7a2 2 0 0 1-2-2v-3a2 2 0 1 0 0-4V5a2 2 0 0 1 2-2h3z"/>
+            <path d="M10 3a2 2 0 1 1 4 0h3a2 2 0 0 1 2 2v3a2 2 0 1 0 0 4v3a2 2 0 0 1-2 2h-3a2 2 0 1 0-4 0H7a2 2 0 0 1-2-2v-3a4 4 0 1 0 0-8V5a2 2 0 0 1 2-2h3z"/>
           </svg>
         );
       case "services":
         return (
           <svg viewBox="0 0 24 24" className={className} aria-hidden="true" fill="currentColor">
-            <path d="M21 14.35V19a2 2 0 0 1-2 2h-4.65a4.5 4.5 0 1 0-4.7 0H5a2 2 0 0 1-2-2v-4.65a4.5 4.5 0 1 0 0-4.7V5a2 2 0 0 1 2-2h4.65a4.5 4.5 0 1 0 4.7 0H19a2 2 0 0 1 2 2v4.65a4.5 4.5 0 1 0 0 4.7zM12 9a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 12a3 3 0 1 1 0-6 3 3 0 0 1 0 6zM3 12a3 3 0 1 1 6 0 3 3 0 0 1-6 0zm12 0a3 3 0 1 1 6 0 3 3 0 0 1-6 0z"/>
+            <path d="M21 14.35V19a2 2 0 0 1-2 2h-4.65a4.5 4.5 0 1 0-4.7 0H5a2 2 0 0 1-2-2v-4.65a4.5 4.5 0 1 0 0-4.7V5a2 2 0 0 1 2-2h4.65a4.5 4.5 0 1 0 4.7 0H19a2 2 0 0 1 2 2v4.65a4.5 4.5 0 1 0 0 4.7z"/>
           </svg>
         );
       default:
@@ -398,7 +409,6 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
 /* ===================== صفحه اصلی ===================== */
 export default function Home() {
   const heroStyle = useHeroFade(320);
-  const scrollY = useScrollY();
 
   // CTAهای هیرو: یکی Filled و یکی Outlined
   const [isConsultFilled, setIsConsultFilled] = useState(() => {
@@ -424,9 +434,9 @@ export default function Home() {
   const serviceItems = Array.isArray(services?.items) ? services.items : [];
 
   return (
-<main className="min-h-screen font-sans relative z-10">
+    <main className="min-h-screen font-sans relative z-10">
       {/* لایهٔ پس‌زمینهٔ متحرک */}
-      <BackgroundLayer scrollY={scrollY} />
+      <BackgroundLayer />
 
       {/* Hero – محتوای قابل محو شدن */}
       <section className="text-white">
@@ -518,7 +528,7 @@ export default function Home() {
             <ServiceCard
               key={s.href || s.slug || s.title || i}
               title={s.title}
-              icon={s.icon} // مثل /icons/services/install.webp
+              icon={s.icon}
               index={i}
               href={s.href || `/services/${s.slug}`}
             />

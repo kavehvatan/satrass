@@ -1,26 +1,39 @@
 // pages/index.js
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
 
-import vendors from "../data/vendors";        // داده‌های تجهیزات
-import services from "../data/services.json"; // داده‌های خدمات (icon + slug + href)
+import vendors from "../data/vendors";
+import services from "../data/services.json";
 
-// ===== رنگ‌ها و کمک‌تابع‌ها =====
+/* ===================== رنگ‌ها و کمک‌ها ===================== */
 const TEAL = "#14b8a6";
 const YELLOW = "#f4c21f";
 const BRAND_COLORS = ["#00E5FF", "#2D5BFF"];
 const LOGO_COLORS = [TEAL, YELLOW];
 const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
-function BackgroundLayer({ scrollY = 0 }) {
-  // فاز رنگِ گرادیان
-  const [phase, setPhase] = useState(0);
+
+/* ===================== ابزار اسکرول ===================== */
+function useScrollY() {
+  const [y, setY] = useState(0);
   useEffect(() => {
-    const id = setInterval(() => setPhase((p) => (p + 1) % 3, 4000));
+    const onScroll = () => setY(window.scrollY || 0);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  return y;
+}
+
+/* ===================== لایه پس‌زمینه متحرک (پارالاکس) ===================== */
+function BackgroundLayer({ scrollY = 0 }) {
+  const [phase, setPhase] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => setPhase((p) => (p + 1) % 3), 4000);
     return () => clearInterval(id);
   }, []);
 
-  // تم‌های گرادیان
   const themes = [
     "from-black via-slate-900 to-emerald-700",
     "from-zinc-900 via-slate-800 to-cyan-700",
@@ -45,66 +58,52 @@ function BackgroundLayer({ scrollY = 0 }) {
   );
 }
 
-  // پارالاکس: هرچه اسکرول بیشتر، بنر کمی پایین‌تر می‌رود
-  // فاکتور 0.45 حس نرم می‌دهد؛ و محدودیت برای جلوگیری از حرکت بی‌نهایت
-  const translate = Math.min(scrollY * 0.45, 2400);
+/* ===================== محو شدن محتوای هیرو با اسکرول ===================== */
+function useHeroFade(max = 320) {
+  const y = useScrollY();
+  const ratio = Math.max(0, Math.min(1, 1 - y / max));
+  const opacity = ratio;
+  // حرکت عمودی ریز برای حس Flare-out
+  const translateY = (1 - ratio) * -12;
+  return { opacity, transform: `translateY(${translateY}px)` };
+}
+
+/* ===================== Animated headline (typewriter) ===================== */
+function AnimatedHeadline({
+  phrases = ["زیرساخت هوشمند", "دقت مهندسی"],
+  typeSpeed = 140,
+  holdTime = 1700,
+}) {
+  const [idx, setIdx] = useState(0);
+  const [shown, setShown] = useState("");
+
+  useEffect(() => {
+    let t;
+    const target = phrases[idx];
+    if (shown.length < target.length) {
+      t = setTimeout(() => setShown(target.slice(0, shown.length + 1)), typeSpeed);
+    } else {
+      t = setTimeout(() => {
+        setShown("");
+        setIdx((i) => (i + 1) % phrases.length);
+      }, holdTime);
+    }
+    return () => clearTimeout(t);
+  }, [shown, idx, phrases, typeSpeed, holdTime]);
 
   return (
-    <div className="fixed inset-0 -z-10 will-change-transform"
-         style={{ transform: `translateY(${translate}px)` }}>
-      <div
-        className={`absolute inset-0 bg-gradient-to-b transition-colors duration-[1200ms] ${themes[phase]}`}
-      />
-      <div className="absolute inset-0 bg-white/5 backdrop-blur-[2px]" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_100%_0%,rgba(255,255,255,.06),transparent_60%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_55%_at_0%_100%,rgba(0,0,0,.12),transparent_60%)]" />
-    </div>
+    <span className="inline-block">
+      {shown}
+      <span className="inline-block w-[0.6ch] animate-pulse">|</span>
+    </span>
   );
 }
 
-function useHeroFade(max = 320) {
-  const [opacity, setOpacity] = useState(1);
-  useEffect(() => {
-    const onScroll = () => {
-      const y = window.scrollY || 0;
-      setOpacity(Math.max(0, 1 - y / max));
-    };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [max]);
-  return opacity;
-}
-
-// ===== جابه‌جایی نوبتی رنگ دکمه‌های هیرو =====
-function useAlternatingBrandPair() {
-  const [primary, setPrimary] = useState(YELLOW);   // Filled
-  const [secondary, setSecondary] = useState(TEAL); // Outlined
-  useEffect(() => {
-    try {
-      const lastIsTeal = localStorage.getItem("satrass_btn_pair") === "1";
-      const nextIsTeal = !lastIsTeal;
-      localStorage.setItem("satrass_btn_pair", nextIsTeal ? "1" : "0");
-      if (nextIsTeal) { setPrimary(TEAL); setSecondary(YELLOW); }
-      else { setPrimary(YELLOW); setSecondary(TEAL); }
-    } catch {}
-  }, []);
-  const swap = () => {
-    setPrimary((p) => {
-      const np = p === TEAL ? YELLOW : TEAL;
-      setSecondary(np === TEAL ? YELLOW : TEAL);
-      try { localStorage.setItem("satrass_btn_pair", np === TEAL ? "1" : "0"); } catch {}
-      return np;
-    });
-  };
-  return { primary, secondary, swap };
-}
-
-// ===== تیتر سکشن با آیکون و خط تزئینی =====
+/* ===================== SectionTitle ===================== */
 function SectionTitle({ as: Tag = "h2", icon = "equipment", className = "", children }) {
+  const [useFallback, setUseFallback] = useState(false);
   const map = { equipment: "vendors", solutions: "solutions", services: "services" };
   const src = `/icons/sections/${map[icon] || icon}.webp`;
-  const [useFallback, setUseFallback] = useState(false);
 
   const FallbackIcon = ({ className = "" }) => {
     switch (icon) {
@@ -145,13 +144,15 @@ function SectionTitle({ as: Tag = "h2", icon = "equipment", className = "", chil
         )}
       </span>
 
-      <Tag className="text-2xl font-extrabold tracking-tight text-slate-900">{children}</Tag>
+      <Tag className="text-2xl font-extrabold tracking-tight text-slate-900">
+        {children}
+      </Tag>
       <span className="flex-1 h-px bg-gradient-to-l from-slate-200 to-transparent" />
     </div>
   );
 }
 
-// ===== مودال شیشه‌ای (برای توضیحات) =====
+/* ===================== مودال شیشه‌ای (برای راهکارها) ===================== */
 function GlassModal({ open, onClose, title, paragraphs }) {
   const [closing, setClosing] = useState(false);
 
@@ -230,7 +231,7 @@ function GlassModal({ open, onClose, title, paragraphs }) {
   );
 }
 
-// ===== کارت برند «تجهیزات» =====
+/* ===================== کارت برند (تجهیزات) ===================== */
 function BrandCard({ title, slug, href, index, logo }) {
   const [border, setBorder] = useState("#e5e7eb");
   const link = href || `/products/${slug || (title || "").toLowerCase()}`;
@@ -240,9 +241,9 @@ function BrandCard({ title, slug, href, index, logo }) {
       : (slug || (title || "")).toLowerCase();
 
   const webp = `/avatars/${base}.webp`;
-  const png  = `/avatars/${base}.png`;
+  const png = `/avatars/${base}.png`;
   const artWebp = `/brand-art/${base}.webp`;
-  const artPng  = `/brand-art/${base}.png`;
+  const artPng = `/brand-art/${base}.png`;
 
   return (
     <Link href={link} className="group block">
@@ -250,8 +251,7 @@ function BrandCard({ title, slug, href, index, logo }) {
         className="
           relative overflow-hidden rounded-2xl
           border bg-white/70 supports-[backdrop-filter]:bg-white/35
-          backdrop-blur-xl
-          p-5 transition duration-200
+          backdrop-blur-xl p-5 transition duration-200
           hover:-translate-y-0.5 hover:shadow-xl
         "
         style={{ borderColor: border, borderWidth: 1 }}
@@ -280,7 +280,7 @@ function BrandCard({ title, slug, href, index, logo }) {
           }}
         />
 
-        {/* لوگو — سمت چپ فیزیکی (در RTL سمت راست دیده می‌شود) */}
+        {/* لوگو سمت راست (RTL) */}
         <div className="relative flex items-center ltr:justify-start rtl:justify-end">
           <div className="w-14 h-14 shrink-0 rounded-xl bg-white ring-1 ring-black/5 shadow-sm grid place-items-center transition-transform duration-200 group-hover:scale-[1.03] overflow-hidden">
             <picture>
@@ -301,7 +301,7 @@ function BrandCard({ title, slug, href, index, logo }) {
   );
 }
 
-// ===== کارت «خدمات» (Teal) =====
+/* ===================== کارت خدمات (Teal) ===================== */
 function ServiceCard({ title, icon, index = 0, href }) {
   const [border, setBorder] = useState("#e5e7eb");
   const bg = "rgba(20,184,166,0.6)"; // TEAL
@@ -333,7 +333,7 @@ function ServiceCard({ title, icon, index = 0, href }) {
   );
 }
 
-// ===== لیست راهکارها (محافظت از داده) =====
+/* ===================== داده‌های «محافظت از داده» ===================== */
 const SOLUTIONS = [
   {
     name: "Commvault",
@@ -353,17 +353,16 @@ const SOLUTIONS = [
     name: "Veeam",
     slug: "Veeam",
     p1: "راهکار قدرتمند بکاپ و ریکاوری برای محیط‌های مجازی، فیزیکی و کلود.",
-    p2: "تمرکز اصلی روی B&R سریع و مطمئن با Instant Recovery؛ پوشش VM/DB/M365 و کلود.",
-    p3: "ویژگی‌ها: Dedup/Compression، انعطاف‌پذیری بالا، DR ساده.",
+    p2: "تمرکز روی Backup & Replication سریع و مطمئن با Instant Recovery و حفاظت از VM/DB و M365.",
+    p3: "ویژگی‌ها: Dedup/Compression، پشتیبانی از چندین پلتفرم، و DR ساده.",
   },
 ];
 
-// ===== کارت راهکار (زرد) =====
+/* ===================== کارت راهکار (زرد) + مودال ===================== */
 function SolutionCard({ name, slug, p1, p2, p3 }) {
   const [border, setBorder] = useState("#e5e7eb");
   const [open, setOpen] = useState(false);
-
-  const bg = "rgba(244,194,31,0.6)"; // زرد
+  const bg = "rgba(244,194,31,0.6)"; // YELLOW
   const fg = "#000";
 
   return (
@@ -381,112 +380,91 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
         aria-haspopup="dialog"
         aria-expanded={open}
       >
-        {/* فقط لوگو؛ بدون قاب سفید */}
         <img
           src={`/avatars/${slug}.webp`}
           onError={(e) => (e.currentTarget.src = `/avatars/${slug}.png`)}
           alt={name}
-          className="
-            w-20 h-20 md:w-24 md:h-24 object-contain
-            drop-shadow-[0_12px_24px_rgba(0,0,0,.18)]
-            transition-transform duration-200
-            group-hover:scale-105 group-hover:-translate-y-0.5
-          "
+          className="w-20 h-20 md:w-24 md:h-24 object-contain drop-shadow-[0_12px_24px_rgba(0,0,0,.18)] transition-transform duration-200 group-hover:scale-105 group-hover:-translate-y-0.5"
           style={{ transform: "translateZ(0)" }}
         />
       </div>
 
-      <GlassModal
-        open={open}
-        onClose={() => setOpen(false)}
-        title={name}
-        paragraphs={[p1, p2, p3]}
-      />
+      <GlassModal open={open} onClose={() => setOpen(false)} title={name} paragraphs={[p1, p2, p3]} />
     </>
   );
 }
 
-// ===== تیتر متحرک هیرو =====
-function AnimatedHeadline({
-  phrases = ["زیرساخت هوشمند", "دقت مهندسی"],
-  typeSpeed = 140,
-  holdTime = 1700,
-}) {
-  const [idx, setIdx] = useState(0);
-  const [shown, setShown] = useState("");
-
-  useEffect(() => {
-    let timer;
-    const target = phrases[idx];
-
-    if (shown.length < target.length) {
-      timer = setTimeout(() => setShown(target.slice(0, shown.length + 1)), typeSpeed);
-    } else {
-      timer = setTimeout(() => {
-        setShown("");
-        setIdx((i) => (i + 1) % phrases.length);
-      }, holdTime);
-    }
-    return () => clearTimeout(timer);
-  }, [shown, idx, phrases, typeSpeed, holdTime]);
-
-  return (
-    <span className="inline-block">
-      {shown}
-      <span className="inline-block w-[0.6ch] animate-pulse">|</span>
-    </span>
-  );
-}
-
-// ===== صفحه اصلی =====
+/* ===================== صفحه اصلی ===================== */
 export default function Home() {
-  const { primary, secondary } = useAlternatingBrandPair();
-  const fade = useHeroFade(320);
+  const heroStyle = useHeroFade(320);
+  const scrollY = useScrollY();
 
-  // 👇 جدید
-const scrollY = useScrollY();
-  // ...
+  // CTAهای هیرو: یکی Filled و یکی Outlined
+  const [isConsultFilled, setIsConsultFilled] = useState(() => {
+    try {
+      return (localStorage.getItem("cta_swap") || "consult") === "consult";
+    } catch {
+      return true;
+    }
+  });
+  const filledColor = isConsultFilled ? YELLOW : TEAL;
+  const outlinedColor = isConsultFilled ? TEAL : YELLOW;
+  const flipCtas = () => {
+    setIsConsultFilled((v) => {
+      const nv = !v;
+      try {
+        localStorage.setItem("cta_swap", nv ? "consult" : "tools");
+      } catch {}
+      return nv;
+    });
+  };
+
+  const safeVendors = Array.isArray(vendors) ? vendors : [];
+  const serviceItems = Array.isArray(services?.items) ? services.items : [];
+
   return (
-    <main className="min-h-screen font-sans">
-      {/* پس‌زمینهٔ ثابتِ شیشه‌ای و گرادیانی با حرکت پارالاکس */}
+    <main className="min-h-screen font-sans relative">
+      {/* لایهٔ پس‌زمینهٔ متحرک */}
       <BackgroundLayer scrollY={scrollY} />
-      {/* بقیهٔ کد بدون تغییر */}
 
-      {/* هیرو (با محو شدن تدریجی) */}
-      <section
-        className="bg-[linear-gradient(135deg,#000_0%,#0a0a0a_60%,#111_100%)] text-white"
-        style={{ opacity: fade }}
-      >
-        <div className="max-w-6xl mx-auto px-4 py-12 md:py-16 grid md:grid-cols-2 items-center gap-10">
+      {/* Hero – محتوای قابل محو شدن */}
+      <section className="text-white">
+        <div
+          className="max-w-6xl mx-auto px-4 py-12 md:py-16 grid md:grid-cols-2 items-center gap-10"
+          style={heroStyle}
+        >
           <div>
             <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">
-              <AnimatedHeadline />
+              <AnimatedHeadline phrases={["زیرساخت هوشمند", "دقت مهندسی"]} typeSpeed={140} holdTime={1700} />
             </h1>
             <p className="mt-4 text-gray-300">از مشاوره تا پشتیبانی، در کنار شما.</p>
 
             <div className="mt-6 flex gap-3">
-              {/* Filled */}
+              {/* ارائه مشاوره — یکی از این دو همیشه Filled است */}
               <a
                 href="/contact"
-                className="rounded-full px-5 py-2.5 font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                onClick={flipCtas}
+                className="rounded-full px-5 py-2.5 font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-yellow-400"
                 style={{
-                  backgroundColor: primary,
-                  color: primary === YELLOW ? "#000" : "#fff",
+                  backgroundColor: filledColor,
+                  color: filledColor === YELLOW ? "#000" : "#fff",
                   border: "1px solid transparent",
                 }}
               >
                 ارائه مشاوره
               </a>
-              {/* Outlined */}
+
+              {/* مشاهده ابزارها — دیگری Outlined */}
               <a
                 href="/tools"
-                className="rounded-full px-5 py-2.5 font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                onClick={flipCtas}
+                className="rounded-full px-5 py-2.5 font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-teal-400"
                 style={{
-                  border: `1px solid ${secondary}`,
-                  color: secondary,
+                  border: `1px solid ${outlinedColor}`,
+                  color: outlinedColor,
                   backgroundColor: "transparent",
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${secondary}1A`)}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${outlinedColor}1A`)}
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
               >
                 مشاهده ابزارها
@@ -525,11 +503,15 @@ const scrollY = useScrollY();
       <section id="solutions" className="max-w-6xl mx-auto px-4 pb-10">
         <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center mb-10">
-          {SOLUTIONS.map((s) => (<SolutionCard key={s.slug} {...s} />))}
+          {SOLUTIONS.map((s) => (
+            <SolutionCard key={s.slug} {...s} />
+          ))}
         </div>
 
         {/* خدمات و راهکارها */}
-        <SectionTitle as="h3" icon="services" className="mb-4">خدمات و راهکارها</SectionTitle>
+        <SectionTitle as="h3" icon="services" className="mb-4">
+          خدمات و راهکارها
+        </SectionTitle>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
           {serviceItems.map((s, i) => (
             <ServiceCard
@@ -543,7 +525,7 @@ const scrollY = useScrollY();
         </div>
       </section>
 
-      {/* Footer + Sitemap */}
+      {/* Footer + Sitemap (داخل خود صفحهٔ خانه) */}
       <footer className="bg-black text-white">
         <div className="max-w-6xl mx-auto px-4 py-10">
           <div className="grid md:grid-cols-3 gap-8 items-start">
@@ -557,7 +539,7 @@ const scrollY = useScrollY();
               </ul>
             </div>
 
-            {/* خدمات */}
+            {/* خدمات و راهکارها */}
             <div>
               <h4 className="font-bold mb-3">خدمات و راهکارها</h4>
               <ul className="space-y-2 text-white/80">
@@ -586,6 +568,7 @@ const scrollY = useScrollY();
           </div>
 
           <hr className="my-8 border-white/10" />
+
           <p className="text-center text-white/80 text-sm">
             © {new Date().getFullYear()} ساتراس، همه حقوق محفوظ است
           </p>

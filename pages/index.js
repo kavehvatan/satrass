@@ -1,19 +1,19 @@
 // pages/index.js
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
-import vendors from "../data/vendors";
-import services from "../data/services.json";
+import vendors from "../data/vendors";          // لیست برندهای «تجهیزات»
+import services from "../data/services.json";   // لیست آیتم‌های «خدمات و راهکارها»
 
-/* ===== رنگ‌ها و کمک‌ها ===== */
+/* ===================== رنگ‌ها و کمک‌ها ===================== */
 const TEAL = "#14b8a6";
 const YELLOW = "#f4c21f";
 const BRAND_COLORS = ["#00E5FF", "#2D5BFF"];
 const LOGO_COLORS = [TEAL, YELLOW];
 const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
 
-/* ===== ابزار اسکرول ساده ===== */
+/* ===================== ابزار اسکرول ===================== */
 function useScrollY() {
   const [y, setY] = useState(0);
   useEffect(() => {
@@ -25,7 +25,105 @@ function useScrollY() {
   return y;
 }
 
-/* ===== SectionTitle ===== */
+/* فاز رنگ بنر را بر اساس سکشن فعلی تعیین می‌کند */
+function useSectionPhase() {
+  const [phase, setPhase] = useState(0);
+
+  useEffect(() => {
+    const handler = () => {
+      const y = window.scrollY + window.innerHeight * 0.35; // نقطهٔ مرجع کمی پایین‌تر از وسط ویو
+      const vendorsTop   = document.getElementById("vendors")?.offsetTop   ?? 1e9;
+      const solutionsTop = document.getElementById("solutions")?.offsetTop ?? 1e9;
+      const servicesTop  = document.getElementById("services")?.offsetTop  ?? 1e9;
+
+      // 0 = هیرو (مشکی)، 1 = پشت تجهیزات/محافظت از داده (ته‌رنگ teal)، 2 = پشت خدمات (ته‌رنگ yellow)
+      if (y >= servicesTop) setPhase(2);
+      else if (y >= Math.min(vendorsTop, solutionsTop)) setPhase(1);
+      else setPhase(0);
+    };
+
+    handler();
+    window.addEventListener("scroll", handler, { passive: true });
+    window.addEventListener("resize", handler);
+    return () => {
+      window.removeEventListener("scroll", handler);
+      window.removeEventListener("resize", handler);
+    };
+  }, []);
+
+  return phase;
+}
+
+/* ===================== لایه پس‌زمینه متحرک (پارالاکسِ پشت همه‌چیز) ===================== */
+function BackgroundLayer() {
+  const scrollY = useScrollY();
+  const phase = useSectionPhase();
+
+  // جابه‌جایی همگام با اسکرول تا حس «آمدن بنر پشت سکشن‌ها» ایجاد شود
+  const translate = Math.min(scrollY, 4000);
+
+  // گرادینت‌ها: 0=مشکی، 1=Teal-ish، 2=Yellow-ish
+  const themes = [
+    "from-[#0a0a0a] via-[#0f0f0f] to-[#151515]", // فاز 0
+    "from-[#06221e] via-[#07312b] to-[#0a3f38]", // فاز 1
+    "from-[#332500] via-[#3f2f00] to-[#4b3900]", // فاز 2
+  ];
+
+  return (
+    <div
+      className="fixed inset-0 -z-10 will-change-transform"
+      style={{ transform: `translate3d(0, ${translate}px, 0)` }}
+      aria-hidden="true"
+    >
+      <div className={`absolute inset-0 bg-gradient-to-b transition-colors duration-[1200ms] ${themes[phase]}`} />
+      <div className="absolute inset-0 bg-white/5 backdrop-blur-[2px]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_100%_0%,rgba(255,255,255,.06),transparent_60%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_55%_at_0%_100%,rgba(0,0,0,.12),transparent_60%)]" />
+    </div>
+  );
+}
+
+/* ===================== محو شدن محتوای هیرو با اسکرول ===================== */
+function useHeroFade(max = 320) {
+  const y = useScrollY();
+  const ratio = Math.max(0, Math.min(1, 1 - y / max));
+  const opacity = ratio;
+  const translateY = (1 - ratio) * -16; // حرکت عمودی لطیف
+  return { opacity, transform: `translateY(${translateY}px)` };
+}
+
+/* ===================== Animated headline (typewriter) ===================== */
+function AnimatedHeadline({
+  phrases = ["زیرساخت هوشمند", "دقت مهندسی"],
+  typeSpeed = 140,
+  holdTime = 1700,
+}) {
+  const [idx, setIdx] = useState(0);
+  const [shown, setShown] = useState("");
+
+  useEffect(() => {
+    let t;
+    const target = phrases[idx];
+    if (shown.length < target.length) {
+      t = setTimeout(() => setShown(target.slice(0, shown.length + 1)), typeSpeed);
+    } else {
+      t = setTimeout(() => {
+        setShown("");
+        setIdx((i) => (i + 1) % phrases.length);
+      }, holdTime);
+    }
+    return () => clearTimeout(t);
+  }, [shown, idx, phrases, typeSpeed, holdTime]);
+
+  return (
+    <span className="inline-block">
+      {shown}
+      <span className="inline-block w-[0.6ch] animate-pulse">|</span>
+    </span>
+  );
+}
+
+/* ===================== SectionTitle ===================== */
 function SectionTitle({ as: Tag = "h2", icon = "equipment", className = "", children }) {
   const [useFallback, setUseFallback] = useState(false);
   const map = { equipment: "vendors", solutions: "solutions", services: "services" };
@@ -78,169 +176,7 @@ function SectionTitle({ as: Tag = "h2", icon = "equipment", className = "", chil
   );
 }
 
-/* ===== تایپ‌نویس عنوان ===== */
-function AnimatedHeadline({
-  phrases = ["زیرساخت هوشمند", "دقت مهندسی"],
-  typeSpeed = 140,
-  holdTime = 1700,
-}) {
-  const [idx, setIdx] = useState(0);
-  const [shown, setShown] = useState("");
-
-  useEffect(() => {
-    let t;
-    const target = phrases[idx];
-    if (shown.length < target.length) {
-      t = setTimeout(() => setShown(target.slice(0, shown.length + 1)), typeSpeed);
-    } else {
-      t = setTimeout(() => {
-        setShown("");
-        setIdx((i) => (i + 1) % phrases.length);
-      }, holdTime);
-    }
-    return () => clearTimeout(t);
-  }, [shown, idx, phrases, typeSpeed, holdTime]);
-
-  return (
-    <span className="inline-block">
-      {shown}
-      <span className="inline-block w-[0.6ch] animate-pulse">|</span>
-    </span>
-  );
-}
-
-/* ===== محوِ محتوای هیرو با اسکرول ===== */
-function useHeroFade(max = 320) {
-  const y = useScrollY();
-  const ratio = Math.max(0, Math.min(1, 1 - y / max));
-  const opacity = ratio;
-  const translateY = (1 - ratio) * -12;
-  return { opacity, transform: `translateY(${translateY}px)` };
-}
-
-/* ===== کارت‌ها ===== */
-function BrandCard({ title, slug, href, index, logo }) {
-  const [border, setBorder] = useState("#e5e7eb");
-  const link = href || `/products/${slug || (title || "").toLowerCase()}`;
-  const base =
-    logo
-      ? logo.replace(/^\/?avatars\//, "").replace(/\.(png|webp)$/i, "")
-      : (slug || (title || "")).toLowerCase();
-
-  const webp = `/avatars/${base}.webp`;
-  const png = `/avatars/${base}.png`;
-  const artWebp = `/brand-art/${base}.webp`;
-  const artPng = `/brand-art/${base}.png`;
-
-  return (
-    <Link href={link} className="group block">
-      <div
-        className="
-          relative overflow-hidden rounded-2xl
-          border bg-white/70 supports-[backdrop-filter]:bg-white/35
-          backdrop-blur-xl p-5 transition duration-200
-          hover:-translate-y-0.5 hover:shadow-xl
-        "
-        style={{ borderColor: border, borderWidth: 1 }}
-        onMouseEnter={() =>
-          setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
-        }
-        onMouseLeave={() => setBorder("#e5e7eb")}
-      >
-        <picture className="pointer-events-none select-none absolute inset-0">
-          <source srcSet={artWebp} type="image/webp" />
-          <img
-            src={artPng}
-            alt=""
-            aria-hidden="true"
-            className="w-full h-full object-cover scale-[1.12] opacity-[.35] contrast-115 saturate-110"
-            onError={(e) => (e.currentTarget.style.display = "none")}
-          />
-        </picture>
-
-        <div
-          className="absolute inset-0 pointer-events-none opacity-30"
-          style={{
-            background: `radial-gradient(140% 120% at -10% -10%, ${colorOf(index)}33 0%, transparent 60%)`,
-          }}
-        />
-
-        <div className="relative flex items-center ltr:justify-start rtl:justify-end">
-          <div className="w-14 h-14 shrink-0 rounded-xl bg-white ring-1 ring-black/5 shadow-sm grid place-items-center transition-transform duration-200 group-hover:scale-[1.03] overflow-hidden">
-            <picture>
-              <source srcSet={webp} type="image/webp" />
-              <img
-                src={png}
-                alt={title}
-                width={56}
-                height={56}
-                className="w-10 h-10 object-contain"
-                onError={(e) => (e.currentTarget.src = "/avatars/default.png")}
-              />
-            </picture>
-          </div>
-        </div>
-      </div>
-    </Link>
-  );
-}
-
-function ServiceCard({ title, icon, index = 0, href }) {
-  const [border, setBorder] = useState("#e5e7eb");
-  const bg = "rgba(20,184,166,0.6)";
-  const fg = "#fff";
-
-  return (
-    <Link href={href} className="w-full max-w-[520px]">
-      <div
-        onMouseEnter={() =>
-          setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
-        }
-        onMouseLeave={() => setBorder("#e5e7eb")}
-        className="flex flex-col items-center justify-center gap-3 p-5 border rounded-lg hover:shadow-md transition text-center w-full mx-auto h-[120px] cursor-pointer select-none"
-        style={{ borderColor: border, background: bg, color: fg }}
-      >
-        {icon ? (
-          <img
-            src={icon}
-            alt=""
-            className="w-10 h-10 object-contain"
-            onError={(e) => (e.currentTarget.style.display = "none")}
-          />
-        ) : null}
-        <span className="font-semibold" style={{ color: fg }}>
-          {title}
-        </span>
-      </div>
-    </Link>
-  );
-}
-
-const SOLUTIONS = [
-  {
-    name: "Commvault",
-    slug: "commvault",
-    p1: "راهکار یکپارچهٔ حفاظت از داده برای VM/DB/Files/SaaS/Cloud با Dedup و Policyهای منعطف.",
-    p2: "Hyperscale X برای Scale-out و Metallic به‌صورت SaaS؛ گزارش‌گیری و خودکارسازی کامل.",
-    p3: "سناریوهای متداول: M365/Endpoint، بکاپ ترکیبی On-prem/Cloud، RTO/RPO سخت‌گیرانه.",
-  },
-  {
-    name: "NetBackup",
-    slug: "netbackup",
-    p1: "پلتفرم بکاپ سازمانی با پوشش عمیق مجازی‌سازی/دیتابیس و Inline Dedup برای پنجرهٔ بکاپ کوچک.",
-    p2: "اپلاینس‌های سری 52xx/Flex، مدیریت متمرکز، RBAC و گزارش‌گیری دقیق.",
-    p3: "سناریوها: VMware/Hyper-V، Oracle/SQL، آرشیو نوار/کلود، بازیابی انتخابی سطح فایل.",
-  },
-  {
-    name: "Veeam",
-    slug: "Veeam",
-    p1: "راهکار قدرتمند بکاپ و ریکاوری برای محیط‌های مجازی، فیزیکی و کلود.",
-    p2: "تمرکز روی Backup & Replication سریع و مطمئن با Instant Recovery و حفاظت از VM/DB و M365.",
-    p3: "ویژگی‌ها: Dedup/Compression، پشتیبانی از چندین پلتفرم، و DR ساده.",
-  },
-];
-// --- اضافه کنید بالای SolutionCard ---
-
+/* ===================== مودال شیشه‌ای (برای راهکارها) ===================== */
 function GlassModal({ open, onClose, title, paragraphs }) {
   const [closing, setClosing] = useState(false);
 
@@ -296,7 +232,6 @@ function GlassModal({ open, onClose, title, paragraphs }) {
                 ×
               </button>
             </div>
-
             {paras.map((tx, i) => (
               <p
                 key={i}
@@ -305,7 +240,6 @@ function GlassModal({ open, onClose, title, paragraphs }) {
                 {tx}
               </p>
             ))}
-
             <div className="mt-6 flex justify-end">
               <button
                 onClick={handleClose}
@@ -320,10 +254,139 @@ function GlassModal({ open, onClose, title, paragraphs }) {
     </div>
   );
 }
+
+/* ===================== کارت برند (تجهیزات) ===================== */
+function BrandCard({ title, slug, href, index, logo }) {
+  const [border, setBorder] = useState("#e5e7eb");
+  const link = href || `/products/${slug || (title || "").toLowerCase()}`;
+  const base =
+    logo
+      ? logo.replace(/^\/?avatars\//, "").replace(/\.(png|webp)$/i, "")
+      : (slug || (title || "")).toLowerCase();
+
+  const webp = `/avatars/${base}.webp`;
+  const png  = `/avatars/${base}.png`;
+  const artWebp = `/brand-art/${base}.webp`;
+  const artPng  = `/brand-art/${base}.png`;
+
+  return (
+    <Link href={link} className="group block">
+      <div
+        className="
+          relative overflow-hidden rounded-2xl
+          border bg-white/70 supports-[backdrop-filter]:bg-white/35
+          backdrop-blur-xl p-5 transition duration-200
+          hover:-translate-y-0.5 hover:shadow-xl
+        "
+        style={{ borderColor: border, borderWidth: 1 }}
+        onMouseEnter={() =>
+          setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
+        }
+        onMouseLeave={() => setBorder("#e5e7eb")}
+      >
+        {/* پس‌زمینه کارت برند */}
+        <picture className="pointer-events-none select-none absolute inset-0">
+          <source srcSet={artWebp} type="image/webp" />
+          <img
+            src={artPng}
+            alt=""
+            aria-hidden="true"
+            className="w-full h-full object-cover scale-[1.12] opacity-[.35] md:opacity-[.35] contrast-115 saturate-110"
+            onError={(e) => (e.currentTarget.style.display = "none")}
+          />
+        </picture>
+
+        {/* هایلایت رنگی آرام */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-30"
+          style={{
+            background: `radial-gradient(140% 120% at -10% -10%, ${colorOf(index)}33 0%, transparent 60%)`,
+          }}
+        />
+
+        {/* لوگو سمت راست (RTL) */}
+        <div className="relative flex items-center ltr:justify-start rtl:justify-end">
+          <div className="w-14 h-14 shrink-0 rounded-xl bg-white ring-1 ring-black/5 shadow-sm grid place-items-center transition-transform duration-200 group-hover:scale-[1.03] overflow-hidden">
+            <picture>
+              <source srcSet={webp} type="image/webp" />
+              <img
+                src={png}
+                alt={title}
+                width={56}
+                height={56}
+                className="w-10 h-10 object-contain"
+                onError={(e) => (e.currentTarget.src = "/avatars/default.png")}
+              />
+            </picture>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+/* ===================== کارت خدمات (Teal) ===================== */
+function ServiceCard({ title, icon, href, index = 0 }) {
+  const [border, setBorder] = useState("#e5e7eb");
+  const bg = "rgba(20,184,166,0.6)"; // TEAL
+  const fg = "#fff";
+
+  return (
+    <Link href={href} className="w-full max-w-[520px]">
+      <div
+        onMouseEnter={() =>
+          setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
+        }
+        onMouseLeave={() => setBorder("#e5e7eb")}
+        className="flex flex-col items-center justify-center gap-3 p-5 border rounded-lg hover:shadow-md transition text-center w-full mx-auto h-[120px] cursor-pointer select-none"
+        style={{ borderColor: border, background: bg, color: fg }}
+      >
+        {icon ? (
+          <img
+            src={icon}
+            alt=""
+            className="w-10 h-10 object-contain"
+            onError={(e) => (e.currentTarget.style.display = "none")}
+          />
+        ) : null}
+        <span className="font-semibold" style={{ color: fg }}>
+          {title}
+        </span>
+      </div>
+    </Link>
+  );
+}
+
+/* ===================== داده‌های «محافظت از داده» ===================== */
+const SOLUTIONS = [
+  {
+    name: "Commvault",
+    slug: "commvault",
+    p1: "راهکار یکپارچهٔ حفاظت از داده برای VM/DB/Files/SaaS/Cloud با Dedup و Policyهای منعطف.",
+    p2: "Hyperscale X برای Scale-out و Metallic به‌صورت SaaS؛ گزارش‌گیری و خودکارسازی کامل.",
+    p3: "سناریوهای متداول: M365/Endpoint، بکاپ ترکیبی On-prem/Cloud، RTO/RPO سخت‌گیرانه.",
+  },
+  {
+    name: "NetBackup",
+    slug: "netbackup",
+    p1: "پلتفرم بکاپ سازمانی با پوشش عمیق مجازی‌سازی/دیتابیس و Inline Dedup برای پنجرهٔ بکاپ کوچک.",
+    p2: "اپلاینس‌های سری 52xx/Flex، مدیریت متمرکز، RBAC و گزارش‌گیری دقیق.",
+    p3: "سناریوها: VMware/Hyper-V، Oracle/SQL، آرشیو نوار/کلود، بازیابی انتخابی سطح فایل.",
+  },
+  {
+    name: "Veeam",
+    slug: "Veeam",
+    p1: "راهکار قدرتمند بکاپ و ریکاوری برای محیط‌های مجازی، فیزیکی و کلود.",
+    p2: "تمرکز روی Backup & Replication سریع و مطمئن با Instant Recovery و حفاظت از VM/DB و M365.",
+    p3: "ویژگی‌ها: Dedup/Compression، پشتیبانی از چندین پلتفرم، و DR ساده.",
+  },
+];
+
+/* ===================== کارت راهکار (زرد) + مودال ===================== */
 function SolutionCard({ name, slug, p1, p2, p3 }) {
   const [border, setBorder] = useState("#e5e7eb");
   const [open, setOpen] = useState(false);
-  const bg = "rgba(244,194,31,0.6)";
+  const bg = "rgba(244,194,31,0.6)"; // YELLOW
   const fg = "#000";
 
   return (
@@ -355,78 +418,40 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
   );
 }
 
-/* ===== صفحه اصلی ===== */
+/* ===================== صفحه اصلی ===================== */
 export default function Home() {
-  const scrollY = useScrollY();
   const heroStyle = useHeroFade(320);
 
-  const heroRef = useRef(null);
-  const vendorsRef = useRef(null);
-
-  // محاسبه‌ی فاز رنگی و مقدار جابجایی پارالاکس بر اساس ارتفاع هیرو
-  const [phase, setPhase] = useState(0);
-  const [translate, setTranslate] = useState(0);
-
-  useEffect(() => {
-    const heroH = heroRef.current ? heroRef.current.offsetHeight : 0;
-
-    // پارالاکس: فقط تا ارتفاع هیرو حرکت کند (احساس «آمدن پشت تجهیزات»)
-    const t = Math.min(Math.max(scrollY * 0.45, 0), heroH);
-    setTranslate(t);
-
-    // تغییر رنگ: 0 → 1 → 2 در بازه‌های مختلف هیرو
-    if (scrollY < heroH * 0.35) setPhase(0);
-    else if (scrollY < heroH * 0.8) setPhase(1);
-    else setPhase(2);
-  }, [scrollY]);
-
-  // CTAهای هیرو
+  // CTAهای هیرو: یکی Filled و یکی Outlined
   const [isConsultFilled, setIsConsultFilled] = useState(() => {
-    try { return (localStorage.getItem("cta_swap") || "consult") === "consult"; }
-    catch { return true; }
+    try {
+      return (typeof window !== "undefined" && localStorage.getItem("cta_swap") === "consult") || true;
+    } catch {
+      return true;
+    }
   });
-  const filledColor = isConsultFilled ? YELLOW : TEAL;
-  const outlinedColor = isConsultFilled ? TEAL : YELLOW;
+  const filledColor   = isConsultFilled ? YELLOW : TEAL;
+  const outlinedColor = isConsultFilled ? TEAL   : YELLOW;
   const flipCtas = () => {
-    setIsConsultFilled(v => {
+    setIsConsultFilled((v) => {
       const nv = !v;
       try { localStorage.setItem("cta_swap", nv ? "consult" : "tools"); } catch {}
       return nv;
     });
   };
 
-  const safeVendors = Array.isArray(vendors) ? vendors : [];
+  const safeVendors  = Array.isArray(vendors) ? vendors : [];
   const serviceItems = Array.isArray(services?.items) ? services.items : [];
 
-  // تم‌های گرادینت
-  const themes = [
-    "from-[#0a0a0a] via-[#101010] to-[#171717]", // مشکی شروع
-    "from-[#0b1220] via-[#0e1a2b] to-[#122033]", // آبی تیره میانی
-    "from-[#071b18] via-[#0a2421] to-[#0d2c29]", // سبز تیره؛ زیر «تجهیزات»
-  ];
-
   return (
-    <main className="min-h-screen font-sans relative z-0">
-      {/* HERO با پس‌زمینه‌ی پارالاکس محدود */}
-      <section
-        ref={heroRef}
-        className="relative text-white min-h-[420px] md:min-h-[520px] flex items-center overflow-hidden"
-      >
-        {/* لایه‌ی پارالاکس داخل سکشن */}
-        <div
-          className="absolute inset-0 -z-10 will-change-transform"
-          style={{ transform: `translateY(${translate}px)` }}
-          aria-hidden="true"
-        >
-          <div className={`absolute inset-0 bg-gradient-to-b transition-colors duration-[900ms] ${themes[phase]}`} />
-          <div className="absolute inset-0 bg-white/5 backdrop-blur-[2px]" />
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_100%_0%,rgba(255,255,255,.06),transparent_60%)]" />
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_55%_at_0%_100%,rgba(0,0,0,.12),transparent_60%)]" />
-        </div>
+    <main className="min-h-screen font-sans relative z-10">
+      {/* لایهٔ پس‌زمینهٔ متحرک که پشت همه نمایش داده می‌شود */}
+      <BackgroundLayer />
 
-        {/* محتوای هیرو */}
+      {/* Hero (محتوا روی بنر؛ خودش پس‌زمینه ندارد و با اسکرول محو می‌شود) */}
+      <section id="hero" className="text-white">
         <div
-          className="relative z-10 w-full max-w-6xl mx-auto px-4 py-12 md:py-16 grid md:grid-cols-2 items-center gap-10"
+          className="max-w-6xl mx-auto px-4 py-12 md:py-16 grid md:grid-cols-2 items-center gap-10"
           style={heroStyle}
         >
           <div>
@@ -436,6 +461,7 @@ export default function Home() {
             <p className="mt-4 text-gray-300">از مشاوره تا پشتیبانی، در کنار شما.</p>
 
             <div className="mt-6 flex gap-3">
+              {/* ارائه مشاوره — یکی از این دو همیشه Filled است */}
               <a
                 href="/contact"
                 onClick={flipCtas}
@@ -449,6 +475,7 @@ export default function Home() {
                 ارائه مشاوره
               </a>
 
+              {/* مشاهده ابزارها — دیگری Outlined */}
               <a
                 href="/tools"
                 onClick={flipCtas}
@@ -477,7 +504,7 @@ export default function Home() {
       </section>
 
       {/* تجهیزات */}
-      <section id="vendors" ref={vendorsRef} className="relative py-12 max-w-6xl mx-auto px-4">
+      <section id="vendors" className="relative py-12 max-w-6xl mx-auto px-4">
         <SectionTitle as="h2" icon="equipment">تجهیزات</SectionTitle>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {safeVendors.map((v, i) => (
@@ -502,15 +529,19 @@ export default function Home() {
           ))}
         </div>
 
+        {/* خدمات و راهکارها */}
         <SectionTitle as="h3" icon="services" className="mb-4">
           خدمات و راهکارها
         </SectionTitle>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+        <div
+          id="services"
+          className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center"
+        >
           {serviceItems.map((s, i) => (
             <ServiceCard
               key={s.href || s.slug || s.title || i}
               title={s.title}
-              icon={s.icon}
+              icon={s.icon} // مثل /icons/services/install.webp
               index={i}
               href={s.href || `/services/${s.slug}`}
             />
@@ -518,10 +549,11 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer داخل صفحه خانه */}
+      {/* Footer + Sitemap (داخل صفحهٔ خانه) */}
       <footer className="bg-black text-white">
         <div className="max-w-6xl mx-auto px-4 py-10">
           <div className="grid md:grid-cols-3 gap-8 items-start">
+            {/* میان‌بُر */}
             <div>
               <h4 className="font-bold mb-3">میان‌بُر</h4>
               <ul className="space-y-2 text-white/80">
@@ -531,6 +563,7 @@ export default function Home() {
               </ul>
             </div>
 
+            {/* خدمات و راهکارها */}
             <div>
               <h4 className="font-bold mb-3">خدمات و راهکارها</h4>
               <ul className="space-y-2 text-white/80">
@@ -542,6 +575,7 @@ export default function Home() {
               </ul>
             </div>
 
+            {/* صفحات */}
             <div>
               <h4 className="font-bold mb-3">صفحات</h4>
               <ul className="space-y-2 text-white/80">
@@ -558,6 +592,7 @@ export default function Home() {
           </div>
 
           <hr className="my-8 border-white/10" />
+
           <p className="text-center text-white/80 text-sm">
             © {new Date().getFullYear()} ساتراس، همه حقوق محفوظ است
           </p>

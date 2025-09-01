@@ -1,10 +1,10 @@
 // data/vendors.js
-// توجه: اسلاگ‌ها استاندارد و کوچک‌حرف باشند تا با URL /products/<slug> یکسان شوند.
+// توجه: فقط اسلاگ‌ها را استاندارد کرده‌ایم تا با URL یکسان شوند.
 
 const vendors = [
   {
     title: "Dell EMC",
-    slug: "dell",
+    slug: "dell",              // ← قبلاً احتمالا "dellemc" بود
     products: [
       {
         title: "PowerEdge R7x",
@@ -67,50 +67,6 @@ const vendors = [
     slug: "quantum",
     products: [
       // محصولات Quantum …
-    ],
-  },
-
-  // ────────────── برندهای جدید ──────────────
-  {
-    title: "Brocade",
-    slug: "brocade",
-    products: [
-      // در صورت نیاز بعداً اضافه کن
-    ],
-  },
-  {
-    title: "Hitachi",
-    slug: "hitachi",
-    products: [
-      // …
-    ],
-  },
-  {
-    title: "Palo Alto",
-    slug: "paloalto", // اسلاگ یکپارچه و بدون فاصله
-    products: [
-      // …
-    ],
-  },
-  {
-    title: "F5",
-    slug: "f5",
-    products: [
-      // …
-    ],
-  },
-  {
-    title: "Fortinet",
-    slug: "fortinet", // «Forti» بهتره به «Fortinet» کامل باشه
-    products: [
-      // …
-    ],
-  },
-  {
-    title: "Oracle",
-    slug: "oracle",
-    products: [
-      // …
     ],
   },
 ];

@@ -1,3 +1,4 @@
+
 {
   "dell": {
     "title": "Dell EMC",
@@ -27,16 +28,11 @@
     ]
   },
 
-  "hpe":      { "title": "HPE",      "intro": "", "items": [] },
-  "lenovo":   { "title": "Lenovo",   "intro": "", "items": [] },
-  "cisco":    { "title": "Cisco",    "intro": "", "items": [] },
-  "juniper":  { "title": "Juniper",  "intro": "", "items": [] },
-  "oracle":   { "title": "Oracle",   "intro": "", "items": [] },
-  "fujitsu":  { "title": "Fujitsu",  "intro": "", "items": [] },
-  "quantum":  { "title": "Quantum",  "intro": "", "items": [] },
-  "brocade":  { "title": "Brocade",  "intro": "", "items": [] },
-  "hitachi":  { "title": "Hitachi",  "intro": "", "items": [] },
-  "paloalto": { "title": "PaloAlto", "intro": "", "items": [] },
-  "f5":       { "title": "F5",       "intro": "", "items": [] },
-  "fortinet": { "title": "Fortinet", "intro": "", "items": [] }
+  "hpe": { "title": "HPE", "items": [] },
+  "lenovo": { "title": "Lenovo", "items": [] },
+  "cisco": { "title": "Cisco", "items": [] },
+  "juniper": { "title": "Juniper", "items": [] },
+  "oracle": { "title": "Oracle", "items": [] },
+  "fujitsu": { "title": "Fujitsu", "items": [] },
+  "quantum": { "title": "Quantum", "items": [] }
 }

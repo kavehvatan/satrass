@@ -358,41 +358,24 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
   );
 }
 
-/* ===================== SectionBanner: بنر شیشه‌ای هر سکشن ===================== */
-function SectionBanner({ theme = "vendors" }) {
-  // تم‌ها: گرادیان پایه + تینت رنگی + شدت گلس
-  const cfg = {
-    vendors: {
-      grad: "from-[#0a0a0a] via-[#0f0f0f] to-[#161616]",     // تیره خنثی (نزدیک هِیرو)
-      tint: "rgba(255,255,255,0.00)",                        // بدون تینت
-      glass: "bg-white/12",
-    },
-    solutions: {
-      grad: "from-[#191307] via-[#211a09] to-[#2b230b]",     // گرم برای «محافظت از داده»
-      tint: "rgba(244,194,31,0.10)",                         // YELLOW 10%
-      glass: "bg-white/14",
-    },
-    services: {
-      grad: "from-[#061a18] via-[#0a2421] to-[#0d2c29]",     // سبز/تیلِ عمیق برای «خدمات و راهکارها»
-      tint: "rgba(20,184,166,0.12)",                         // TEAL 12%
-      glass: "bg-white/14",
-    },
-  };
-
-  const themeCfg = cfg[theme] || cfg.vendors;
+/* ===================== SectionBanner: فقط برای «محافظت از داده» ===================== */
+function SectionBanner({ theme = "solutions" }) {
+  // فقط یک تمِ گرم-زرد با گلس
+  const grad = "from-[#191307] via-[#211a09] to-[#2b230b]";
+  const tint = "rgba(244,194,31,0.10)"; // YELLOW 10%
 
   return (
     <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
       {/* گرادیان پایه */}
-      <div className={`absolute inset-0 bg-gradient-to-b ${themeCfg.grad}`} />
+      <div className={`absolute inset-0 bg-gradient-to-b ${grad}`} />
       {/* تینت ملایم برند */}
-      <div className="absolute inset-0" style={{ backgroundColor: themeCfg.tint }} />
+      <div className="absolute inset-0" style={{ backgroundColor: tint }} />
       {/* لایهٔ گلس */}
-      <div className={`absolute inset-0 ${themeCfg.glass} supports-[backdrop-filter]:bg-white/10 backdrop-blur-xl`} />
+      <div className="absolute inset-0 bg-white/14 supports-[backdrop-filter]:bg-white/10 backdrop-blur-xl" />
       {/* های‌لایت‌های نرم */}
       <div className="absolute inset-0 bg-[radial-gradient(80%_60%_at_100%_0%,rgba(255,255,255,.10),transparent_60%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(70%_55%_at_0%_100%,rgba(0,0,0,.12),transparent_60%)]" />
-      {/* نویز لطیف برای حس مات */}
+      {/* نویز لطیف */}
       <div
         className="absolute inset-0 opacity-[0.05] mix-blend-overlay"
         style={{
@@ -437,7 +420,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen font-sans relative z-10">
-      {/* Hero (بنر مشکی بالا – بدون تغییر منطقی) */}
+      {/* Hero (بنر مشکی بالا – مثل قبل) */}
       <section className="bg-[linear-gradient(135deg,#000_0%,#0a0a0a_60%,#111_100%)] text-white">
         <div
           className="max-w-6xl mx-auto px-4 py-12 md:py-16 grid md:grid-cols-2 items-center gap-10"
@@ -496,29 +479,26 @@ export default function Home() {
         </div>
       </section>
 
-      {/* تجهیزات — با بنر شیشه‌ای مخصوص خودش */}
-      <section id="vendors" className="relative py-12">
-        <SectionBanner theme="vendors" />
-        <div className="relative z-10 max-w-6xl mx-auto px-4">
-          <SectionTitle as="h2" icon="equipment">تجهیزات</SectionTitle>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {safeVendors.map((v, i) => (
-              <BrandCard
-                key={v.href || v.slug || v.title || i}
-                title={v.title}
-                slug={v.slug}
-                href={v.href}
-                index={i}
-                logo={v.logo}
-              />
-            ))}
-          </div>
+      {/* تجهیزات (بدون بنر اضافه) */}
+      <section id="vendors" className="relative py-12 max-w-6xl mx-auto px-4">
+        <SectionTitle as="h2" icon="equipment">تجهیزات</SectionTitle>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {safeVendors.map((v, i) => (
+            <BrandCard
+              key={v.href || v.slug || v.title || i}
+              title={v.title}
+              slug={v.slug}
+              href={v.href}
+              index={i}
+              logo={v.logo}
+            />
+          ))}
         </div>
       </section>
 
-      {/* محافظت از داده — با بنر شیشه‌ای زرد-گرم */}
+      {/* محافظت از داده — فقط این سکشن بنر شیشه‌ای دارد */}
       <section id="solutions" className="relative pb-10">
-        <SectionBanner theme="solutions" />
+        <SectionBanner />
         <div className="relative z-10 max-w-6xl mx-auto px-4">
           <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center mb-10">
@@ -527,25 +507,20 @@ export default function Home() {
             ))}
           </div>
 
-          {/* خدمات و راهکارها — داخل همین سکشن ولی با بنر اختصاصی خودش */}
-          <div className="relative mt-4 pt-10 pb-2">
-            <SectionBanner theme="services" />
-            <div className="relative z-10">
-              <SectionTitle as="h3" icon="services" className="mb-4">
-                خدمات و راهکارها
-              </SectionTitle>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-                {serviceItems.map((s, i) => (
-                  <ServiceCard
-                    key={s.href || s.slug || s.title || i}
-                    title={s.title}
-                    icon={s.icon} // مثل /icons/services/install.webp
-                    index={i}
-                    href={s.href || `/services/${s.slug}`}
-                  />
-                ))}
-              </div>
-            </div>
+          {/* خدمات و راهکارها (بدون بنر اضافه) */}
+          <SectionTitle as="h3" icon="services" className="mb-4">
+            خدمات و راهکارها
+          </SectionTitle>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+            {serviceItems.map((s, i) => (
+              <ServiceCard
+                key={s.href || s.slug || s.title || i}
+                title={s.title}
+                icon={s.icon}
+                index={i}
+                href={s.href || `/services/${s.slug}`}
+              />
+            ))}
           </div>
         </div>
       </section>

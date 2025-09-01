@@ -117,22 +117,23 @@ function SectionTitle({ as: Tag = "h2", icon = "equipment", className = "", chil
 }
 
 /* ===================== بنر پس‌زمینه مخصوص هر سکشن ===================== */
-/* فقط پشت همون سکشن قرار می‌گیرد (بدون تغییر به بقیه‌ بخش‌ها) */
 function SectionBanner({ theme = "vendors" }) {
   const themes = {
-    vendors:  "from-[#0a0a0a] via-[#0e0e0e] to-[#121212]",     // تیره مثل هیرو
-    solutions:"from-[#0b1220] via-[#0e1a2b] to-[#122033]",     // آبی تیره
-    services: "from-[#052e2a] via-[#06433d] to-[#074b44]",     // سبز/تیل تیره
+    vendors:  "from-[#0a0a0a] via-[#0e0e0e] to-[#121212]",   // تیره شبیه هیرو
+    solutions:"from-[#0b1220] via-[#0e1a2b] to-[#122033]",   // آبی تیره
+    services: "from-[#052e2a] via-[#06433d] to-[#074b44]",   // سبز/تیل تیره
   };
+
   return (
-    <div className="absolute inset-0 -z-10 pointer-events-none">
-      {/* گرادیان کم‌رنگ تا متن‌های فعلی خوانا بمانند */}
-      <div className={`absolute inset-0 bg-gradient-to-b ${themes[theme]} opacity-[.14]`} />
+    // مهم: منفیِ z را برداشتیم تا زیر خود سکشن باشد، نه زیر کل صفحه
+    <div className="absolute inset-0 z-0 pointer-events-none">
+      {/* گرادیان اصلی */}
+      <div className={`absolute inset-0 bg-gradient-to-b ${themes[theme]} opacity-30`} />
       {/* لایه شیشه‌ای ملایم */}
-      <div className="absolute inset-0 bg-white/5 backdrop-blur-[1.5px] opacity-[.16]" />
-      {/* های‌لایت‌های ملایم */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_55%_at_100%_0%,rgba(255,255,255,.06),transparent_60%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_0%_100%,rgba(0,0,0,.08),transparent_60%)]" />
+      <div className="absolute inset-0 bg-white/10 backdrop-blur-[2px]" />
+      {/* های‌لایت‌های خیلی ملایم */}
+      <div className="absolute inset-0 bg-[radial-gradient(70%_55%_at_100%_0%,rgba(255,255,255,.08),transparent_60%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(80%_60%_at_0%_100%,rgba(0,0,0,.10),transparent_60%)]" />
     </div>
   );
 }

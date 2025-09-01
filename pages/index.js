@@ -6,14 +6,14 @@ import Image from "next/image";
 import vendors from "../data/vendors";
 import services from "../data/services.json";
 
-/* ===================== رنگ‌ها و کمک‌ها ===================== */
+/* ===== رنگ‌ها و کمک‌ها ===== */
 const TEAL = "#14b8a6";
 const YELLOW = "#f4c21f";
 const BRAND_COLORS = ["#00E5FF", "#2D5BFF"];
 const LOGO_COLORS = [TEAL, YELLOW];
 const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
 
-/* ===================== ابزار اسکرول ===================== */
+/* ===== ابزار اسکرول ساده ===== */
 function useScrollY() {
   const [y, setY] = useState(0);
   useEffect(() => {
@@ -25,78 +25,44 @@ function useScrollY() {
   return y;
 }
 
-/* ===================== فازهای اسکرول برای تغییر تم پس‌زمینه ===================== */
-function useScrollPhase() {
-  const [scrollY, setScrollY] = useState(0);
-  const [vh, setVh] = useState(0);
+/* ===== لایه پس‌زمینه‌ی پارالاکس (محدود به هیرو) ===== */
+function BackgroundLayer({ scrollY, phase = 0 }) {
+  // حرکت نرم، محدود تا 200px فقط داخل ارتفاع هیرو
+  const translate = Math.min(Math.max(scrollY * 0.35, 0), 200);
 
-  useEffect(() => {
-    const onScroll = () => setScrollY(window.scrollY || 0);
-    const onResize = () => setVh(window.innerHeight || 0);
-    onResize();
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onResize);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onResize);
-    };
-  }, []);
-
-  // حدود تقریبی: شروع تجهیزات و شروع محافظت از داده
-  const vendorStart = vh * 0.75;
-  const solutionsStart = vh * 1.9;
-
-  let phase = 0;
-  if (scrollY >= solutionsStart) phase = 2;
-  else if (scrollY >= vendorStart) phase = 1;
-
-  return { scrollY, phase };
-}
-
-/* ===================== لایه پس‌زمینه متحرک (پارالاکس) ===================== */
-function BackgroundLayer() {
-  const { scrollY, phase } = useScrollPhase();
-
-  // حرکت عمودی پس‌زمینه؛ حس «آمدن بنر به پشت سکشن‌ها»
-  const translate = Math.min(scrollY * 0.45, 2400);
-
-  // تم‌های گرادینت برای فازهای مختلف
+  // سه تم گرادینت؛ اگر بعداً خواستی با اسکرول فاز را عوض کنی، prop بده
   const themes = [
-    "from-[#0a0a0a] via-[#101010] to-[#171717]", // هیرو (مشکی)
-    "from-[#0b1220] via-[#0e1a2b] to-[#122033]", // پشت تجهیزات (ته‌رنگ آبی)
-    "from-[#071b18] via-[#0a2421] to-[#0d2c29]", // پشت محافظت از داده و خدمات (ته‌رنگ سبز)
+    "from-[#0a0a0a] via-[#101010] to-[#171717]",
+    "from-[#0b1220] via-[#0e1a2b] to-[#122033]",
+    "from-[#071b18] via-[#0a2421] to-[#0d2c29]",
   ];
 
   return (
     <div
-      className="fixed inset-0 -z-10 will-change-transform"
+      className="absolute inset-0 h-full -z-10 will-change-transform overflow-hidden"
       style={{ transform: `translateY(${translate}px)` }}
       aria-hidden="true"
     >
-      {/* گرادینت زمینه که رنگش با فاز تغییر می‌کند */}
       <div
         className={`absolute inset-0 bg-gradient-to-b transition-colors duration-[1200ms] ${themes[phase]}`}
       />
-      {/* شیشه‌ای کم */}
       <div className="absolute inset-0 bg-white/5 backdrop-blur-[2px]" />
-      {/* های‌لایت‌های ملایم */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_100%_0%,rgba(255,255,255,.06),transparent_60%)]" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_55%_at_0%_100%,rgba(0,0,0,.12),transparent_60%)]" />
     </div>
   );
 }
 
-/* ===================== محو شدن محتوای هیرو با اسکرول ===================== */
+/* ===== محوِ محتوای هیرو با اسکرول ===== */
 function useHeroFade(max = 320) {
   const y = useScrollY();
   const ratio = Math.max(0, Math.min(1, 1 - y / max));
   const opacity = ratio;
-  const translateY = (1 - ratio) * -14; // کمی به بالا برای فلر نرم
+  const translateY = (1 - ratio) * -12; // کمی بالا برود تا خروج نرم‌تر شود
   return { opacity, transform: `translateY(${translateY}px)` };
 }
 
-/* ===================== Animated headline (typewriter) ===================== */
+/* ===== تایپ‌نویس عنوان ===== */
 function AnimatedHeadline({
   phrases = ["زیرساخت هوشمند", "دقت مهندسی"],
   typeSpeed = 140,
@@ -127,7 +93,7 @@ function AnimatedHeadline({
   );
 }
 
-/* ===================== SectionTitle ===================== */
+/* ===== SectionTitle ===== */
 function SectionTitle({ as: Tag = "h2", icon = "equipment", className = "", children }) {
   const [useFallback, setUseFallback] = useState(false);
   const map = { equipment: "vendors", solutions: "solutions", services: "services" };
@@ -180,7 +146,7 @@ function SectionTitle({ as: Tag = "h2", icon = "equipment", className = "", chil
   );
 }
 
-/* ===================== مودال شیشه‌ای (برای راهکارها) ===================== */
+/* ===== مودال شیشه‌ای ===== */
 function GlassModal({ open, onClose, title, paragraphs }) {
   const [closing, setClosing] = useState(false);
 
@@ -259,7 +225,7 @@ function GlassModal({ open, onClose, title, paragraphs }) {
   );
 }
 
-/* ===================== کارت برند (تجهیزات) ===================== */
+/* ===== کارت برند (تجهیزات) ===== */
 function BrandCard({ title, slug, href, index, logo }) {
   const [border, setBorder] = useState("#e5e7eb");
   const link = href || `/products/${slug || (title || "").toLowerCase()}`;
@@ -329,10 +295,10 @@ function BrandCard({ title, slug, href, index, logo }) {
   );
 }
 
-/* ===================== کارت خدمات (Teal) ===================== */
+/* ===== کارت خدمات (Teal) ===== */
 function ServiceCard({ title, icon, index = 0, href }) {
   const [border, setBorder] = useState("#e5e7eb");
-  const bg = "rgba(20,184,166,0.6)"; // TEAL
+  const bg = "rgba(20,184,166,0.6)";
   const fg = "#fff";
 
   return (
@@ -361,7 +327,7 @@ function ServiceCard({ title, icon, index = 0, href }) {
   );
 }
 
-/* ===================== داده‌های «محافظت از داده» ===================== */
+/* ===== داده‌های «محافظت از داده» ===== */
 const SOLUTIONS = [
   {
     name: "Commvault",
@@ -386,11 +352,11 @@ const SOLUTIONS = [
   },
 ];
 
-/* ===================== کارت راهکار (زرد) + مودال ===================== */
+/* ===== کارت راهکار (زرد) + مودال ===== */
 function SolutionCard({ name, slug, p1, p2, p3 }) {
   const [border, setBorder] = useState("#e5e7eb");
   const [open, setOpen] = useState(false);
-  const bg = "rgba(244,194,31,0.6)"; // YELLOW
+  const bg = "rgba(244,194,31,0.6)";
   const fg = "#000";
 
   return (
@@ -422,11 +388,12 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
   );
 }
 
-/* ===================== صفحه اصلی ===================== */
+/* ===== صفحه اصلی ===== */
 export default function Home() {
+  const scrollY = useScrollY();
   const heroStyle = useHeroFade(320);
 
-  // CTAهای هیرو: یکی Filled و یکی Outlined
+  // جابجایی نوبتی رنگ CTAها
   const [isConsultFilled, setIsConsultFilled] = useState(() => {
     try {
       return (localStorage.getItem("cta_swap") || "consult") === "consult";
@@ -450,24 +417,36 @@ export default function Home() {
   const serviceItems = Array.isArray(services?.items) ? services.items : [];
 
   return (
-    <main className="min-h-screen font-sans relative z-10">
-      {/* لایهٔ پس‌زمینهٔ متحرک (پارالاکس) */}
-      <BackgroundLayer />
+    <main className="min-h-screen font-sans relative z-0">
+      {/* HERO با پس‌زمینه‌ی پارالاکس محدود */}
+      <section
+        className="
+          relative
+          text-white
+          min-h-[420px] md:min-h-[520px]
+          flex items-center
+        "
+      >
+        {/* لایه‌ی پارالاکس فقط داخل همین سکشن */}
+        <BackgroundLayer scrollY={scrollY} />
 
-      {/* Hero – محتوای قابل محو شدن */}
-      <section className="text-white">
+        {/* محتوای هیرو که با اسکرول کمی محو/حرکت می‌کند */}
         <div
-          className="max-w-6xl mx-auto px-4 py-12 md:py-16 grid md:grid-cols-2 items-center gap-10"
+          className="relative z-10 w-full max-w-6xl mx-auto px-4 py-12 md:py-16 grid md:grid-cols-2 items-center gap-10"
           style={heroStyle}
         >
           <div>
             <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">
-              <AnimatedHeadline phrases={["زیرساخت هوشمند", "دقت مهندسی"]} typeSpeed={140} holdTime={1700} />
+              <AnimatedHeadline
+                phrases={["زیرساخت هوشمند", "دقت مهندسی"]}
+                typeSpeed={140}
+                holdTime={1700}
+              />
             </h1>
             <p className="mt-4 text-gray-300">از مشاوره تا پشتیبانی، در کنار شما.</p>
 
             <div className="mt-6 flex gap-3">
-              {/* ارائه مشاوره — یکی از این دو همیشه Filled است */}
+              {/* ارائه مشاوره — یکی Filled */}
               <a
                 href="/contact"
                 onClick={flipCtas}
@@ -481,7 +460,7 @@ export default function Home() {
                 ارائه مشاوره
               </a>
 
-              {/* مشاهده ابزارها — دیگری Outlined */}
+              {/* مشاهده ابزارها — یکی Outlined */}
               <a
                 href="/tools"
                 onClick={flipCtas}
@@ -526,7 +505,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* محافظت از داده */}
+      {/* محافظت از داده + خدمات */}
       <section id="solutions" className="max-w-6xl mx-auto px-4 pb-10">
         <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center mb-10">
@@ -535,7 +514,6 @@ export default function Home() {
           ))}
         </div>
 
-        {/* خدمات و راهکارها */}
         <SectionTitle as="h3" icon="services" className="mb-4">
           خدمات و راهکارها
         </SectionTitle>
@@ -552,11 +530,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer + Sitemap (داخل صفحهٔ خانه) */}
+      {/* Footer داخل صفحه خانه */}
       <footer className="bg-black text-white">
         <div className="max-w-6xl mx-auto px-4 py-10">
           <div className="grid md:grid-cols-3 gap-8 items-start">
-            {/* میان‌بُر */}
             <div>
               <h4 className="font-bold mb-3">میان‌بُر</h4>
               <ul className="space-y-2 text-white/80">
@@ -566,7 +543,6 @@ export default function Home() {
               </ul>
             </div>
 
-            {/* خدمات و راهکارها */}
             <div>
               <h4 className="font-bold mb-3">خدمات و راهکارها</h4>
               <ul className="space-y-2 text-white/80">
@@ -578,7 +554,6 @@ export default function Home() {
               </ul>
             </div>
 
-            {/* صفحات */}
             <div>
               <h4 className="font-bold mb-3">صفحات</h4>
               <ul className="space-y-2 text-white/80">
@@ -595,7 +570,6 @@ export default function Home() {
           </div>
 
           <hr className="my-8 border-white/10" />
-
           <p className="text-center text-white/80 text-sm">
             © {new Date().getFullYear()} ساتراس، همه حقوق محفوظ است
           </p>

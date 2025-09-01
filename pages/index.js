@@ -467,24 +467,66 @@ export default function Home() {
       {/* تجهیزات */}
       <section id="vendors" className="relative py-12">
         {/* بنر اختصاصی سکشن */}
-        <SectionBanner theme="vendors" />
-        {/* محتوای سکشن */}
-        <div className="relative z-10 max-w-6xl mx-auto px-4">
-          <SectionTitle as="h2" icon="equipment">تجهیزات</SectionTitle>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {safeVendors.map((v, i) => (
-              <BrandCard
-                key={v.href || v.slug || v.title || i}
-                title={v.title}
-                slug={v.slug}
-                href={v.href}
-                index={i}
-                logo={v.logo}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
+        // === SectionBanner: بنر شیشه‌ایِ هر سکشن با تم‌های متفاوت
+function SectionBanner({ theme = "vendors" }) {
+  // تم‌ها: پایه‌ی گرادیان + تینت رنگی (YELLOW/TEAL) + شدت گلس
+  const cfg = {
+    vendors: {
+      grad: "from-[#0a0a0a] via-[#0f0f0f] to-[#161616]",     // تیره خنثی مثل هِیرو
+      tint: "rgba(255,255,255,0.00)",                        // بدون تینت
+      glass: "bg-white/12",                                  // شدت گلس
+    },
+    solutions: {
+      grad: "from-[#191307] via-[#211a09] to-[#2b230b]",     // زمینه‌ی گرم برای «محافظت از داده»
+      tint: "rgba(244,194,31,0.10)",                         // YELLOW 10%
+      glass: "bg-white/14",
+    },
+    services: {
+      grad: "from-[#061a18] via-[#0a2421] to-[#0d2c29]",     // سبز/تیلِ عمیق برای «خدمات و راهکارها»
+      tint: "rgba(20,184,166,0.12)",                         // TEAL 12%
+      glass: "bg-white/14",
+    },
+  };
+
+  const themeCfg = cfg[theme] || cfg.vendors;
+
+  return (
+    // مهم: بنر باید پشت محتوای سکشن باشد، نه پشت کل صفحه
+    <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+      {/* گرادیان پایه که تم پس‌زمینه را می‌دهد */}
+      <div className={`absolute inset-0 bg-gradient-to-b ${themeCfg.grad}`} />
+
+      {/* تینت ملایم برند (زرد یا تیل) برای هویت‌بخشی */}
+      <div
+        className="absolute inset-0"
+        style={{ backgroundColor: themeCfg.tint }}
+      />
+
+      {/* لایهٔ گلس: شیشه‌ای واضح‌تر با بلور قوی */}
+      <div
+        className={`absolute inset-0 ${themeCfg.glass} supports-[backdrop-filter]:bg-white/10 backdrop-blur-xl`}
+      />
+
+      {/* های‌لایت‌های ظریف برای عمق بصری */}
+      <div className="absolute inset-0 bg-[radial-gradient(80%_60%_at_100%_0%,rgba(255,255,255,.10),transparent_60%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(70%_55%_at_0%_100%,rgba(0,0,0,.12),transparent_60%)]" />
+
+      {/* نویز خیلی لطیف برای حس مات‌بودن شیشه (grain) */}
+      <div
+        className="absolute inset-0 opacity-[0.05] mix-blend-overlay"
+        style={{
+          backgroundImage:
+            "radial-gradient(rgba(255,255,255,.6) 1px, transparent 1px)",
+          backgroundSize: "3px 3px",
+        }}
+      />
+
+      {/* هیرلاین‌های بالا/پایین برای کادربندی نرم */}
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-l from-white/40 via-white/20 to-transparent" />
+      <div className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-white/40 via-white/20 to-transparent" />
+    </div>
+  );
+}
 
       {/* محافظت از داده */}
       <section id="solutions" className="relative pb-10">

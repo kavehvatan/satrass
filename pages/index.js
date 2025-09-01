@@ -13,7 +13,7 @@ const BRAND_COLORS = ["#00E5FF", "#2D5BFF"];
 const LOGO_COLORS = [TEAL, YELLOW];
 const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
 
-/* ===================== ابزار اسکرول ساده برای محو هیرو ===================== */
+/* ===================== ابزار اسکرول ساده ===================== */
 function useScrollY() {
   const [y, setY] = useState(0);
   useEffect(() => {
@@ -24,15 +24,17 @@ function useScrollY() {
   }, []);
   return y;
 }
+
+/* ===================== محو‌شدن نرم هِیرو با اسکرول ===================== */
 function useHeroFade(max = 320) {
   const y = useScrollY();
   const ratio = Math.max(0, Math.min(1, 1 - y / max));
   const opacity = ratio;
-  const translateY = (1 - ratio) * -12; // حرکت عمودی خیلی کم
+  const translateY = (1 - ratio) * -12; // کمی بالا بره حس fade-out
   return { opacity, transform: `translateY(${translateY}px)` };
 }
 
-/* ===================== Animated headline (typewriter) ===================== */
+/* ===================== تیتر تایپی (typewriter) ===================== */
 function AnimatedHeadline({
   phrases = ["زیرساخت هوشمند", "دقت مهندسی"],
   typeSpeed = 140,
@@ -108,37 +110,13 @@ function SectionTitle({ as: Tag = "h2", icon = "equipment", className = "", chil
         )}
       </span>
 
-      <Tag className="text-2xl font-extrabold tracking-tight text-slate-900">
-        {children}
-      </Tag>
+      <Tag className="text-2xl font-extrabold tracking-tight text-slate-900">{children}</Tag>
       <span className="flex-1 h-px bg-gradient-to-l from-slate-200 to-transparent" />
     </div>
   );
 }
 
-/* ===================== بنر پس‌زمینه مخصوص هر سکشن ===================== */
-function SectionBanner({ theme = "vendors" }) {
-  const themes = {
-    vendors:  "from-[#0a0a0a] via-[#0e0e0e] to-[#121212]",   // تیره شبیه هیرو
-    solutions:"from-[#0b1220] via-[#0e1a2b] to-[#122033]",   // آبی تیره
-    services: "from-[#052e2a] via-[#06433d] to-[#074b44]",   // سبز/تیل تیره
-  };
-
-  return (
-    // مهم: منفیِ z را برداشتیم تا زیر خود سکشن باشد، نه زیر کل صفحه
-    <div className="absolute inset-0 z-0 pointer-events-none">
-      {/* گرادیان اصلی */}
-      <div className={`absolute inset-0 bg-gradient-to-b ${themes[theme]} opacity-30`} />
-      {/* لایه شیشه‌ای ملایم */}
-      <div className="absolute inset-0 bg-white/10 backdrop-blur-[2px]" />
-      {/* های‌لایت‌های خیلی ملایم */}
-      <div className="absolute inset-0 bg-[radial-gradient(70%_55%_at_100%_0%,rgba(255,255,255,.08),transparent_60%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(80%_60%_at_0%_100%,rgba(0,0,0,.10),transparent_60%)]" />
-    </div>
-  );
-}
-
-/* ===================== مودال شیشه‌ای (برای راهکارها) ===================== */
+/* ===================== مودال شیشه‌ای ===================== */
 function GlassModal({ open, onClose, title, paragraphs }) {
   const [closing, setClosing] = useState(false);
 
@@ -290,7 +268,7 @@ function BrandCard({ title, slug, href, index, logo }) {
 /* ===================== کارت خدمات (Teal) ===================== */
 function ServiceCard({ title, icon, index = 0, href }) {
   const [border, setBorder] = useState("#e5e7eb");
-  const bg = "rgba(20,184,166,0.6)"; // TEAL
+  const bg = "rgba(20,184,166,0.6)"; // TEAL 60%
   const fg = "#fff";
 
   return (
@@ -348,7 +326,7 @@ const SOLUTIONS = [
 function SolutionCard({ name, slug, p1, p2, p3 }) {
   const [border, setBorder] = useState("#e5e7eb");
   const [open, setOpen] = useState(false);
-  const bg = "rgba(244,194,31,0.6)"; // YELLOW
+  const bg = "rgba(244,194,31,0.6)"; // YELLOW 60%
   const fg = "#000";
 
   return (
@@ -380,18 +358,68 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
   );
 }
 
+/* ===================== SectionBanner: بنر شیشه‌ای هر سکشن ===================== */
+function SectionBanner({ theme = "vendors" }) {
+  // تم‌ها: گرادیان پایه + تینت رنگی + شدت گلس
+  const cfg = {
+    vendors: {
+      grad: "from-[#0a0a0a] via-[#0f0f0f] to-[#161616]",     // تیره خنثی (نزدیک هِیرو)
+      tint: "rgba(255,255,255,0.00)",                        // بدون تینت
+      glass: "bg-white/12",
+    },
+    solutions: {
+      grad: "from-[#191307] via-[#211a09] to-[#2b230b]",     // گرم برای «محافظت از داده»
+      tint: "rgba(244,194,31,0.10)",                         // YELLOW 10%
+      glass: "bg-white/14",
+    },
+    services: {
+      grad: "from-[#061a18] via-[#0a2421] to-[#0d2c29]",     // سبز/تیلِ عمیق برای «خدمات و راهکارها»
+      tint: "rgba(20,184,166,0.12)",                         // TEAL 12%
+      glass: "bg-white/14",
+    },
+  };
+
+  const themeCfg = cfg[theme] || cfg.vendors;
+
+  return (
+    <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+      {/* گرادیان پایه */}
+      <div className={`absolute inset-0 bg-gradient-to-b ${themeCfg.grad}`} />
+      {/* تینت ملایم برند */}
+      <div className="absolute inset-0" style={{ backgroundColor: themeCfg.tint }} />
+      {/* لایهٔ گلس */}
+      <div className={`absolute inset-0 ${themeCfg.glass} supports-[backdrop-filter]:bg-white/10 backdrop-blur-xl`} />
+      {/* های‌لایت‌های نرم */}
+      <div className="absolute inset-0 bg-[radial-gradient(80%_60%_at_100%_0%,rgba(255,255,255,.10),transparent_60%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(70%_55%_at_0%_100%,rgba(0,0,0,.12),transparent_60%)]" />
+      {/* نویز لطیف برای حس مات */}
+      <div
+        className="absolute inset-0 opacity-[0.05] mix-blend-overlay"
+        style={{
+          backgroundImage: "radial-gradient(rgba(255,255,255,.6) 1px, transparent 1px)",
+          backgroundSize: "3px 3px",
+        }}
+      />
+      {/* هیرلاین‌های بالا/پایین */}
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-l from-white/40 via-white/20 to-transparent" />
+      <div className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-white/40 via-white/20 to-transparent" />
+    </div>
+  );
+}
+
 /* ===================== صفحه اصلی ===================== */
 export default function Home() {
   const heroStyle = useHeroFade(320);
 
-  // CTAهای هیرو: یکی Filled و یکی Outlined (بدون تغییر)
-  const [isConsultFilled, setIsConsultFilled] = useState(() => {
+  // CTAهای هیرو: یکی Filled و یکی Outlined (خوانا)
+  const [isConsultFilled, setIsConsultFilled] = useState(true);
+  useEffect(() => {
     try {
-      return (localStorage.getItem("cta_swap") || "consult") === "consult";
-    } catch {
-      return true;
-    }
-  });
+      const v = localStorage.getItem("cta_swap");
+      if (v === "tools") setIsConsultFilled(false);
+      else setIsConsultFilled(true);
+    } catch {}
+  }, []);
   const filledColor = isConsultFilled ? YELLOW : TEAL;
   const outlinedColor = isConsultFilled ? TEAL : YELLOW;
   const flipCtas = () => {
@@ -408,8 +436,8 @@ export default function Home() {
   const serviceItems = Array.isArray(services?.items) ? services.items : [];
 
   return (
-    <main className="min-h-screen font-sans relative">
-      {/* Hero (بنر مشکی بالا — دقیقاً مثل قبل) */}
+    <main className="min-h-screen font-sans relative z-10">
+      {/* Hero (بنر مشکی بالا – بدون تغییر منطقی) */}
       <section className="bg-[linear-gradient(135deg,#000_0%,#0a0a0a_60%,#111_100%)] text-white">
         <div
           className="max-w-6xl mx-auto px-4 py-12 md:py-16 grid md:grid-cols-2 items-center gap-10"
@@ -417,7 +445,11 @@ export default function Home() {
         >
           <div>
             <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">
-              <AnimatedHeadline phrases={["زیرساخت هوشمند", "دقت مهندسی"]} typeSpeed={140} holdTime={1700} />
+              <AnimatedHeadline
+                phrases={["زیرساخت هوشمند", "دقت مهندسی"]}
+                typeSpeed={140}
+                holdTime={1700}
+              />
             </h1>
             <p className="mt-4 text-gray-300">از مشاوره تا پشتیبانی، در کنار شما.</p>
 
@@ -464,75 +496,29 @@ export default function Home() {
         </div>
       </section>
 
-      {/* تجهیزات */}
+      {/* تجهیزات — با بنر شیشه‌ای مخصوص خودش */}
       <section id="vendors" className="relative py-12">
-        {/* بنر اختصاصی سکشن */}
-        // === SectionBanner: بنر شیشه‌ایِ هر سکشن با تم‌های متفاوت
-function SectionBanner({ theme = "vendors" }) {
-  // تم‌ها: پایه‌ی گرادیان + تینت رنگی (YELLOW/TEAL) + شدت گلس
-  const cfg = {
-    vendors: {
-      grad: "from-[#0a0a0a] via-[#0f0f0f] to-[#161616]",     // تیره خنثی مثل هِیرو
-      tint: "rgba(255,255,255,0.00)",                        // بدون تینت
-      glass: "bg-white/12",                                  // شدت گلس
-    },
-    solutions: {
-      grad: "from-[#191307] via-[#211a09] to-[#2b230b]",     // زمینه‌ی گرم برای «محافظت از داده»
-      tint: "rgba(244,194,31,0.10)",                         // YELLOW 10%
-      glass: "bg-white/14",
-    },
-    services: {
-      grad: "from-[#061a18] via-[#0a2421] to-[#0d2c29]",     // سبز/تیلِ عمیق برای «خدمات و راهکارها»
-      tint: "rgba(20,184,166,0.12)",                         // TEAL 12%
-      glass: "bg-white/14",
-    },
-  };
+        <SectionBanner theme="vendors" />
+        <div className="relative z-10 max-w-6xl mx-auto px-4">
+          <SectionTitle as="h2" icon="equipment">تجهیزات</SectionTitle>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {safeVendors.map((v, i) => (
+              <BrandCard
+                key={v.href || v.slug || v.title || i}
+                title={v.title}
+                slug={v.slug}
+                href={v.href}
+                index={i}
+                logo={v.logo}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
 
-  const themeCfg = cfg[theme] || cfg.vendors;
-
-  return (
-    // مهم: بنر باید پشت محتوای سکشن باشد، نه پشت کل صفحه
-    <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-      {/* گرادیان پایه که تم پس‌زمینه را می‌دهد */}
-      <div className={`absolute inset-0 bg-gradient-to-b ${themeCfg.grad}`} />
-
-      {/* تینت ملایم برند (زرد یا تیل) برای هویت‌بخشی */}
-      <div
-        className="absolute inset-0"
-        style={{ backgroundColor: themeCfg.tint }}
-      />
-
-      {/* لایهٔ گلس: شیشه‌ای واضح‌تر با بلور قوی */}
-      <div
-        className={`absolute inset-0 ${themeCfg.glass} supports-[backdrop-filter]:bg-white/10 backdrop-blur-xl`}
-      />
-
-      {/* های‌لایت‌های ظریف برای عمق بصری */}
-      <div className="absolute inset-0 bg-[radial-gradient(80%_60%_at_100%_0%,rgba(255,255,255,.10),transparent_60%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(70%_55%_at_0%_100%,rgba(0,0,0,.12),transparent_60%)]" />
-
-      {/* نویز خیلی لطیف برای حس مات‌بودن شیشه (grain) */}
-      <div
-        className="absolute inset-0 opacity-[0.05] mix-blend-overlay"
-        style={{
-          backgroundImage:
-            "radial-gradient(rgba(255,255,255,.6) 1px, transparent 1px)",
-          backgroundSize: "3px 3px",
-        }}
-      />
-
-      {/* هیرلاین‌های بالا/پایین برای کادربندی نرم */}
-      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-l from-white/40 via-white/20 to-transparent" />
-      <div className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-white/40 via-white/20 to-transparent" />
-    </div>
-  );
-}
-
-      {/* محافظت از داده */}
+      {/* محافظت از داده — با بنر شیشه‌ای زرد-گرم */}
       <section id="solutions" className="relative pb-10">
-        {/* بنر اختصاصی سکشن */}
         <SectionBanner theme="solutions" />
-        {/* محتوای سکشن */}
         <div className="relative z-10 max-w-6xl mx-auto px-4">
           <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center mb-10">
@@ -541,77 +527,78 @@ function SectionBanner({ theme = "vendors" }) {
             ))}
           </div>
 
-          {/* خدمات و راهکارها */}
-          <SectionTitle as="h3" icon="services" className="mb-4">
-            خدمات و راهکارها
-          </SectionTitle>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-            {serviceItems.map((s, i) => (
-              <ServiceCard
-                key={s.href || s.slug || s.title || i}
-                title={s.title}
-                icon={s.icon} // مثل /icons/services/install.webp
-                index={i}
-                href={s.href || `/services/${s.slug}`}
-              />
-            ))}
+          {/* خدمات و راهکارها — داخل همین سکشن ولی با بنر اختصاصی خودش */}
+          <div className="relative mt-4 pt-10 pb-2">
+            <SectionBanner theme="services" />
+            <div className="relative z-10">
+              <SectionTitle as="h3" icon="services" className="mb-4">
+                خدمات و راهکارها
+              </SectionTitle>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+                {serviceItems.map((s, i) => (
+                  <ServiceCard
+                    key={s.href || s.slug || s.title || i}
+                    title={s.title}
+                    icon={s.icon} // مثل /icons/services/install.webp
+                    index={i}
+                    href={s.href || `/services/${s.slug}`}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Footer + Sitemap (داخل صفحهٔ خانه) */}
-      <section className="relative">
-        {/* بنر اختصاصی سکشن خدمات (برای هماهنگی پس‌زمینه‌ی فوتر) */}
-        <SectionBanner theme="services" />
-        <footer className="relative z-10 bg-black/80 text-white">
-          <div className="max-w-6xl mx-auto px-4 py-10">
-            <div className="grid md:grid-cols-3 gap-8 items-start">
-              {/* میان‌بُر */}
-              <div>
-                <h4 className="font-bold mb-3">میان‌بُر</h4>
-                <ul className="space-y-2 text-white/80">
-                  <li><a href="#vendors" className="hover:text-white">تجهیزات</a></li>
-                  <li><a href="/tools" className="hover:text-white">ابزارها</a></li>
-                  <li><a href="#solutions" className="hover:text-white">خدمات و راهکارها</a></li>
-                </ul>
-              </div>
-
-              {/* خدمات و راهکارها */}
-              <div>
-                <h4 className="font-bold mb-3">خدمات و راهکارها</h4>
-                <ul className="space-y-2 text-white/80">
-                  <li><a href="/services/install" className="hover:text-white">نصب و راه‌اندازی</a></li>
-                  <li><a href="/services/monitoring" className="hover:text-white">پایش</a></li>
-                  <li><a href="/services/training" className="hover:text-white">آموزش</a></li>
-                  <li><a href="/services/consulting-design" className="hover:text-white">مشاوره و طراحی</a></li>
-                  <li><a href="/services/operations" className="hover:text-white">راهبری</a></li>
-                </ul>
-              </div>
-
-              {/* صفحات */}
-              <div>
-                <h4 className="font-bold mb-3">صفحات</h4>
-                <ul className="space-y-2 text-white/80">
-                  <li><a href="/contact" className="hover:text-white">تماس با ما</a></li>
-                  <li><a href="/about" className="hover:text-white">درباره ما</a></li>
-                  <li><a href="/warranty" className="hover:text-white">استعلام گارانتی</a></li>
-                  <li>
-                    <a href="/news" className="hover:text-white">
-                      تازه‌ها <span className="text-white/60">(اخبار و مقالات)</span>
-                    </a>
-                  </li>
-                </ul>
-              </div>
+      <footer className="bg-black text-white">
+        <div className="max-w-6xl mx-auto px-4 py-10">
+          <div className="grid md:grid-cols-3 gap-8 items-start">
+            {/* میان‌بُر */}
+            <div>
+              <h4 className="font-bold mb-3">میان‌بُر</h4>
+              <ul className="space-y-2 text-white/80">
+                <li><a href="#vendors" className="hover:text-white">تجهیزات</a></li>
+                <li><a href="/tools" className="hover:text-white">ابزارها</a></li>
+                <li><a href="#solutions" className="hover:text-white">خدمات و راهکارها</a></li>
+              </ul>
             </div>
 
-            <hr className="my-8 border-white/10" />
+            {/* خدمات و راهکارها */}
+            <div>
+              <h4 className="font-bold mb-3">خدمات و راهکارها</h4>
+              <ul className="space-y-2 text-white/80">
+                <li><a href="/services/install" className="hover:text-white">نصب و راه‌اندازی</a></li>
+                <li><a href="/services/monitoring" className="hover:text-white">پایش</a></li>
+                <li><a href="/services/training" className="hover:text-white">آموزش</a></li>
+                <li><a href="/services/consulting-design" className="hover:text-white">مشاوره و طراحی</a></li>
+                <li><a href="/services/operations" className="hover:text-white">راهبری</a></li>
+              </ul>
+            </div>
 
-            <p className="text-center text-white/80 text-sm">
-              © {new Date().getFullYear()} ساتراس، همه حقوق محفوظ است
-            </p>
+            {/* صفحات */}
+            <div>
+              <h4 className="font-bold mb-3">صفحات</h4>
+              <ul className="space-y-2 text-white/80">
+                <li><a href="/contact" className="hover:text-white">تماس با ما</a></li>
+                <li><a href="/about" className="hover:text-white">درباره ما</a></li>
+                <li><a href="/warranty" className="hover:text-white">استعلام گارانتی</a></li>
+                <li>
+                  <a href="/news" className="hover:text-white">
+                    تازه‌ها <span className="text-white/60">(اخبار و مقالات)</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
           </div>
-        </footer>
-      </section>
+
+          <hr className="my-8 border-white/10" />
+
+          <p className="text-center text-white/80 text-sm">
+            © {new Date().getFullYear()} ساتراس، همه حقوق محفوظ است
+          </p>
+        </div>
+      </footer>
     </main>
   );
 }

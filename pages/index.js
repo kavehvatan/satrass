@@ -3,8 +3,8 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
-import vendors from "../data/vendors";          // کارت‌های «تجهیزات»
-import services from "../data/services.json";   // آیتم‌های «خدمات و راهکارها»
+import vendors from "../data/vendors";
+import services from "../data/services.json";
 
 /* ===================== رنگ‌ها و کمک‌ها ===================== */
 const TEAL = "#14b8a6";
@@ -13,7 +13,38 @@ const BRAND_COLORS = ["#00E5FF", "#2D5BFF"];
 const LOGO_COLORS = [TEAL, YELLOW];
 const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
 
-/* ===================== تیتر سکشن با آیکون ===================== */
+/* ===================== Animated headline (typewriter) ===================== */
+function AnimatedHeadline({
+  phrases = ["زیرساخت هوشمند", "دقت مهندسی"],
+  typeSpeed = 140,
+  holdTime = 1700,
+}) {
+  const [idx, setIdx] = useState(0);
+  const [shown, setShown] = useState("");
+
+  useEffect(() => {
+    let t;
+    const target = phrases[idx];
+    if (shown.length < target.length) {
+      t = setTimeout(() => setShown(target.slice(0, shown.length + 1)), typeSpeed);
+    } else {
+      t = setTimeout(() => {
+        setShown("");
+        setIdx((i) => (i + 1) % phrases.length);
+      }, holdTime);
+    }
+    return () => clearTimeout(t);
+  }, [shown, idx, phrases, typeSpeed, holdTime]);
+
+  return (
+    <span className="inline-block">
+      {shown}
+      <span className="inline-block w-[0.6ch] animate-pulse">|</span>
+    </span>
+  );
+}
+
+/* ===================== SectionTitle ===================== */
 function SectionTitle({ as: Tag = "h2", icon = "equipment", className = "", children }) {
   const [useFallback, setUseFallback] = useState(false);
   const map = { equipment: "vendors", solutions: "solutions", services: "services" };
@@ -66,7 +97,7 @@ function SectionTitle({ as: Tag = "h2", icon = "equipment", className = "", chil
   );
 }
 
-/* ===================== مودال شیشه‌ای (برای راهکارها) ===================== */
+/* ===================== مودال شیشه‌ای ===================== */
 function GlassModal({ open, onClose, title, paragraphs }) {
   const [closing, setClosing] = useState(false);
 
@@ -87,7 +118,7 @@ function GlassModal({ open, onClose, title, paragraphs }) {
     setTimeout(() => {
       setClosing(false);
       onClose?.();
-    }, 200);
+    }, 180);
   };
 
   if (!open) return null;
@@ -155,9 +186,9 @@ function BrandCard({ title, slug, href, index, logo }) {
       : (slug || (title || "")).toLowerCase();
 
   const webp = `/avatars/${base}.webp`;
-  const png  = `/avatars/${base}.png`;
+  const png = `/avatars/${base}.png`;
   const artWebp = `/brand-art/${base}.webp`;
-  const artPng  = `/brand-art/${base}.png`;
+  const artPng = `/brand-art/${base}.png`;
 
   return (
     <Link href={link} className="group block">
@@ -194,7 +225,7 @@ function BrandCard({ title, slug, href, index, logo }) {
           }}
         />
 
-        {/* لوگو */}
+        {/* لوگو سمت راست (RTL) */}
         <div className="relative flex items-center ltr:justify-start rtl:justify-end">
           <div className="w-14 h-14 shrink-0 rounded-xl bg-white ring-1 ring-black/5 shadow-sm grid place-items-center transition-transform duration-200 group-hover:scale-[1.03] overflow-hidden">
             <picture>
@@ -247,6 +278,31 @@ function ServiceCard({ title, icon, index = 0, href }) {
   );
 }
 
+/* ===================== داده‌های «محافظت از داده» ===================== */
+const SOLUTIONS = [
+  {
+    name: "Commvault",
+    slug: "commvault",
+    p1: "راهکار یکپارچهٔ حفاظت از داده برای VM/DB/Files/SaaS/Cloud با Dedup و Policyهای منعطف.",
+    p2: "Hyperscale X برای Scale-out و Metallic به‌صورت SaaS؛ گزارش‌گیری و خودکارسازی کامل.",
+    p3: "سناریوهای متداول: M365/Endpoint، بکاپ ترکیبی On-prem/Cloud، RTO/RPO سخت‌گیرانه.",
+  },
+  {
+    name: "NetBackup",
+    slug: "netbackup",
+    p1: "پلتفرم بکاپ سازمانی با پوشش عمیق مجازی‌سازی/دیتابیس و Inline Dedup برای پنجرهٔ بکاپ کوچک.",
+    p2: "اپلاینس‌های سری 52xx/Flex، مدیریت متمرکز، RBAC و گزارش‌گیری دقیق.",
+    p3: "سناریوها: VMware/Hyper-V، Oracle/SQL، آرشیو نوار/کلود، بازیابی انتخابی سطح فایل.",
+  },
+  {
+    name: "Veeam",
+    slug: "Veeam",
+    p1: "راهکار قدرتمند بکاپ و ریکاوری برای محیط‌های مجازی، فیزیکی و کلود.",
+    p2: "تمرکز روی Backup & Replication سریع و مطمئن با Instant Recovery و حفاظت از VM/DB و M365.",
+    p3: "ویژگی‌ها: Dedup/Compression، پشتیبانی از چندین پلتفرم، و DR ساده.",
+  },
+];
+
 /* ===================== کارت راهکار (زرد) + مودال ===================== */
 function SolutionCard({ name, slug, p1, p2, p3 }) {
   const [border, setBorder] = useState("#e5e7eb");
@@ -283,141 +339,70 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
   );
 }
 
-/* ===================== Banner پشت سکشن «محافظت از داده» ===================== */
+/* ===================== بنر شیشه‌ای مختص «محافظت از داده» ===================== */
+// طوسی بسیار کمرنگ + شیشه‌ای فقط پشت سکشن solutions
 function SolutionsBanner() {
   return (
-    <div
-      className="
-        pointer-events-none absolute inset-x-0
-        -top-4 md:-top-6
-        h-[420px] md:h-[460px]
-        -z-10
-      "
-      aria-hidden="true"
-    >
-      <div
-        className="
-          h-full rounded-[28px]
-          bg-gradient-to-b from-[#F6F8FB] to-transparent
-          ring-1 ring-black/5 shadow-[0_30px_80px_-30px_rgba(0,0,0,.25)]
-          overflow-hidden
-        "
-      >
-        <div className="absolute inset-0 bg-white/30 supports-[backdrop-filter]:bg-white/20 backdrop-blur-[2px]" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(55%_35%_at_100%_0%,rgba(255,255,255,.20),transparent_60%)]" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_40%_at_0%_100%,rgba(0,0,0,.06),transparent_60%)]" />
-      </div>
+    <div className="pointer-events-none absolute inset-0 -z-10">
+      <div className="absolute inset-0 bg-gradient-to-b from-[#fafafa] via-[#f7f7f7] to-[#f2f2f2]" />
+      <div className="absolute inset-0 bg-white/30 backdrop-blur-md supports-[backdrop-filter]:backdrop-blur-lg" />
+      <div className="absolute inset-0 bg-[radial-gradient(80%_60%_at_100%_0%,rgba(255,255,255,.30),transparent_60%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(70%_55%_at_0%_100%,rgba(0,0,0,.06),transparent_60%)]" />
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-black/10 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-black/10 to-transparent" />
     </div>
-  );
-}
-
-/* ===================== داده‌های «محافظت از داده» ===================== */
-const SOLUTIONS = [
-  {
-    name: "Commvault",
-    slug: "commvault",
-    p1: "راهکار یکپارچهٔ حفاظت از داده برای VM/DB/Files/SaaS/Cloud با Dedup و Policyهای منعطف.",
-    p2: "Hyperscale X برای Scale-out و Metallic به‌صورت SaaS؛ گزارش‌گیری و خودکارسازی کامل.",
-    p3: "سناریوهای متداول: M365/Endpoint، بکاپ ترکیبی On-prem/Cloud، RTO/RPO سخت‌گیرانه.",
-  },
-  {
-    name: "NetBackup",
-    slug: "netbackup",
-    p1: "پلتفرم بکاپ سازمانی با پوشش عمیق مجازی‌سازی/دیتابیس و Inline Dedup برای پنجرهٔ بکاپ کوچک.",
-    p2: "اپلاینس‌های سری 52xx/Flex، مدیریت متمرکز، RBAC و گزارش‌گیری دقیق.",
-    p3: "سناریوها: VMware/Hyper-V، Oracle/SQL، آرشیو نوار/کلود، بازیابی انتخابی سطح فایل.",
-  },
-  {
-    name: "Veeam",
-    slug: "Veeam",
-    p1: "راهکار قدرتمند بکاپ و ریکاوری برای محیط‌های مجازی، فیزیکی و کلود.",
-    p2: "تمرکز بر Backup & Replication سریع و مطمئن با Instant Recovery و حفاظت از VM/DB و M365.",
-    p3: "ویژگی‌ها: Dedup/Compression، پشتیبانی از چندین پلتفرم، و DR ساده.",
-  },
-];
-
-/* ===================== هدلاین تایپی هیرو ===================== */
-function AnimatedHeadline({
-  phrases = ["زیرساخت هوشمند", "دقت مهندسی"],
-  typeSpeed = 140,
-  holdTime = 1700,
-}) {
-  const [idx, setIdx] = useState(0);
-  const [shown, setShown] = useState("");
-
-  useEffect(() => {
-    let t;
-    const target = phrases[idx];
-    if (shown.length < target.length) {
-      t = setTimeout(() => setShown(target.slice(0, shown.length + 1)), typeSpeed);
-    } else {
-      t = setTimeout(() => {
-        setShown("");
-        setIdx((i) => (i + 1) % phrases.length);
-      }, holdTime);
-    }
-    return () => clearTimeout(t);
-  }, [shown, idx, phrases, typeSpeed, holdTime]);
-
-  return (
-    <span className="inline-block">
-      {shown}
-      <span className="inline-block w-[0.6ch] animate-pulse">|</span>
-    </span>
   );
 }
 
 /* ===================== صفحه اصلی ===================== */
 export default function Home() {
-  // دکمه‌های هیرو: یک Filled و یک Outlined (با جابجایی هنگام کلیک)
+  // CTAهای هیرو: یکی Filled و یکی Outlined
   const [isConsultFilled, setIsConsultFilled] = useState(() => {
     try {
-      return (localStorage.getItem("cta_swap") || "consult") === "consult";
+      return (typeof window !== "undefined" && localStorage.getItem("cta_swap") || "consult") === "consult";
     } catch {
       return true;
     }
   });
-  const filledColor   = isConsultFilled ? YELLOW : TEAL;
-  const outlinedColor = isConsultFilled ? TEAL   : YELLOW;
+  const filledColor = isConsultFilled ? YELLOW : TEAL;
+  const outlinedColor = isConsultFilled ? TEAL : YELLOW;
   const flipCtas = () => {
     setIsConsultFilled((v) => {
       const nv = !v;
-      try { localStorage.setItem("cta_swap", nv ? "consult" : "tools"); } catch {}
+      try {
+        localStorage.setItem("cta_swap", nv ? "consult" : "tools");
+      } catch {}
       return nv;
     });
   };
 
   const safeVendors = Array.isArray(vendors) ? vendors : [];
 
-  // خدمات و راهکارها: از JSON اگر بود؛ وگرنه fallback کامل
-  const jsonItems = Array.isArray(services?.items) ? services.items : [];
-  const fallbackServices = [
-    { title: "نصب و راه‌اندازی",  slug: "install",              icon: "/icons/services/install.webp",           href: "/services/install" },
-    { title: "پایش",              slug: "monitoring",           icon: "/icons/services/monitoring.webp",        href: "/services/monitoring" },
-    { title: "آموزش",             slug: "training",             icon: "/icons/services/training.webp",          href: "/services/training" },
-    { title: "مشاوره و طراحی",    slug: "consulting-design",    icon: "/icons/services/consulting-design.webp", href: "/services/consulting-design" },
-    { title: "راهبری",            slug: "operations",           icon: "/icons/services/operations.webp",        href: "/services/operations" },
-    { title: "دسکتاپ مجازی",      slug: "virtual-desktop",      icon: "/icons/services/virtual-desktop.webp",   href: "/services/virtual-desktop" },
-    { title: "رایانش کاربر نهایی",slug: "euc",                  icon: "/icons/services/euc.webp",               href: "/services/euc" },
-    { title: "مجازی‌سازی و ابر",  slug: "virtualization-cloud", icon: "/icons/services/virtualization.webp",    href: "/services/virtualization-cloud" },
-    { title: "تداوم کسب‌وکار",    slug: "business-continuity",  icon: "/icons/services/bc.webp",                href: "/services/business-continuity" },
-    { title: "هوش مصنوعی",        slug: "ai",                   icon: "/icons/services/ai.webp",                href: "/services/ai" },
+  // خدمات از فایل + fallback برای ۵ مورد درصورت نبود
+  const baseServices = Array.isArray(services?.items) ? services.items : [];
+  const wanted = [
+    { title: "دسکتاپ مجازی", slug: "virtual-desktop", href: "/services/virtual-desktop" },
+    { title: "رایانش کاربر نهایی", slug: "euc", href: "/services/euc" },
+    { title: "مجازی‌سازی و ابر", slug: "virtualization-cloud", href: "/services/virtualization-cloud" },
+    { title: "تداوم کسب‌وکار", slug: "business-continuity", href: "/services/business-continuity" },
+    { title: "هوش مصنوعی", slug: "ai", href: "/services/ai" },
   ];
-  const serviceItems = jsonItems.length ? jsonItems : fallbackServices;
+  const have = new Set(baseServices.map((s) => (s?.title || "").trim()));
+  const serviceItems = baseServices.concat(wanted.filter((w) => !have.has(w.title)));
 
   return (
-    <main className="min-h-screen font-sans">
+    <main className="min-h-screen font-sans relative">
       {/* Hero (بنر مشکی بالا) */}
       <section className="bg-[linear-gradient(135deg,#000_0%,#0a0a0a_60%,#111_100%)] text-white">
         <div className="max-w-6xl mx-auto px-4 py-12 md:py-16 grid md:grid-cols-2 items-center gap-10">
           <div>
             <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">
-              <AnimatedHeadline phrases={["زیرساخت هوشمند", "دقت مهندسی"]} />
+              <AnimatedHeadline phrases={["زیرساخت هوشمند", "دقت مهندسی"]} typeSpeed={140} holdTime={1700} />
             </h1>
             <p className="mt-4 text-gray-300">از مشاوره تا پشتیبانی، در کنار شما.</p>
 
             <div className="mt-6 flex gap-3">
-              {/* ارائه مشاوره — Filled */}
+              {/* ارائه مشاوره — یکی از این دو همیشه Filled است */}
               <a
                 href="/contact"
                 onClick={flipCtas}
@@ -431,7 +416,7 @@ export default function Home() {
                 ارائه مشاوره
               </a>
 
-              {/* مشاهده ابزارها — Outlined */}
+              {/* مشاهده ابزارها — دیگری Outlined */}
               <a
                 href="/tools"
                 onClick={flipCtas}
@@ -476,9 +461,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* محافظت از داده */}
+      {/* محافظت از داده — با بنر شیشه‌ای طوسی خیلی کمرنگ فقط برای این سکشن */}
       <section id="solutions" className="relative max-w-6xl mx-auto px-4 pb-10">
-        {/* فقط این سکشن بنر دارد */}
+        {/* بنر پس‌زمینه مخصوص این سکشن */}
         <SolutionsBanner />
 
         <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
@@ -488,7 +473,7 @@ export default function Home() {
           ))}
         </div>
 
-        {/* خدمات و راهکارها (کامل) */}
+        {/* خدمات و راهکارها (بدون بنر) */}
         <SectionTitle as="h3" icon="services" className="mb-4">
           خدمات و راهکارها
         </SectionTitle>
@@ -505,7 +490,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer داخل صفحه‌ی خانه */}
+      {/* Footer + Sitemap (داخل صفحهٔ خانه) */}
       <footer className="bg-black text-white">
         <div className="max-w-6xl mx-auto px-4 py-10">
           <div className="grid md:grid-cols-3 gap-8 items-start">

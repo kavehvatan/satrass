@@ -298,24 +298,24 @@ export default function Home() {
       </section>
 
       {/* محافظت از داده — بنر طوسی ثابت با فاصلهٔ بالا/پایین متناسب */}
-      <section id="solutions" className="py-12">
-        <div className="relative max-w-6xl mx-auto px-4">
-          {/* بنر طوسی */}
-          <div
-            className="absolute inset-0 -z-10 rounded-2xl bg-gray-100"
-            style={{ top: 12, bottom: 16 }} // فاصله از بالا/پایین تا کارت‌ها نچسبه
-            aria-hidden
-          />
-          {/* محتوا */}
-          <div className="relative z-10 pt-6 pb-8">
-            <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-              {SOLUTIONS.map((s) => (<SolutionCard key={s.slug} {...s} />))}
-            </div>
-          </div>
-        </div>
-      </section>
-
+      {/* محافظت از داده — بنر طوسی ثابت با فاصلهٔ بالا/پایین متناسب */}
+<section id="solutions" className="py-12">
+  <div className="relative max-w-6xl mx-auto px-4">
+    {/* بنر طوسی: لایه پایه */}
+    <div
+      className="absolute inset-0 z-0 rounded-2xl bg-gray-100"
+      style={{ top: 16, bottom: 20 }}  // اگر خواستی کمتر/بیشتر کن
+      aria-hidden
+    />
+    {/* محتوای سکشن: روی بنر */}
+    <div className="relative z-10 pt-7 pb-10">
+      <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+        {SOLUTIONS.map((s) => (<SolutionCard key={s.slug} {...s} />))}
+      </div>
+    </div>
+  </div>
+</section>
       {/* خدمات و راهکارها */}
       <section id="services" className="py-12">
         <div className="relative max-w-6xl mx-auto px-4">

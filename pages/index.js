@@ -57,10 +57,10 @@ const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
 
 /* 🎨 پالت‌های بنر «محافظت از داده» (بیرون از Home) */
 const BANNER_STYLES = [
-  { label: "Gray 400",  style: { background: "#f3f4f6" } },
-  { label: "Slate 400", style: { background: "#f1f5f9" } },
-  { label: "Neutral 400", style: { background: "#f5f5f5" } },
-  { label: "Gray 400",   style: { background: "#f9fafb" } },
+  { label: "Gray 600",  style: { background: "#f3f4f6" } },
+  { label: "Slate 600", style: { background: "#f1f5f9" } },
+  { label: "Neutral 600", style: { background: "#f5f5f5" } },
+  { label: "Gray 600",   style: { background: "#f9fafb" } },
   // گرادیان‌های لطیف
   { label: "G: slate→transparent", style: { background: "linear-gradient(180deg,#f1f5f9 0%, #f8fafc 100%)" } },
   { label: "G: warm",               style: { background: "linear-gradient(180deg,#f8fafc 0%, #fff7ed 100%)" } },

@@ -93,7 +93,24 @@ function useAlternatingBrandPair() {
   };
   return { primary, secondary, swap };
 }
+// 👇 مشخص می‌کنیم کدام سکشن فعال است تا فقط همان بنر داشته باشد
+const [activeBg, setActiveBg] = useState("vendors");
 
+useEffect(() => {
+  const ids = ["vendors", "solutions", "services"];
+  const opts = { threshold: 0.55 }; // وقتی ~۵۵٪ سکشن دیده شد، فعالش کن
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (e.isIntersecting) setActiveBg(e.target.id);
+    });
+  }, opts);
+
+  ids.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) io.observe(el);
+  });
+  return () => io.disconnect();
+}, []);
 // --- مودال شیشه‌ای
 function GlassModal({ open, onClose, title, paragraphs }) {
   const [closing, setClosing] = useState(false);
@@ -475,33 +492,53 @@ export default function Home() {
   {/* بنر طوسی کم‌رنگ که فقط پشت این سه سکشن دیده می‌شود */}
   <div className="absolute inset-0 bg-gray-100 pointer-events-none" style={{ zIndex: 0 }} />
 
-  {/* تجهیزات */}
-  <section id="vendors" className="relative z-10 py-12 max-w-6xl mx-auto px-4">
+ {/* تجهیزات */}
+<section id="vendors" className="py-12">
+  {/* کانتینر این سکشن */}
+  <div className="relative max-w-6xl mx-auto px-4">
+    {/* بنر طوسی فقط وقتی این سکشن فعاله دیده میشه */}
+    <div
+      className={`absolute inset-0 -z-10 rounded-2xl transition-opacity duration-300 ${
+        activeBg === "vendors" ? "opacity-100" : "opacity-0"
+      }`}
+      style={{ background: "#f3f4f6" }}
+      aria-hidden
+    />
     <SectionTitle as="h2" icon="equipment">تجهیزات</SectionTitle>
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {safeVendors.map((v, i) => (
-        <BrandCard
-          key={v.href || v.slug || v.title || i}
-          title={v.title}
-          slug={v.slug}
-          href={v.href}
-          index={i}
-          logo={v.logo}
-        />
+        <BrandCard key={v.href || v.slug || v.title || i} title={v.title} slug={v.slug} href={v.href} index={i} logo={v.logo} />
       ))}
     </div>
-  </section>
+  </div>
+</section>
 
-  {/* محافظت از داده */}
-  <section id="solutions" className="relative z-10 py-12 max-w-6xl mx-auto px-4">
+{/* محافظت از داده */}
+<section id="solutions" className="py-12">
+  <div className="relative max-w-6xl mx-auto px-4">
+    <div
+      className={`absolute inset-0 -z-10 rounded-2xl transition-opacity duration-300 ${
+        activeBg === "solutions" ? "opacity-100" : "opacity-0"
+      }`}
+      style={{ background: "#f3f4f6" }}
+      aria-hidden
+    />
     <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
       {SOLUTIONS.map((s) => (<SolutionCard key={s.slug} {...s} />))}
     </div>
-  </section>
-
-  {/* خدمات و راهکارها */}
-  <section id="services" className="relative z-10 py-12 max-w-6xl mx-auto px-4">
+  </div>
+</section>
+  {/* خدمات و راهکارها */}{/* خدمات و راهکارها */}
+<section id="services" className="py-12">
+  <div className="relative max-w-6xl mx-auto px-4">
+    <div
+      className={`absolute inset-0 -z-10 rounded-2xl transition-opacity duration-300 ${
+        activeBg === "services" ? "opacity-100" : "opacity-0"
+      }`}
+      style={{ background: "#f3f4f6" }}
+      aria-hidden
+    />
     <SectionTitle as="h2" icon="services">خدمات و راهکارها</SectionTitle>
     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
       {serviceItems.map((s, i) => (
@@ -514,7 +551,8 @@ export default function Home() {
         />
       ))}
     </div>
-  </section>
+  </div>
+</section>
 </div>
 
 {/* Footer + Sitemap (وسط‌چین روی موبایل، راست‌چین روی دسکتاپ) */}

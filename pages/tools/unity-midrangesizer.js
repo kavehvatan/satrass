@@ -12,33 +12,21 @@ export default function UnityMidrangeSizer() {
         />
       </Head>
 
-      <section className="max-w-5xl mx-auto px-4 py-8 md:py-10">
-        <h1 className="text-slate-800 text-2xl md:text-3xl font-extrabold mb-4">
+      <section className="max-w-7xl mx-auto px-4 py-8 md:py-10">
+        {/* تیتر وسط */}
+        <h1 className="text-slate-800 text-2xl md:text-3xl font-extrabold mb-6 text-center">
           Unity MidrangeSizer
         </h1>
 
-        {/* iFrame ساده روی بک‌گراند یکدست */}
-        <div className="overflow-hidden rounded-xl border border-slate-200 shadow-sm bg-[#f8fafc]">
+        {/* قاب ماشین حساب */}
+        <div className="overflow-hidden rounded-xl border border-slate-200 bg-[#f8fafc] shadow-md">
           <iframe
             src="https://unitycalculator.onrender.com/"
             title="Unity MidrangeSizer"
             className="w-full"
-            style={{ height: "calc(100vh - 220px)", border: 0 }}
+            style={{ height: "calc(100vh - 200px)", border: 0 }}
           />
         </div>
-
-        <p className="text-slate-600 text-sm mt-4">
-          اگر ابزار در اینجا نمایش داده نشد،{" "}
-          <a
-            href="https://unitycalculator.onrender.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline hover:text-slate-800"
-          >
-            این لینک
-          </a>{" "}
-          را باز کنید.
-        </p>
       </section>
     </main>
   );

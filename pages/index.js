@@ -55,18 +55,19 @@ const BRAND_COLORS = ["#00E5FF", "#2D5BFF"];
 const LOGO_COLORS = [TEAL, YELLOW];
 const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
 
+
 /* 🎨 پالت‌های بنر «محافظت از داده» (بیرون از Home) */
 const BANNER_STYLES = [
-  { label: "Slate 200", style: { background: "rgba(226,232,240,0.25)" } }, // #e2e8f0
-  { label: "Slate 300", style: { background: "rgba(203,213,225,0.25)" } }, // #cbd5e1
-  { label: "Slate 400", style: { background: "rgba(148,163,184,0.25)" } }, // #94a3b8
-  { label: "Slate 500", style: { background: "rgba(100,116,139,0.25)" } }, // #64748b
-  { label: "Slate 600", style: { background: "rgba(71,85,105,0.25)" } },   // #475569
-  { label: "Slate 650", style: { background: "rgba(60,72,92,0.25)" } },    // custom بین 600 و 700
-  { label: "Slate 700", style: { background: "rgba(51,65,85,0.25)" } },    // #334155
-  { label: "Slate 800", style: { background: "rgba(30,41,59,0.25)" } },    // #1e293b
-  { label: "Slate 850", style: { background: "rgba(22,31,45,0.25)" } },    // custom بین 800 و 900
-  { label: "Slate 900", style: { background: "rgba(15,23,42,0.25)" } },    // #0f172a
+  { label: "Warm 50",  style: { background: "rgba(255,251,235,0.25)" } }, // warm cream
+  { label: "Warm 100", style: { background: "rgba(254,243,199,0.25)" } }, // light warm beige
+  { label: "Warm 200", style: { background: "rgba(253,230,138,0.25)" } }, // pale golden
+  { label: "Warm 300", style: { background: "rgba(252,211,77,0.25)" } },  // soft golden
+  { label: "Warm 400", style: { background: "rgba(251,191,36,0.25)" } },  // stronger yellow
+  { label: "Warm 500", style: { background: "rgba(245,158,11,0.25)" } },  // amber tone
+  { label: "Warm 600", style: { background: "rgba(217,119,6,0.25)" } },   // dark amber
+  { label: "Warm 700", style: { background: "rgba(180,83,9,0.25)" } },    // brownish amber
+  { label: "Warm 800", style: { background: "rgba(146,64,14,0.25)" } },   // deep brown-gold
+  { label: "Warm 900", style: { background: "rgba(120,53,15,0.25)" } },   // darkest warm brown
 ];
 
 /* =============== GlassModal =============== */

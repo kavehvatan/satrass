@@ -55,7 +55,7 @@ const BRAND_COLORS = ["#00E5FF", "#2D5BFF"];
 const LOGO_COLORS = [TEAL, YELLOW];
 const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
 
-// 🎨 پالت‌های بنر «محافظت از داده»
+/* 🎨 پالت‌های بنر «محافظت از داده» (بیرون از Home) */
 const BANNER_STYLES = [
   { label: "Gray 100",  style: { background: "#f3f4f6" } },
   { label: "Slate 100", style: { background: "#f1f5f9" } },
@@ -263,6 +263,27 @@ export default function Home() {
     });
   };
 
+  // --- پالت و تغییر رنگ بنر «محافظت از داده»
+  const [bannerIdx, setBannerIdx] = useState(() => {
+    try {
+      const saved = localStorage.getItem("solutions_banner_idx");
+      const n = Number(saved);
+      return Number.isFinite(n) ? n % BANNER_STYLES.length : 0;
+    } catch {
+      return 0;
+    }
+  });
+
+  useEffect(() => {
+    try { localStorage.setItem("solutions_banner_idx", String(bannerIdx)); } catch {}
+  }, [bannerIdx]);
+
+  const handleSolutionsClick = (e) => {
+    const interactive = e.target.closest("a, button, [role='button']");
+    if (interactive) return;
+    setBannerIdx((i) => (i + 1) % BANNER_STYLES.length);
+  };
+
   return (
     <main className="min-h-screen font-sans">
       {/* Hero */}
@@ -312,23 +333,24 @@ export default function Home() {
         </div>
       </section>
 
-{/* محافظت از داده — بنر سراسری با کلیک تغییر رنگ می‌دهد */}
-<section id="solutions" className="relative py-12" onClick={handleSolutionsClick}>
-  {/* بنر سراسری؛ با فاصله‌ی بالا/پایین و تغییر نرم رنگ */}
-  <div
-    className="absolute inset-0 z-0 rounded-2xl transition-colors duration-300"
-    style={{ top: 16, bottom: 20, ...BANNER_STYLES[bannerIdx].style }}
-    aria-hidden
-    title={`Banner: ${BANNER_STYLES[bannerIdx].label} — کلیک کن برای بعدی`}
-  />
-  {/* محتوا */}
-  <div className="relative z-10 max-w-6xl mx-auto px-4 pt-7 pb-10">
-    <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
-    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-      {SOLUTIONS.map((s) => (<SolutionCard key={s.slug} {...s} />))}
-    </div>
-  </div>
-</section>
+      {/* محافظت از داده — بنر سراسری با کلیک تغییر رنگ می‌دهد */}
+      <section id="solutions" className="relative py-12" onClick={handleSolutionsClick}>
+        {/* بنر سراسری؛ فاصله‌ی بالا/پایین + انتقال نرم رنگ */}
+        <div
+          className="absolute inset-0 z-0 rounded-2xl transition-colors duration-300"
+          style={{ top: 16, bottom: 20, ...BANNER_STYLES[bannerIdx].style }}
+          aria-hidden
+          title={`Banner: ${BANNER_STYLES[bannerIdx].label} — کلیک کن برای بعدی`}
+        />
+        {/* محتوا */}
+        <div className="relative z-10 max-w-6xl mx-auto px-4 pt-7 pb-10">
+          <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+            {SOLUTIONS.map((s) => (<SolutionCard key={s.slug} {...s} />))}
+          </div>
+        </div>
+      </section>
+
       {/* خدمات و راهکارها */}
       <section id="services" className="py-12">
         <div className="relative max-w-6xl mx-auto px-4">

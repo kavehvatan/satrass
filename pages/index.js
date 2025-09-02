@@ -481,26 +481,33 @@ export default function Home() {
       </section>
 
       {/* راهکارها + خدمات */}
-      <section id="solutions" className="max-w-6xl mx-auto px-4 pb-10">
-        <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center mb-10">
-          {SOLUTIONS.map((s) => (<SolutionCard key={s.slug} {...s} />))}
-        </div>
+    {/* 🔹 محافظت از داده — با بنر طوسی فقط پشت این بخش */}
+<section id="solutions" className="relative py-12">
+  {/* بنر طوسی کم‌رنگ فقط برای این سکشن */}
+  <div aria-hidden className="absolute inset-0" style={{ background: "#f3f4f6" }} />
+  <div className="relative max-w-6xl mx-auto px-4">
+    <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
+    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+      {SOLUTIONS.map((s) => (<SolutionCard key={s.slug} {...s} />))}
+    </div>
+  </div>
+</section>
 
-    {/* بخش خدمات در صفحه اصلی */}
-<SectionTitle as="h3" icon="services" className="mb-4">خدمات و راهکارها</SectionTitle>
-<div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-  {serviceItems.map((s, i) => (
-    <ServiceCard
-      key={s.href || s.slug || s.title || i}
-      title={s.title}
-      icon={s.icon}                     // مثل /icons/services/install.webp
-      index={i}
-      href={s.href || `/services/${s.slug}`}  // ← این خط مهم است
-    />
-  ))}
-</div>
-      </section>
+{/* 🔹 خدمات و راهکارها — ۹ آیتم، بدون هیچ بنری زیرش */}
+<section id="services" className="py-12 max-w-6xl mx-auto px-4">
+  <SectionTitle as="h2" icon="services">خدمات و راهکارها</SectionTitle>
+  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+    {serviceItems.map((s, i) => (
+      <ServiceCard
+        key={s.href || s.slug || s.title || i}
+        title={s.title}
+        icon={s.icon}
+        index={i}
+        href={s.href || `/services/${s.slug}`}
+      />
+    ))}
+  </div>
+</section>
 
 {/* Footer + Sitemap (وسط‌چین روی موبایل، راست‌چین روی دسکتاپ) */}
 <footer className="bg-black text-white">
@@ -512,7 +519,7 @@ export default function Home() {
         <ul className="space-y-2 text-white/80">
           <li><a href="#vendors" className="hover:text-white">تجهیزات</a></li>
           <li><a href="/tools" className="hover:text-white">ابزارها</a></li>
-          <li><a href="#solutions" className="hover:text-white">خدمات و راهکارها</a></li>
+          <li><a href="#services" className="hover:text-white">خدمات و راهکارها</a></li>
         </ul>
       </div>
 

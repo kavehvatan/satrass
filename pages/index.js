@@ -489,71 +489,33 @@ useEffect(() => {
           </div>
         </div>
       </section>
-
+{/* بنر سراسریِ خاکستری که نرم جابه‌جا می‌شود */}
+<div
+  id="movingBanner"
+  className="fixed left-1/2 -translate-x-1/2 bg-gray-100 rounded-2xl pointer-events-none transition-all duration-300"
+  style={{ top: 0, width: 0, height: 0, zIndex: 0 }}
+/>
       {/* تجهیزات — بنر طوسی فقط وقتی این سکشن فعال است */}
-     <section id="vendors" className="py-12">
-  <div className="relative max-w-6xl mx-auto px-4">
-    <div
-      className={`absolute inset-0 z-0 rounded-2xl transition-opacity duration-300 ${
-        activeBg === "vendors" ? "opacity-100" : "opacity-0"
-      }`}
-      style={{ background: "#f3f4f6" }}
-      aria-hidden
-    />
-    <div className="relative z-10">
-      <SectionTitle as="h2" icon="equipment">تجهیزات</SectionTitle>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {safeVendors.map((v, i) => (
-          <BrandCard key={v.href || v.slug || v.title || i} title={v.title} slug={v.slug} href={v.href} index={i} logo={v.logo} />
-        ))}
-      </div>
-    </div>
+    <section id="vendors" className="py-12">
+  <div className="section-inner relative z-10 max-w-6xl mx-auto px-4">
+    <SectionTitle as="h2" icon="equipment">تجهیزات</SectionTitle>
+    {/* ...grid... */}
   </div>
 </section>
 
       {/* محافظت از داده — بنر طوسی فقط وقتی این سکشن فعال است */}
-     <section id="solutions" className="py-12">
-  <div className="relative max-w-6xl mx-auto px-4">
-    <div
-      className={`absolute inset-0 z-0 rounded-2xl transition-opacity duration-300 ${
-        activeBg === "solutions" ? "opacity-100" : "opacity-0"
-      }`}
-      style={{ background: "#f3f4f6" }}
-      aria-hidden
-    />
-    <div className="relative z-10">
-      <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-        {SOLUTIONS.map((s) => (<SolutionCard key={s.slug} {...s} />))}
-      </div>
-    </div>
+<section id="solutions" className="py-12">
+  <div className="section-inner relative z-10 max-w-6xl mx-auto px-4">
+    <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
+    {/* ...grid... */}
   </div>
 </section>
 
-      {/* خدمات و راهکارها — ۹ آیتم، بنر طوسی فقط وقتی این سکشن فعال است */}
-    <section id="services" className="py-12">
-  <div className="relative max-w-6xl mx-auto px-4">
-    <div
-      className={`absolute inset-0 z-0 rounded-2xl transition-opacity duration-300 ${
-        activeBg === "services" ? "opacity-100" : "opacity-0"
-      }`}
-      style={{ background: "#f3f4f6" }}
-      aria-hidden
-    />
-    <div className="relative z-10">
-      <SectionTitle as="h2" icon="services">خدمات و راهکارها</SectionTitle>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-        {serviceItems.map((s, i) => (
-          <ServiceCard
-            key={s.href || s.slug || s.title || i}
-            title={s.title}
-            icon={s.icon}
-            index={i}
-            href={s.href || `/services/${s.slug}`}
-          />
-        ))}
-      </div>
-    </div>
+     {/* خدمات و راهکارها */}
+<section id="services" className="py-12">
+  <div className="section-inner relative z-10 max-w-6xl mx-auto px-4">
+    <SectionTitle as="h2" icon="services">خدمات و راهکارها</SectionTitle>
+    {/* ...grid... */}
   </div>
 </section>
 

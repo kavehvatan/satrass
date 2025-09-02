@@ -3,18 +3,25 @@ import Head from "next/head";
 
 export default function UnityMidrangeSizer() {
   return (
-    <main dir="rtl" className="min-h-screen bg-slate-900 text-right">
+    <main
+      dir="rtl"
+      className="min-h-screen bg-[linear-gradient(180deg,#0b0b0b_0%,#111_100%)] text-right"
+    >
       <Head>
         <title>Unity MidrangeSizer | Satrass</title>
-        <meta name="description" content="محاسبه ظرفیت و پیکربندی بهینه Unity" />
+        <meta
+          name="description"
+          content="محاسبه ظرفیت و پیکربندی بهینه Unity"
+        />
       </Head>
 
-      <section className="container mx-auto px-4 py-8 md:py-10">
+      <section className="max-w-5xl mx-auto px-4 py-8 md:py-10">
         <h1 className="text-white text-2xl md:text-3xl font-extrabold mb-4">
           Unity MidrangeSizer
         </h1>
 
-        <div className="rounded-2xl overflow-hidden shadow-xl ring-1 ring-black/10 bg-black/20">
+        {/* قاب تمیز برای iFrame */}
+        <div className="rounded-2xl overflow-hidden shadow-lg shadow-black/10 border border-slate-200 bg-white">
           <iframe
             src="https://unitycalculator.onrender.com/"
             title="Unity MidrangeSizer"
@@ -29,7 +36,7 @@ export default function UnityMidrangeSizer() {
             href="https://unitycalculator.onrender.com/"
             target="_blank"
             rel="noopener noreferrer"
-            className="underline"
+            className="underline hover:text-white"
           >
             این لینک
           </a>{" "}

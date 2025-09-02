@@ -1,4 +1,5 @@
 // pages/index.js
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import vendors from "../data/vendors";            // داده‌های تجهیزات
@@ -24,7 +25,7 @@ function SectionTitle({ as: Tag = "h2", icon = "equipment", className = "", chil
       case "solutions":
         return (
           <svg viewBox="0 0 24 24" className={className} aria-hidden="true" fill="currentColor">
-            <path d="M10 3a2 2 0 1 1 4 0h3a2 2 0 0 1 2 2v3a2 2 0 1 0 0 4v3a2 2 0 0 1-2 2h-3a2 2 0 1 0-4 0H7a2 2 0 0 1-2-2v-3a2 2 0 1 0 0-4V5a2 2 0 0 1 2-2h3z"/>
+            <path d="M10 3a2 2 0 1 1 4 0h3a2 2 0 0 1 2 2v3a2 2 0 1 0 0 4v3a2 2 0 0 1-2 2h-3a2 2 0 1 0-4 0H7a2 2 0 0 1-2-2v-4.65a4.5 4.5 0 1 0 0-4.7V5a2 2 0 0 1 2-2h3z"/>
           </svg>
         );
       case "services":
@@ -63,6 +64,7 @@ function SectionTitle({ as: Tag = "h2", icon = "equipment", className = "", chil
     </div>
   );
 }
+
 // --- رنگ‌ها و کمک‌تابع‌ها
 const TEAL = "#14b8a6";
 const YELLOW = "#f4c21f";
@@ -93,24 +95,7 @@ function useAlternatingBrandPair() {
   };
   return { primary, secondary, swap };
 }
-// 👇 مشخص می‌کنیم کدام سکشن فعال است تا فقط همان بنر داشته باشد
-const [activeBg, setActiveBg] = useState("vendors");
 
-useEffect(() => {
-  const ids = ["vendors", "solutions", "services"];
-  const opts = { threshold: 0.55 }; // وقتی ~۵۵٪ سکشن دیده شد، فعالش کن
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach((e) => {
-      if (e.isIntersecting) setActiveBg(e.target.id);
-    });
-  }, opts);
-
-  ids.forEach((id) => {
-    const el = document.getElementById(id);
-    if (el) io.observe(el);
-  });
-  return () => io.disconnect();
-}, []);
 // --- مودال شیشه‌ای
 function GlassModal({ open, onClose, title, paragraphs }) {
   const [closing, setClosing] = useState(false);
@@ -261,8 +246,7 @@ function BrandCard({ title, slug, href, index, logo }) {
   );
 }
 
-// --- کارت «خدمات» با پس‌زمینهٔ ۷۰٪ از دو رنگ برند + توضیحات در مودال
-// قبلی ServiceCard را با این نسخه جایگزین کن
+// --- کارت «خدمات» با پس‌زمینهٔ ۷۰٪ Teal + توضیحات در مودال
 function ServiceCard({ title, icon, index = 0, href }) {
   const [border, setBorder] = useState("#e5e7eb");
 
@@ -295,7 +279,8 @@ function ServiceCard({ title, icon, index = 0, href }) {
     </Link>
   );
 }
-// --- راهکارها
+
+// --- راهکارها (برای محافظت از داده) — ۳ مورد
 const SOLUTIONS = [
   {
     name: "Commvault",
@@ -359,7 +344,7 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
         />
       </div>
 
-      {/* توضیحات قبلی همچنان در مودال (بدون تغییر) */}
+      {/* توضیحات در مودال */}
       <GlassModal
         open={open}
         onClose={() => setOpen(false)}
@@ -370,26 +355,21 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
   );
 }
 
-// --- Animated headline (typewriter with pause)
-import { useEffect, useState } from "react";
-
-// --- Animated headline (typewriter with pause)
+/* ===================== Animated headline ===================== */
 function AnimatedHeadline({
   phrases = ["زیرساخت هوشمند", "دقت مهندسی"],
-  typeSpeed = 120,   // سرعت تایپ آرام‌تر
-  holdTime = 2100,  // مکث کوتاه پس از تکمیل هر عبارت
+  typeSpeed = 140,
+  holdTime = 1700,
 }) {
-  const [idx, setIdx] = useState(0);        // کدام عبارت
-  const [shown, setShown] = useState("");   // متن تایپ‌شده فعلی
+  const [idx, setIdx] = useState(0);
+  const [shown, setShown] = useState("");
 
   useEffect(() => {
     let timer;
     const target = phrases[idx];
 
     if (shown.length < target.length) {
-      timer = setTimeout(() => {
-        setShown(target.slice(0, shown.length + 1));
-      }, typeSpeed);
+      timer = setTimeout(() => setShown(target.slice(0, shown.length + 1)), typeSpeed);
     } else {
       timer = setTimeout(() => {
         setShown("");
@@ -406,7 +386,8 @@ function AnimatedHeadline({
     </span>
   );
 }
-// --- صفحه
+
+/* ===================== صفحه اصلی ===================== */
 export default function Home() {
   const { primary, secondary, swap } = useAlternatingBrandPair();
   const primaryIsYellow = primary === YELLOW;
@@ -414,7 +395,7 @@ export default function Home() {
   const safeVendors = Array.isArray(vendors) ? vendors : [];
   const serviceItems = Array.isArray(services?.items) ? services.items : [];
 
-  // 👇 این تیکه رو اضافه کن
+  // CTA swap state (مثل قبل)
   const [isConsultFilled, setIsConsultFilled] = useState(() => {
     try {
       return (localStorage.getItem("cta_swap") || "consult") === "consult";
@@ -434,52 +415,66 @@ export default function Home() {
     });
   };
 
+  // 👇 کدام سکشن الان «در دید» است تا فقط همان بنر طوسی بگیرد
+  const [activeBg, setActiveBg] = useState("vendors");
+  useEffect(() => {
+    const ids = ["vendors", "solutions", "services"];
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) setActiveBg(e.target.id);
+        });
+      },
+      { threshold: 0.55 } // ~۵۵٪ سکشن دیده شود
+    );
+    ids.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) io.observe(el);
+    });
+    return () => io.disconnect();
+  }, []);
+
   return (
-    // ...
     <main className="min-h-screen font-sans">
       {/* Hero (بنر مشکی بالا) */}
       <section className="bg-[linear-gradient(135deg,#000_0%,#0a0a0a_60%,#111_100%)] text-white">
         <div className="max-w-6xl mx-auto px-4 py-12 md:py-16 grid md:grid-cols-2 items-center gap-10">
           <div>
-         <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">
-  <AnimatedHeadline
-    phrases={["زیرساخت هوشمند", "دقت مهندسی"]}
-    typeSpeed={140}   // کندتر از قبل
-    holdTime={1700}  // کمی مکث روی هر عبارت
-  />
-</h1>
+            <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">
+              <AnimatedHeadline phrases={["زیرساخت هوشمند", "دقت مهندسی"]} />
+            </h1>
             <p className="mt-4 text-gray-300">از مشاوره تا پشتیبانی، درکنار شما.</p>
-          <div className="mt-6 flex gap-3">
-  {/* ارائه مشاوره */}
-  <a
-    href="/contact"
-    onClick={flipCtas}
-    className="rounded-full px-5 py-2.5 font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-    style={{
-      backgroundColor: filledColor,
-      color: filledColor === YELLOW ? "#000" : "#fff",
-      border: `1px solid ${filledColor}`,   // ✅ مرز هم‌رنگ خودش
-    }}
-  >
-    ارائه مشاوره
-  </a>
+            <div className="mt-6 flex gap-3">
+              {/* ارائه مشاوره */}
+              <a
+                href="/contact"
+                onClick={flipCtas}
+                className="rounded-full px-5 py-2.5 font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                style={{
+                  backgroundColor: filledColor,
+                  color: filledColor === YELLOW ? "#000" : "#fff",
+                  border: `1px solid ${filledColor}`,
+                }}
+              >
+                ارائه مشاوره
+              </a>
 
-  {/* مشاهده ابزارها */}
-  <a
-    href="/tools"
-    onClick={flipCtas}
-    className="rounded-full px-5 py-2.5 font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-    style={{
-      border: `1px solid ${outlinedColor}`,
-      color: outlinedColor,
-      backgroundColor: "transparent",
-    }}
-    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${outlinedColor}1A`)}
-    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-  >
-    مشاهده ابزارها
-  </a>
-</div>
+              {/* مشاهده ابزارها */}
+              <a
+                href="/tools"
+                onClick={flipCtas}
+                className="rounded-full px-5 py-2.5 font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                style={{
+                  border: `1px solid ${outlinedColor}`,
+                  color: outlinedColor,
+                  backgroundColor: "transparent",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${outlinedColor}1A`)}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+              >
+                مشاهده ابزارها
+              </a>
+            </div>
           </div>
           <div className="flex justify-center">
             <img src="/satrass-hero.webp" alt="آواتار ساتراس" className="w-[280px] md:w-[340px] lg:w-[400px] h-auto object-contain" />
@@ -487,123 +482,116 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 🔶 Wrapper مشترک برای بنر طوسی + سه سکشن زیر */}
-<div className="relative">
-  {/* بنر طوسی کم‌رنگ که فقط پشت این سه سکشن دیده می‌شود */}
-  <div className="absolute inset-0 bg-gray-100 pointer-events-none" style={{ zIndex: 0 }} />
+      {/* تجهیزات — بنر طوسی فقط وقتی این سکشن فعال است */}
+      <section id="vendors" className="py-12">
+        <div className="relative max-w-6xl mx-auto px-4">
+          <div
+            className={`absolute inset-0 -z-10 rounded-2xl transition-opacity duration-300 ${
+              activeBg === "vendors" ? "opacity-100" : "opacity-0"
+            }`}
+            style={{ background: "#f3f4f6" }}
+            aria-hidden
+          />
+          <SectionTitle as="h2" icon="equipment">تجهیزات</SectionTitle>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {safeVendors.map((v, i) => (
+              <BrandCard key={v.href || v.slug || v.title || i} title={v.title} slug={v.slug} href={v.href} index={i} logo={v.logo} />
+            ))}
+          </div>
+        </div>
+      </section>
 
- {/* تجهیزات */}
-<section id="vendors" className="py-12">
-  {/* کانتینر این سکشن */}
-  <div className="relative max-w-6xl mx-auto px-4">
-    {/* بنر طوسی فقط وقتی این سکشن فعاله دیده میشه */}
-    <div
-      className={`absolute inset-0 -z-10 rounded-2xl transition-opacity duration-300 ${
-        activeBg === "vendors" ? "opacity-100" : "opacity-0"
-      }`}
-      style={{ background: "#f3f4f6" }}
-      aria-hidden
-    />
-    <SectionTitle as="h2" icon="equipment">تجهیزات</SectionTitle>
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {safeVendors.map((v, i) => (
-        <BrandCard key={v.href || v.slug || v.title || i} title={v.title} slug={v.slug} href={v.href} index={i} logo={v.logo} />
-      ))}
-    </div>
-  </div>
-</section>
+      {/* محافظت از داده — بنر طوسی فقط وقتی این سکشن فعال است */}
+      <section id="solutions" className="py-12">
+        <div className="relative max-w-6xl mx-auto px-4">
+          <div
+            className={`absolute inset-0 -z-10 rounded-2xl transition-opacity duration-300 ${
+              activeBg === "solutions" ? "opacity-100" : "opacity-0"
+            }`}
+            style={{ background: "#f3f4f6" }}
+            aria-hidden
+          />
+          <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+            {SOLUTIONS.map((s) => (<SolutionCard key={s.slug} {...s} />))}
+          </div>
+        </div>
+      </section>
 
-{/* محافظت از داده */}
-<section id="solutions" className="py-12">
-  <div className="relative max-w-6xl mx-auto px-4">
-    <div
-      className={`absolute inset-0 -z-10 rounded-2xl transition-opacity duration-300 ${
-        activeBg === "solutions" ? "opacity-100" : "opacity-0"
-      }`}
-      style={{ background: "#f3f4f6" }}
-      aria-hidden
-    />
-    <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
-    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-      {SOLUTIONS.map((s) => (<SolutionCard key={s.slug} {...s} />))}
-    </div>
-  </div>
-</section>
-  {/* خدمات و راهکارها */}{/* خدمات و راهکارها */}
-<section id="services" className="py-12">
-  <div className="relative max-w-6xl mx-auto px-4">
-    <div
-      className={`absolute inset-0 -z-10 rounded-2xl transition-opacity duration-300 ${
-        activeBg === "services" ? "opacity-100" : "opacity-0"
-      }`}
-      style={{ background: "#f3f4f6" }}
-      aria-hidden
-    />
-    <SectionTitle as="h2" icon="services">خدمات و راهکارها</SectionTitle>
-    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-      {serviceItems.map((s, i) => (
-        <ServiceCard
-          key={s.href || s.slug || s.title || i}
-          title={s.title}
-          icon={s.icon}
-          index={i}
-          href={s.href || `/services/${s.slug}`}
-        />
-      ))}
-    </div>
-  </div>
-</section>
-</div>
+      {/* خدمات و راهکارها — ۹ آیتم، بنر طوسی فقط وقتی این سکشن فعال است */}
+      <section id="services" className="py-12">
+        <div className="relative max-w-6xl mx-auto px-4">
+          <div
+            className={`absolute inset-0 -z-10 rounded-2xl transition-opacity duration-300 ${
+              activeBg === "services" ? "opacity-100" : "opacity-0"
+            }`}
+            style={{ background: "#f3f4f6" }}
+            aria-hidden
+          />
+          <SectionTitle as="h2" icon="services">خدمات و راهکارها</SectionTitle>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+            {serviceItems.map((s, i) => (
+              <ServiceCard
+                key={s.href || s.slug || s.title || i}
+                title={s.title}
+                icon={s.icon}                     // مثل /icons/services/install.webp
+                index={i}
+                href={s.href || `/services/${s.slug}`}  // ← مهم
+              />
+            ))}
+          </div>
+        </div>
+      </section>
 
-{/* Footer + Sitemap (وسط‌چین روی موبایل، راست‌چین روی دسکتاپ) */}
-<footer className="bg-black text-white">
-  <div className="max-w-6xl mx-auto px-4 py-10">
-    <div className="grid md:grid-cols-3 gap-8 items-start text-center md:text-right">
-      {/* ستون 1: میان‌بُر */}
-      <div>
-        <h4 className="font-bold mb-3">میان‌بُر</h4>
-        <ul className="space-y-2 text-white/80">
-          <li><a href="#vendors" className="hover:text-white">تجهیزات</a></li>
-          <li><a href="/tools" className="hover:text-white">ابزارها</a></li>
-          <li><a href="#services" className="hover:text-white">خدمات و راهکارها</a></li>
-        </ul>
-      </div>
+      {/* Footer + Sitemap */}
+      <footer className="bg-black text-white">
+        <div className="max-w-6xl mx-auto px-4 py-10">
+          <div className="grid md:grid-cols-3 gap-8 items-start text-center md:text-right">
+            {/* ستون 1: میان‌بُر */}
+            <div>
+              <h4 className="font-bold mb-3">میان‌بُر</h4>
+              <ul className="space-y-2 text-white/80">
+                <li><a href="#vendors" className="hover:text-white">تجهیزات</a></li>
+                <li><a href="/tools" className="hover:text-white">ابزارها</a></li>
+                <li><a href="#services" className="hover:text-white">خدمات و راهکارها</a></li>
+              </ul>
+            </div>
 
-      {/* ستون 2: خدمات و راهکارها */}
-      <div>
-        <h4 className="font-bold mb-3">خدمات و راهکارها</h4>
-        <ul className="space-y-2 text-white/80">
-          <li><a href="/services/install" className="hover:text-white">نصب و راه‌اندازی</a></li>
-          <li><a href="/services/monitoring" className="hover:text-white">پایش</a></li>
-          <li><a href="/services/training" className="hover:text-white">آموزش</a></li>
-          <li><a href="/services/consulting-design" className="hover:text-white">مشاوره و طراحی</a></li>
-          <li><a href="/services/operations" className="hover:text-white">راهبری</a></li>
-        </ul>
-      </div>
+            {/* ستون 2: خدمات و راهکارها */}
+            <div>
+              <h4 className="font-bold mb-3">خدمات و راهکارها</h4>
+              <ul className="space-y-2 text-white/80">
+                <li><a href="/services/install" className="hover:text-white">نصب و راه‌اندازی</a></li>
+                <li><a href="/services/monitoring" className="hover:text-white">پایش</a></li>
+                <li><a href="/services/training" className="hover:text-white">آموزش</a></li>
+                <li><a href="/services/consulting-design" className="hover:text-white">مشاوره و طراحی</a></li>
+                <li><a href="/services/operations" className="hover:text-white">راهبری</a></li>
+              </ul>
+            </div>
 
-      {/* ستون 3: صفحات */}
-      <div>
-        <h4 className="font-bold mb-3">صفحات</h4>
-        <ul className="space-y-2 text-white/80">
-          <li><a href="/contact" className="hover:text-white">تماس با ما</a></li>
-          <li><a href="/about" className="hover:text-white">درباره ما</a></li>
-          <li><a href="/warranty" className="hover:text-white">استعلام گارانتی</a></li>
-          <li>
-            <a href="/news" className="hover:text-white">
-              تازه‌ها <span className="text-white/60">(اخبار و مقالات)</span>
-            </a>
-          </li>
-        </ul>
-      </div>
-    </div>
+            {/* ستون 3: صفحات */}
+            <div>
+              <h4 className="font-bold mb-3">صفحات</h4>
+              <ul className="space-y-2 text-white/80">
+                <li><a href="/contact" className="hover:text-white">تماس با ما</a></li>
+                <li><a href="/about" className="hover:text-white">درباره ما</a></li>
+                <li><a href="/warranty" className="hover:text-white">استعلام گارانتی</a></li>
+                <li>
+                  <a href="/news" className="hover:text-white">
+                    تازه‌ها <span className="text-white/60">(اخبار و مقالات)</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
 
-    <hr className="my-8 border-white/10" />
+          <hr className="my-8 border-white/10" />
 
-    <p className="text-center text-white/80 text-sm">
-      © {new Date().getFullYear()} ساتراس، همه حقوق محفوظ است
-    </p>
-  </div>
-</footer>
+          <p className="text-center text-white/80 text-sm">
+            © {new Date().getFullYear()} ساتراس، همه حقوق محفوظ است
+          </p>
+        </div>
+      </footer>
     </main>
   );
 }

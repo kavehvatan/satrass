@@ -55,6 +55,21 @@ const BRAND_COLORS = ["#00E5FF", "#2D5BFF"];
 const LOGO_COLORS = [TEAL, YELLOW];
 const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
 
+// 🎨 پالت‌های بنر «محافظت از داده»
+const BANNER_STYLES = [
+  { label: "Gray 100",  style: { background: "#f3f4f6" } },
+  { label: "Slate 100", style: { background: "#f1f5f9" } },
+  { label: "Neutral 100", style: { background: "#f5f5f5" } },
+  { label: "Gray 50",   style: { background: "#f9fafb" } },
+  // گرادیان‌های لطیف
+  { label: "G: slate→transparent", style: { background: "linear-gradient(180deg,#f1f5f9 0%, #f8fafc 100%)" } },
+  { label: "G: warm",               style: { background: "linear-gradient(180deg,#f8fafc 0%, #fff7ed 100%)" } },
+  { label: "G: cool",               style: { background: "linear-gradient(180deg,#f1f5f9 0%, #eef2ff 100%)" } },
+  // خیلی لطیف رنگ‌دار
+  { label: "Tint teal",   style: { background: "rgba(20,184,166,0.06)" } },
+  { label: "Tint yellow", style: { background: "rgba(244,194,31,0.09)" } },
+];
+
 /* =============== GlassModal =============== */
 function GlassModal({ open, onClose, title, paragraphs }) {
   const [closing, setClosing] = useState(false);
@@ -297,6 +312,7 @@ export default function Home() {
         </div>
       </section>
 
+{/* محافظت از داده — بنر طوسی سراسری با تغییر رنگ با کلیک */}
 {/* محافظت از داده — بنر طوسی سراسری با تغییر رنگ با کلیک */}
 <section id="solutions" className="relative py-12" onClick={handleSolutionsClick}>
   {/* بنر سراسری؛ فاصله‌ی بالا/پایین + انتقال نرم رنگ */}

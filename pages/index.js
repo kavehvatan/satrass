@@ -398,75 +398,81 @@ export default function Home() {
       return nv;
     });
   };
+useEffect(() => {
+  const ids = ["vendors", "solutions", "services"];
+  const banner = document.getElementById("movingBanner");
+  const heroEdge = document.getElementById("heroEdge");
+  if (!banner || !heroEdge) return;
 
-  // 🔶 بنر سراسریِ نرم: ابعاد/مکان را با اسکرول به اندازهٔ سکشن فعال تنظیم می‌کنیم
-  useEffect(() => {
-    const ids = ["vendors", "solutions", "services"];
-    const banner = document.getElementById("movingBanner");
-    if (!banner) return;
+  let ticking = false;
 
-    let ticking = false;
+  const getActiveRect = () => {
+    const targetY = window.innerHeight * 0.35; // خط مرجع
+    let chosen = null;
 
-    const getActiveRect = () => {
-      const targetY = window.innerHeight * 0.35; // نقطهٔ مرجع
-      let chosen = null;
+    // 1) سکشنی که targetY داخلش است
+    for (const id of ids) {
+      const inner = document.querySelector(`#${id} .section-inner`);
+      if (!inner) continue;
+      const r = inner.getBoundingClientRect();
+      if (r.top <= targetY && r.bottom >= targetY) { chosen = r; break; }
+    }
 
-      // اگر سکشنی targetY را پوشش دهد، همان انتخاب می‌شود
+    // 2) نزدیک‌ترین سکشن
+    if (!chosen) {
+      let best = Infinity;
       for (const id of ids) {
         const inner = document.querySelector(`#${id} .section-inner`);
         if (!inner) continue;
         const r = inner.getBoundingClientRect();
-        if (r.top <= targetY && r.bottom >= targetY) {
-          chosen = r;
-          break;
-        }
+        const d = r.top > targetY ? r.top - targetY : targetY - r.bottom;
+        if (d < best) { best = d; chosen = r; }
       }
+    }
+    return chosen;
+  };
 
-      // در غیر این صورت نزدیک‌ترین سکشن به targetY را انتخاب کن
-      if (!chosen) {
-        let bestDist = Infinity;
-        for (const id of ids) {
-          const inner = document.querySelector(`#${id} .section-inner`);
-          if (!inner) continue;
-          const r = inner.getBoundingClientRect();
-          const dist = r.top > targetY ? r.top - targetY : targetY - r.bottom;
-          if (dist < bestDist) { bestDist = dist; chosen = r; }
-        }
-      }
-      return chosen;
-    };
+  const update = () => {
+    const r = getActiveRect();
+    if (r) {
+      // اجازه نده بالای هیرو بره
+      const heroTop = heroEdge.getBoundingClientRect().top;
+      const top = Math.max(Math.round(r.top), Math.round(heroTop) + 8); // +8px فاصله لطیف
 
-    const update = () => {
-      const r = getActiveRect();
-      if (r) {
-        banner.style.top = `${Math.round(r.top)}px`;
-        banner.style.height = `${Math.round(r.height)}px`;
-        banner.style.width = `${Math.round(r.width)}px`;
-      }
-    };
+      banner.style.top = `${top}px`;
+      banner.style.height = `${Math.round(r.height)}px`;
+      // تمام عرض ویوپورت
+      banner.style.width = `${Math.round(window.innerWidth)}px`;
+    }
+  };
 
-    const onScrollOrResize = () => {
-      if (!ticking) {
-        ticking = true;
-        requestAnimationFrame(() => { update(); ticking = false; });
-      }
-    };
+  const onScrollOrResize = () => {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(() => { update(); ticking = false; });
+    }
+  };
 
-    // اولین محاسبه
-    update();
+  // استایل‌های بهینه
+  banner.style.willChange = "top,height,width";
 
-    window.addEventListener("scroll", onScrollOrResize, { passive: true });
-    window.addEventListener("resize", onScrollOrResize);
-    return () => {
-      window.removeEventListener("scroll", onScrollOrResize);
-      window.removeEventListener("resize", onScrollOrResize);
-    };
-  }, []);
+  update();
+  window.addEventListener("scroll", onScrollOrResize, { passive: true });
+  window.addEventListener("resize", onScrollOrResize);
+  return () => {
+    window.removeEventListener("scroll", onScrollOrResize);
+    window.removeEventListener("resize", onScrollOrResize);
+  };
+}, []);
 
   return (
     <main className="min-h-screen font-sans">
       {/* Hero (بنر مشکی بالا) */}
-      <section className="bg-[linear-gradient(135deg,#000_0%,#0a0a0a_60%,#111_100%)] text-white">
+      <section id="hero" className="relative z-10 bg-[linear-gradient(135deg,#000_0%,#0a0a0a_60%,#111_100%)] text-white">
+   ...
+ </section>
++ {/* مرز پایان هیرو برای جلوگیری از هم‌پوشانی بنر */}
++ <div id="heroEdge" className="h-0" />
         <div className="max-w-6xl mx-auto px-4 py-12 md:py-16 grid md:grid-cols-2 items-center gap-10">
           <div>
             <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">
@@ -514,8 +520,8 @@ export default function Home() {
       {/* بنر سراسریِ خاکستری که نرم جابه‌جا می‌شود */}
       <div
         id="movingBanner"
-        className="fixed left-1/2 -translate-x-1/2 bg-gray-100 rounded-2xl pointer-events-none transition-all duration-300"
-        style={{ top: 0, width: 0, height: 0, zIndex: 0 }}
+        className="fixed inset-x-0 bg-gray-100 pointer-events-none transition-all duration-300"
+        style={{ top: 0, width: '100vw', height: 0, zIndex: 0 }}
       />
 
       {/* تجهیزات */}

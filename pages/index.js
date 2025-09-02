@@ -1,23 +1,55 @@
 // pages/index.js
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import vendors from "../data/vendors";            // داده‌های تجهیزات
-import services from "../data/services.json";     // داده‌های خدمات (با آیکون و توضیحات)
 
-/* ===================== SectionTitle =====================
- * تیتر سکشن با آیکون و خط تزئینی
- * آیکون از /public/icons/sections/*.webp خوانده می‌شود:
- *    equipment -> vendors.webp
- *    solutions -> solutions.webp
- *    services  -> services.webp
- * اگر لود نشد، SVG داخلی نمایش داده می‌شود.
- * ======================================================= */
+// ورودی‌های فعلی پروژه
+import vendors from "../data/vendors";
+import services from "../data/services.json";
+
+/* ===================== رنگ‌ها و کمک‌ها ===================== */
+const TEAL = "#14b8a6";
+const YELLOW = "#f4c21f";
+const BRAND_COLORS = ["#00E5FF", "#2D5BFF"];
+const LOGO_COLORS = [TEAL, YELLOW];
+const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
+
+/* ===================== Animated headline (typewriter) ===================== */
+function AnimatedHeadline({
+  phrases = ["زیرساخت هوشمند", "دقت مهندسی"],
+  typeSpeed = 140,
+  holdTime = 1700,
+}) {
+  const [idx, setIdx] = useState(0);
+  const [shown, setShown] = useState("");
+
+  useEffect(() => {
+    let t;
+    const target = phrases[idx];
+    if (shown.length < target.length) {
+      t = setTimeout(() => setShown(target.slice(0, shown.length + 1)), typeSpeed);
+    } else {
+      t = setTimeout(() => {
+        setShown("");
+        setIdx((i) => (i + 1) % phrases.length);
+      }, holdTime);
+    }
+    return () => clearTimeout(t);
+  }, [shown, idx, phrases, typeSpeed, holdTime]);
+
+  return (
+    <span className="inline-block">
+      {shown}
+      <span className="inline-block w-[0.6ch] animate-pulse">|</span>
+    </span>
+  );
+}
+
+/* ===================== SectionTitle ===================== */
 function SectionTitle({ as: Tag = "h2", icon = "equipment", className = "", children }) {
+  const [useFallback, setUseFallback] = useState(false);
   const map = { equipment: "vendors", solutions: "solutions", services: "services" };
   const src = `/icons/sections/${map[icon] || icon}.webp`;
-
-  // اگر تصویر لود نشد، فقط SVG را نشان بده
-  const [useFallback, setUseFallback] = useState(false);
 
   const FallbackIcon = ({ className = "" }) => {
     switch (icon) {
@@ -33,7 +65,7 @@ function SectionTitle({ as: Tag = "h2", icon = "equipment", className = "", chil
             <path d="M21 14.35V19a2 2 0 0 1-2 2h-4.65a4.5 4.5 0 1 0-4.7 0H5a2 2 0 0 1-2-2v-4.65a4.5 4.5 0 1 0 0-4.7V5a2 2 0 0 1 2-2h4.65a4.5 4.5 0 1 0 4.7 0H19a2 2 0 0 1 2 2v4.65a4.5 4.5 0 1 0 0 4.7zM12 9a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 12a3 3 0 1 1 0-6 3 3 0 0 1 0 6zM3 12a3 3 0 1 1 6 0 3 3 0 0 1-6 0zm12 0a3 3 0 1 1 6 0 3 3 0 0 1-6 0z"/>
           </svg>
         );
-      default: // equipment
+      default:
         return (
           <svg viewBox="0 0 24 24" className={className} aria-hidden="true" fill="currentColor">
             <path d="M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5A2 2 0 0 1 3 8V5zm0 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3zm3-8h3v2H6V6zm0 9h3v2H6v-2zm10-9h2v2h-2V6zm0 9h2v2h-2v-2z"/>
@@ -58,43 +90,15 @@ function SectionTitle({ as: Tag = "h2", icon = "equipment", className = "", chil
         )}
       </span>
 
-      <Tag className="text-2xl font-extrabold tracking-tight text-slate-900">{children}</Tag>
+      <Tag className="text-2xl font-extrabold tracking-tight text-slate-900">
+        {children}
+      </Tag>
       <span className="flex-1 h-px bg-gradient-to-l from-slate-200 to-transparent" />
     </div>
   );
 }
-// --- رنگ‌ها و کمک‌تابع‌ها
-const TEAL = "#14b8a6";
-const YELLOW = "#f4c21f";
-const BRAND_COLORS = ["#00E5FF", "#2D5BFF"];
-const LOGO_COLORS = [TEAL, YELLOW];
-const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
 
-// --- دکمه‌های هیرو با جابجایی نوبتی رنگ‌ها
-function useAlternatingBrandPair() {
-  const [primary, setPrimary] = useState(YELLOW);   // Filled
-  const [secondary, setSecondary] = useState(TEAL); // Outlined
-  useEffect(() => {
-    try {
-      const lastIsTeal = localStorage.getItem("satrass_btn_pair") === "1";
-      const nextIsTeal = !lastIsTeal;
-      localStorage.setItem("satrass_btn_pair", nextIsTeal ? "1" : "0");
-      if (nextIsTeal) { setPrimary(TEAL); setSecondary(YELLOW); }
-      else { setPrimary(YELLOW); setSecondary(TEAL); }
-    } catch {}
-  }, []);
-  const swap = () => {
-    setPrimary((p) => {
-      const np = p === TEAL ? YELLOW : TEAL;
-      setSecondary(np === TEAL ? YELLOW : TEAL);
-      try { localStorage.setItem("satrass_btn_pair", np === TEAL ? "1" : "0"); } catch {}
-      return np;
-    });
-  };
-  return { primary, secondary, swap };
-}
-
-// --- مودال شیشه‌ای
+/* ===================== مودال شیشه‌ای (برای راهکارها) ===================== */
 function GlassModal({ open, onClose, title, paragraphs }) {
   const [closing, setClosing] = useState(false);
 
@@ -115,7 +119,7 @@ function GlassModal({ open, onClose, title, paragraphs }) {
     setTimeout(() => {
       setClosing(false);
       onClose?.();
-    }, 200);
+    }, 180);
   };
 
   if (!open) return null;
@@ -173,7 +177,7 @@ function GlassModal({ open, onClose, title, paragraphs }) {
   );
 }
 
-// --- کارت برند «تجهیزات» (لوگو سمت چپ کارت)
+/* ===================== کارت برند (تجهیزات) ===================== */
 function BrandCard({ title, slug, href, index, logo }) {
   const [border, setBorder] = useState("#e5e7eb");
   const link = href || `/products/${slug || (title || "").toLowerCase()}`;
@@ -193,8 +197,7 @@ function BrandCard({ title, slug, href, index, logo }) {
         className="
           relative overflow-hidden rounded-2xl
           border bg-white/70 supports-[backdrop-filter]:bg-white/35
-          backdrop-blur-xl
-          p-5 transition duration-200
+          backdrop-blur-xl p-5 transition duration-200
           hover:-translate-y-0.5 hover:shadow-xl
         "
         style={{ borderColor: border, borderWidth: 1 }}
@@ -210,12 +213,12 @@ function BrandCard({ title, slug, href, index, logo }) {
             src={artPng}
             alt=""
             aria-hidden="true"
-            className="w-full h-full object-cover scale-[1.12] opacity-[.35] md:opacity-[.35] contrast-115 saturate-110"
+            className="w-full h-full object-cover scale-[1.12] opacity-[.35] contrast-115 saturate-110"
             onError={(e) => (e.currentTarget.style.display = "none")}
           />
         </picture>
 
-        {/* هایلایت رنگی آرام */}
+        {/* هایلایت آرام */}
         <div
           className="absolute inset-0 pointer-events-none opacity-30"
           style={{
@@ -223,7 +226,7 @@ function BrandCard({ title, slug, href, index, logo }) {
           }}
         />
 
-        {/* لوگو — سمت چپ فیزیکی */}
+        {/* لوگو سمت راست (RTL) */}
         <div className="relative flex items-center ltr:justify-start rtl:justify-end">
           <div className="w-14 h-14 shrink-0 rounded-xl bg-white ring-1 ring-black/5 shadow-sm grid place-items-center transition-transform duration-200 group-hover:scale-[1.03] overflow-hidden">
             <picture>
@@ -244,14 +247,11 @@ function BrandCard({ title, slug, href, index, logo }) {
   );
 }
 
-// --- کارت «خدمات» با پس‌زمینهٔ ۷۰٪ از دو رنگ برند + توضیحات در مودال
-// قبلی ServiceCard را با این نسخه جایگزین کن
+/* ===================== کارت خدمات (Teal) ===================== */
 function ServiceCard({ title, icon, index = 0, href }) {
   const [border, setBorder] = useState("#e5e7eb");
-
-  // همیشه Teal
-  const bg = "rgba(20,184,166,0.6)"; // TEAL 70%
-  const fg = "#fff"; // نوشته سفید
+  const bg = "rgba(20,184,166,0.6)"; // TEAL
+  const fg = "#fff";
 
   return (
     <Link href={href} className="w-full max-w-[520px]">
@@ -278,7 +278,8 @@ function ServiceCard({ title, icon, index = 0, href }) {
     </Link>
   );
 }
-// --- راهکارها
+
+/* ===================== داده‌های «محافظت از داده» ===================== */
 const SOLUTIONS = [
   {
     name: "Commvault",
@@ -298,115 +299,107 @@ const SOLUTIONS = [
     name: "Veeam",
     slug: "Veeam",
     p1: "راهکار قدرتمند بکاپ و ریکاوری برای محیط‌های مجازی، فیزیکی و کلود.",
-    p2: "تمرکز اصلی روی Backup & Replication سریع، انعطاف‌پذیر و مطمئن با امکان Instant Recovery و حفاظت از ماشین‌های مجازی، دیتابیس‌ها و سرویس‌های ابری مثل M365.",
-    p3: "ویژگی‌ها: Dedup/Compression، پشتیبانی از چندین پلتفرم، و قابلیت Disaster Recovery آسان.",
+    p2: "تمرکز روی Backup & Replication سریع و مطمئن با Instant Recovery و حفاظت از VM/DB و M365.",
+    p3: "ویژگی‌ها: Dedup/Compression، پشتیبانی از چندین پلتفرم، و DR ساده.",
   },
 ];
 
-// --- کارت راهکار
-function SolutionCard({ name, slug, p1, p2, p3 }) {
-  const [border, setBorder] = useState("#e5e7eb");
-  const [open, setOpen] = useState(false);
-
-  // پس‌زمینه‌ی زرد نیمه‌شفاف مخصوص «محافظت از داده»
-  const bg = "rgba(244,194,31,0.6)"; // YELLOW 70%
-  const fg = "#000";
-
+/* ===================== بنر شیشه‌ای مختص «محافظت از داده» ===================== */
+function SolutionsBanner() {
   return (
-    <>
-      <div
-        onMouseEnter={() =>
-          setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
-        }
-        onMouseLeave={() => setBorder("#e5e7eb")}
-        onClick={() => setOpen(true)}
-        className="group flex flex-col items-center justify-center gap-4 p-5 border rounded-2xl hover:shadow-lg transition text-center w-full max-w-[520px] mx-auto h-[140px] cursor-pointer select-none"
-        style={{ borderColor: border, background: bg, color: fg }}
-        role="button"
-        tabIndex={0}
-        aria-haspopup="dialog"
-        aria-expanded={open}
-      >
-        {/* فقط لوگو؛ بدون مربع سفید؛ کمی بزرگتر + عمق بصری نرم */}
-        <img
-          src={`/avatars/${slug}.webp`}
-          onError={(e) => (e.currentTarget.src = `/avatars/${slug}.png`)}
-          alt={name}
-          className="
-            w-20 h-20 md:w-24 md:h-24 object-contain
-            drop-shadow-[0_12px_24px_rgba(0,0,0,.18)]
-            transition-transform duration-200
-            group-hover:scale-105 group-hover:-translate-y-0.5
-          "
-          style={{ transform: "translateZ(0)" }}
-        />
-      </div>
-
-      {/* توضیحات قبلی همچنان در مودال (بدون تغییر) */}
-      <GlassModal
-        open={open}
-        onClose={() => setOpen(false)}
-        title={name}
-        paragraphs={[p1, p2, p3]}
-      />
-    </>
+    <div className="pointer-events-none absolute inset-0 -z-10">
+      <div className="absolute inset-0 bg-gradient-to-b from-[#fafafa] via-[#f7f7f7] to-[#f2f2f2]" />
+      <div className="absolute inset-0 bg-white/30 backdrop-blur-md supports-[backdrop-filter]:backdrop-blur-lg" />
+      <div className="absolute inset-0 bg-[radial-gradient(80%_60%_at_100%_0%,rgba(255,255,255,.30),transparent_60%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(70%_55%_at_0%_100%,rgba(0,0,0,.06),transparent_60%)]" />
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-black/10 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-black/10 to-transparent" />
+    </div>
   );
 }
 
-// --- Animated headline (typewriter with pause)
-import { useEffect, useState } from "react";
+/* ===================== Fallback/Ensure helpers ===================== */
+// تجهیزاتی که می‌خوایم حتما نمایش داده بشن
+const REQUIRED_VENDOR_STUBS = [
+  { title: "Dell EMC", slug: "dell" },
+  { title: "HPE", slug: "hpe" },
+  { title: "Lenovo", slug: "lenovo" },
+  { title: "Cisco", slug: "cisco" },
+  { title: "Juniper", slug: "juniper" },
+  { title: "Quantum", slug: "quantum" },
+  { title: "Brocade", slug: "brocade" },
+  { title: "Hitachi", slug: "hitachi" },
+  { title: "PaloAlto", slug: "paloalto" },
+  { title: "F5", slug: "f5" },
+  { title: "Fortinet", slug: "fortinet" },
+  { title: "Oracle", slug: "oracle" },
+];
 
-// --- Animated headline (typewriter with pause)
-function AnimatedHeadline({
-  phrases = ["زیرساخت هوشمند", "دقت مهندسی"],
-  typeSpeed = 120,   // سرعت تایپ آرام‌تر
-  holdTime = 2100,  // مکث کوتاه پس از تکمیل هر عبارت
-}) {
-  const [idx, setIdx] = useState(0);        // کدام عبارت
-  const [shown, setShown] = useState("");   // متن تایپ‌شده فعلی
-
-  useEffect(() => {
-    let timer;
-    const target = phrases[idx];
-
-    if (shown.length < target.length) {
-      timer = setTimeout(() => {
-        setShown(target.slice(0, shown.length + 1));
-      }, typeSpeed);
-    } else {
-      timer = setTimeout(() => {
-        setShown("");
-        setIdx((i) => (i + 1) % phrases.length);
-      }, holdTime);
+function ensureVendors(input) {
+  const list = Array.isArray(input) ? input : [];
+  const bySlug = new Map();
+  for (const v of list) {
+    const slug = (v?.slug || v?.title || "").toString().trim().toLowerCase();
+    if (!slug) continue;
+    bySlug.set(slug, v);
+  }
+  for (const stub of REQUIRED_VENDOR_STUBS) {
+    const slug = stub.slug.toLowerCase();
+    if (!bySlug.has(slug)) {
+      bySlug.set(slug, {
+        title: stub.title,
+        slug: stub.slug,
+        // می‌تونی بعداً logo اختصاصی بذاری؛ کارت خودش fallback می‌کند
+        logo: `/avatars/${stub.slug}.png`,
+      });
     }
-    return () => clearTimeout(timer);
-  }, [shown, idx, phrases, typeSpeed, holdTime]);
-
-  return (
-    <span className="inline-block">
-      {shown}
-      <span className="inline-block w-[0.6ch] animate-pulse">|</span>
-    </span>
-  );
+  }
+  return Array.from(bySlug.values());
 }
-// --- صفحه
+
+// سرویس‌هایی که می‌خوایم حتما باشند
+const REQUIRED_SERVICE_STUBS = [
+  { title: "نصب و راه‌اندازی", slug: "install", href: "/services/install", icon: "/icons/services/install.webp" },
+  { title: "پایش", slug: "monitoring", href: "/services/monitoring", icon: "/icons/services/monitoring.webp" },
+  { title: "آموزش", slug: "training", href: "/services/training", icon: "/icons/services/training.webp" },
+  { title: "مشاوره و طراحی", slug: "consulting-design", href: "/services/consulting-design", icon: "/icons/services/consulting-design.webp" },
+  { title: "راهبری", slug: "operations", href: "/services/operations", icon: "/icons/services/operations.webp" },
+  // مواردی که گفتی اضافه شوند:
+  { title: "دسکتاپ مجازی", slug: "virtual-desktop", href: "/services/virtual-desktop", icon: "/icons/services/virtual-desktop.webp" },
+  { title: "رایانش کاربر نهایی", slug: "euc", href: "/services/euc", icon: "/icons/services/euc.webp" },
+  { title: "مجازی‌سازی و ابر", slug: "virtualization-cloud", href: "/services/virtualization-cloud", icon: "/icons/services/virtualization-cloud.webp" },
+  { title: "تداوم کسب‌وکار", slug: "business-continuity", href: "/services/business-continuity", icon: "/icons/services/business-continuity.webp" },
+  { title: "هوش مصنوعی", slug: "ai", href: "/services/ai", icon: "/icons/services/ai.webp" },
+];
+
+function ensureServices(inputItems) {
+  const items = Array.isArray(inputItems) ? inputItems : [];
+  const byTitle = new Map();
+  for (const s of items) {
+    const key = (s?.title || "").toString().trim();
+    if (!key) continue;
+    byTitle.set(key, s);
+  }
+  for (const stub of REQUIRED_SERVICE_STUBS) {
+    if (!byTitle.has(stub.title)) {
+      byTitle.set(stub.title, stub);
+    }
+  }
+  return Array.from(byTitle.values());
+}
+
+/* ===================== صفحه اصلی ===================== */
 export default function Home() {
-  const { primary, secondary, swap } = useAlternatingBrandPair();
-  const primaryIsYellow = primary === YELLOW;
-
-  const safeVendors = Array.isArray(vendors) ? vendors : [];
-  const serviceItems = Array.isArray(services?.items) ? services.items : [];
-
-  // 👇 این تیکه رو اضافه کن
+  // CTAهای هیرو: یکی Filled و یکی Outlined
   const [isConsultFilled, setIsConsultFilled] = useState(() => {
     try {
-      return (localStorage.getItem("cta_swap") || "consult") === "consult";
+      return (typeof window !== "undefined" && localStorage.getItem("cta_swap") || "consult") === "consult";
     } catch {
       return true;
     }
   });
-  const filledColor = isConsultFilled ? TEAL : YELLOW;
-  const outlinedColor = isConsultFilled ? YELLOW : TEAL;
+  const filledColor = isConsultFilled ? YELLOW : TEAL;
+  const outlinedColor = isConsultFilled ? TEAL : YELLOW;
   const flipCtas = () => {
     setIsConsultFilled((v) => {
       const nv = !v;
@@ -417,53 +410,61 @@ export default function Home() {
     });
   };
 
+  // اطمینان از کامل بودن لیست‌ها
+  const safeVendors = ensureVendors(vendors);
+  const baseServices = Array.isArray(services?.items) ? services.items : [];
+  const serviceItems = ensureServices(baseServices);
+
   return (
-    // ...
-    <main className="min-h-screen font-sans">
+    <main className="min-h-screen font-sans relative">
       {/* Hero (بنر مشکی بالا) */}
       <section className="bg-[linear-gradient(135deg,#000_0%,#0a0a0a_60%,#111_100%)] text-white">
         <div className="max-w-6xl mx-auto px-4 py-12 md:py-16 grid md:grid-cols-2 items-center gap-10">
           <div>
-         <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">
-  <AnimatedHeadline
-    phrases={["زیرساخت هوشمند", "دقت مهندسی"]}
-    typeSpeed={140}   // کندتر از قبل
-    holdTime={1700}  // کمی مکث روی هر عبارت
-  />
-</h1>
-            <p className="mt-4 text-gray-300">از مشاوره تا پشتیبانی، درکنار شما.</p>
-            <div className="mt-6 flex gap-3">
-  {/* ارائه مشاوره — یکی از این دو همیشه Filled است */}
-  <a
-    href="/contact"
-    onClick={flipCtas}
-    className="rounded-full px-5 py-2.5 font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-yellow-400"
-    style={{
-      backgroundColor: filledColor,
-      color: filledColor === YELLOW ? "#000" : "#fff",
-      border: "1px solid transparent",
-    }}
-  >
-    ارائه مشاوره
-  </a>
+            <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">
+              <AnimatedHeadline phrases={["زیرساخت هوشمند", "دقت مهندسی"]} typeSpeed={140} holdTime={1700} />
+            </h1>
+            <p className="mt-4 text-gray-300">از مشاوره تا پشتیبانی، در کنار شما.</p>
 
-{/* مشاهده ابزارها */}
-<a
-  href="/tools"
-  onClick={flipCtas}
-  className="rounded-full px-5 py-2.5 font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-teal-400"
-  style={{
-    backgroundColor: outlinedColor,
-    color: outlinedColor === YELLOW ? "#000" : "#fff",
-    border: "1px solid transparent",
-  }}
->
-  مشاهده ابزارها
-</a>
-</div>
+            <div className="mt-6 flex gap-3">
+              {/* ارائه مشاوره — یکی از این دو همیشه Filled است */}
+              <a
+                href="/contact"
+                onClick={flipCtas}
+                className="rounded-full px-5 py-2.5 font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-yellow-400"
+                style={{
+                  backgroundColor: filledColor,
+                  color: filledColor === YELLOW ? "#000" : "#fff",
+                  border: "1px solid transparent",
+                }}
+              >
+                ارائه مشاوره
+              </a>
+
+              {/* مشاهده ابزارها — دیگری Outlined */}
+              <a
+                href="/tools"
+                onClick={flipCtas}
+                className="rounded-full px-5 py-2.5 font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-teal-400"
+                style={{
+                  border: `1px solid ${outlinedColor}`,
+                  color: outlinedColor,
+                  backgroundColor: "transparent",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${outlinedColor}1A`)}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+              >
+                مشاهده ابزارها
+              </a>
+            </div>
           </div>
+
           <div className="flex justify-center">
-            <img src="/satrass-hero.webp" alt="آواتار ساتراس" className="w-[280px] md:w-[340px] lg:w-[400px] h-auto object-contain" />
+            <img
+              src="/satrass-hero.webp"
+              alt="آواتار ساتراس"
+              className="w-[280px] md:w-[340px] lg:w-[400px] h-auto object-contain"
+            />
           </div>
         </div>
       </section>
@@ -473,82 +474,95 @@ export default function Home() {
         <SectionTitle as="h2" icon="equipment">تجهیزات</SectionTitle>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {safeVendors.map((v, i) => (
-            <BrandCard key={v.href || v.slug || v.title || i} title={v.title} slug={v.slug} href={v.href} index={i} logo={v.logo} />
+            <BrandCard
+              key={v.href || v.slug || v.title || i}
+              title={v.title}
+              slug={v.slug}
+              href={v.href}
+              index={i}
+              logo={v.logo}
+            />
           ))}
         </div>
       </section>
 
-      {/* راهکارها + خدمات */}
-      <section id="solutions" className="max-w-6xl mx-auto px-4 pb-10">
+      {/* محافظت از داده — با بنر شیشه‌ای طوسی خیلی کمرنگ فقط برای این سکشن */}
+      <section id="solutions" className="relative max-w-6xl mx-auto px-4 pb-10">
+        <SolutionsBanner />
+
         <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center mb-10">
-          {SOLUTIONS.map((s) => (<SolutionCard key={s.slug} {...s} />))}
+          {SOLUTIONS.map((s) => (
+            <SolutionCard key={s.slug} {...s} />
+          ))}
         </div>
 
-    {/* بخش خدمات در صفحه اصلی */}
-<SectionTitle as="h3" icon="services" className="mb-4">خدمات و راهکارها</SectionTitle>
-<div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-  {serviceItems.map((s, i) => (
-    <ServiceCard
-      key={s.href || s.slug || s.title || i}
-      title={s.title}
-      icon={s.icon}                     // مثل /icons/services/install.webp
-      index={i}
-      href={s.href || `/services/${s.slug}`}  // ← این خط مهم است
-    />
-  ))}
-</div>
+        {/* خدمات و راهکارها */}
+        <SectionTitle as="h3" icon="services" className="mb-4">
+          خدمات و راهکارها
+        </SectionTitle>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+          {serviceItems.map((s, i) => (
+            <ServiceCard
+              key={s.href || s.slug || s.title || i}
+              title={s.title}
+              icon={s.icon}
+              index={i}
+              href={s.href || `/services/${s.slug}`}
+            />
+          ))}
+        </div>
       </section>
 
-{/* Footer + Sitemap (وسط‌چین روی موبایل، راست‌چین روی دسکتاپ) */}
-<footer className="bg-black text-white">
-  <div className="max-w-6xl mx-auto px-4 py-10">
-    <div className="grid md:grid-cols-3 gap-8 items-start text-center md:text-right">
-      {/* ستون 1: میان‌بُر */}
-      <div>
-        <h4 className="font-bold mb-3">میان‌بُر</h4>
-        <ul className="space-y-2 text-white/80">
-          <li><a href="#vendors" className="hover:text-white">تجهیزات</a></li>
-          <li><a href="/tools" className="hover:text-white">ابزارها</a></li>
-          <li><a href="#solutions" className="hover:text-white">خدمات و راهکارها</a></li>
-        </ul>
-      </div>
+      {/* Footer + Sitemap (داخل صفحهٔ خانه) */}
+      <footer className="bg-black text-white">
+        <div className="max-w-6xl mx-auto px-4 py-10">
+          <div className="grid md:grid-cols-3 gap-8 items-start">
+            {/* میان‌بُر */}
+            <div>
+              <h4 className="font-bold mb-3">میان‌بُر</h4>
+              <ul className="space-y-2 text-white/80">
+                <li><a href="#vendors" className="hover:text-white">تجهیزات</a></li>
+                <li><a href="/tools" className="hover:text-white">ابزارها</a></li>
+                <li><a href="#solutions" className="hover:text-white">خدمات و راهکارها</a></li>
+              </ul>
+            </div>
 
-      {/* ستون 2: خدمات و راهکارها */}
-      <div>
-        <h4 className="font-bold mb-3">خدمات و راهکارها</h4>
-        <ul className="space-y-2 text-white/80">
-          <li><a href="/services/install" className="hover:text-white">نصب و راه‌اندازی</a></li>
-          <li><a href="/services/monitoring" className="hover:text-white">پایش</a></li>
-          <li><a href="/services/training" className="hover:text-white">آموزش</a></li>
-          <li><a href="/services/consulting-design" className="hover:text-white">مشاوره و طراحی</a></li>
-          <li><a href="/services/operations" className="hover:text-white">راهبری</a></li>
-        </ul>
-      </div>
+            {/* خدمات و راهکارها */}
+            <div>
+              <h4 className="font-bold mb-3">خدمات و راهکارها</h4>
+              <ul className="space-y-2 text-white/80">
+                <li><a href="/services/install" className="hover:text-white">نصب و راه‌اندازی</a></li>
+                <li><a href="/services/monitoring" className="hover:text-white">پایش</a></li>
+                <li><a href="/services/training" className="hover:text-white">آموزش</a></li>
+                <li><a href="/services/consulting-design" className="hover:text-white">مشاوره و طراحی</a></li>
+                <li><a href="/services/operations" className="hover:text-white">راهبری</a></li>
+              </ul>
+            </div>
 
-      {/* ستون 3: صفحات */}
-      <div>
-        <h4 className="font-bold mb-3">صفحات</h4>
-        <ul className="space-y-2 text-white/80">
-          <li><a href="/contact" className="hover:text-white">تماس با ما</a></li>
-          <li><a href="/about" className="hover:text-white">درباره ما</a></li>
-          <li><a href="/warranty" className="hover:text-white">استعلام گارانتی</a></li>
-          <li>
-            <a href="/news" className="hover:text-white">
-              تازه‌ها <span className="text-white/60">(اخبار و مقالات)</span>
-            </a>
-          </li>
-        </ul>
-      </div>
-    </div>
+            {/* صفحات */}
+            <div>
+              <h4 className="font-bold mb-3">صفحات</h4>
+              <ul className="space-y-2 text-white/80">
+                <li><a href="/contact" className="hover:text-white">تماس با ما</a></li>
+                <li><a href="/about" className="hover:text-white">درباره ما</a></li>
+                <li><a href="/warranty" className="hover:text-white">استعلام گارانتی</a></li>
+                <li>
+                  <a href="/news" className="hover:text-white">
+                    تازه‌ها <span className="text-white/60">(اخبار و مقالات)</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
 
-    <hr className="my-8 border-white/10" />
+          <hr className="my-8 border-white/10" />
 
-    <p className="text-center text-white/80 text-sm">
-      © {new Date().getFullYear()} ساتراس، همه حقوق محفوظ است
-    </p>
-  </div>
-</footer>
+          <p className="text-center text-white/80 text-sm">
+            © {new Date().getFullYear()} ساتراس، همه حقوق محفوظ است
+          </p>
+        </div>
+      </footer>
     </main>
   );
 }

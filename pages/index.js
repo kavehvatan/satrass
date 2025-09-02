@@ -261,6 +261,25 @@ export default function Home() {
       return nv;
     });
   };
+  // --- پالت و کلیکِ بنر «محافظت از داده»
+  const [bannerIdx, setBannerIdx] = useState(() => {
+    try {
+      const saved = localStorage.getItem("solutions_banner_idx");
+      const n = Number(saved);
+      return Number.isFinite(n) ? n % BANNER_STYLES.length : 0;
+    } catch { return 0; }
+  });
+
+  useEffect(() => {
+    try { localStorage.setItem("solutions_banner_idx", String(bannerIdx)); } catch {}
+  }, [bannerIdx]);
+
+  const handleSolutionsClick = (e) => {
+    // روی لینک/دکمه کلیک نشه رنگ عوض نکن
+    const interactive = e.target.closest("a, button, [role='button']");
+    if (interactive) return;
+    setBannerIdx((i) => (i + 1) % BANNER_STYLES.length);
+  };
 
   // --- Fade کل محتوای هیرو هنگام اسکرول
   const [heroOpacity, setHeroOpacity] = useState(1);

@@ -3,7 +3,7 @@ import Head from "next/head";
 
 export default function UnityMidrangeSizer() {
   return (
-    <main dir="rtl" className="min-h-screen bg-white text-right">
+    <main dir="rtl" className="min-h-screen bg-[#f8fafc] text-right">
       <Head>
         <title>Unity MidrangeSizer | Satrass</title>
         <meta
@@ -17,8 +17,8 @@ export default function UnityMidrangeSizer() {
           Unity MidrangeSizer
         </h1>
 
-        {/* قاب برای iFrame */}
-        <div className="rounded-xl overflow-hidden shadow-md border border-slate-200 bg-white">
+        {/* iFrame ساده روی بک‌گراند یکدست */}
+        <div className="overflow-hidden rounded-xl border border-slate-200 shadow-sm bg-[#f8fafc]">
           <iframe
             src="https://unitycalculator.onrender.com/"
             title="Unity MidrangeSizer"

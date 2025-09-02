@@ -57,7 +57,7 @@ const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
 
 /* 🎨 پالت‌های بنر «محافظت از داده» (بیرون از Home) */
 const BANNER_STYLES = [
-  { label: "Gray 200",  style: { background: "#f3f4f6" } },
+  { label: "Gray 400",  style: { background: "#f3f4f6" } },
   { label: "Slate 200", style: { background: "#f1f5f9" } },
   { label: "Neutral 200", style: { background: "#f5f5f5" } },
   { label: "Gray 200",   style: { background: "#f9fafb" } },

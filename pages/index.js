@@ -297,16 +297,16 @@ export default function Home() {
         </div>
       </section>
 
-     {/* محافظت از داده — بنر طوسی سراسری */}
-<section id="solutions" className="relative py-12">
-  {/* بنر طوسی تمام‌عرض پشت سکشن */}
+{/* محافظت از داده — بنر طوسی سراسری با تغییر رنگ با کلیک */}
+<section id="solutions" className="relative py-12" onClick={handleSolutionsClick}>
+  {/* بنر سراسری؛ فاصله‌ی بالا/پایین + انتقال نرم رنگ */}
   <div
-    className="absolute inset-0 z-0 bg-gray-100"
-    style={{ top: 16, bottom: 20 }} // فاصله‌ی لطیف از بالا و پایین
+    className="absolute inset-0 z-0 rounded-2xl transition-colors duration-300"
+    style={{ top: 16, bottom: 20, ...BANNER_STYLES[bannerIdx].style }}
     aria-hidden
+    title={`Banner: ${BANNER_STYLES[bannerIdx].label} — کلیک کن برای بعدی`}
   />
-
-  {/* محتوای سکشن */}
+  {/* محتوا */}
   <div className="relative z-10 max-w-6xl mx-auto px-4 pt-7 pb-10">
     <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">

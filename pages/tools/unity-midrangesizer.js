@@ -3,66 +3,33 @@ import Head from "next/head";
 
 export default function UnityMidrangeSizer() {
   return (
-    <main
-      dir="rtl"
-      className="min-h-screen bg-[linear-gradient(180deg,#0b0b0b_0%,#111_100%)] text-right"
-    >
+    <main dir="rtl" className="min-h-screen bg-slate-900 text-right">
       <Head>
         <title>Unity MidrangeSizer | Satrass</title>
-        <meta
-          name="description"
-          content="محاسبه ظرفیت و پیکربندی بهینه Unity"
-        />
+        <meta name="description" content="محاسبه ظرفیت و پیکربندی بهینه Unity" />
       </Head>
 
-      <section className="max-w-5xl mx-auto px-4 py-8 md:py-10">
-        {/* عنوان صفحه ابزار */}
-        <h1 className="text-white/90 text-2xl md:text-3xl font-extrabold mb-5">
-          Unity Midrange Sizer
+      <section className="container mx-auto px-4 py-8 md:py-10">
+        <h1 className="text-white text-2xl md:text-3xl font-extrabold mb-4">
+          Unity MidrangeSizer
         </h1>
 
-        {/* قاب/کانتینر واسط برای iFrame */}
-        <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-white">
-          {/* نوار بالایی شبیه اپ دسکتاپ */}
-          <div className="flex items-center gap-2 px-4 py-2 border-b border-slate-200 bg-slate-100">
-            <span
-              className="w-3 h-3 rounded-full bg-red-400"
-              aria-hidden="true"
-            />
-            <span
-              className="w-3 h-3 rounded-full bg-amber-400"
-              aria-hidden="true"
-            />
-            <span
-              className="w-3 h-3 rounded-full bg-emerald-400"
-              aria-hidden="true"
-            />
-            <span className="ms-3 text-[13px] text-slate-700 select-none">
-              Midrange Sizer
-            </span>
-          </div>
-
-          {/* بدنه پنل + iFrame */}
-          <div className="p-2 md:p-4 bg-white">
-            <iframe
-              src="https://unitycalculator.onrender.com/"
-              title="Unity Midrange Sizer"
-              className="w-full h-[80vh] bg-white"
-              style={{ border: 0 }}
-              loading="lazy"
-              referrerPolicy="no-referrer"
-            />
-          </div>
+        <div className="rounded-2xl overflow-hidden shadow-xl ring-1 ring-black/10 bg-black/20">
+          <iframe
+            src="https://unitycalculator.onrender.com/"
+            title="Unity MidrangeSizer"
+            className="w-full"
+            style={{ height: "calc(100vh - 220px)", border: 0 }}
+          />
         </div>
 
-        {/* راهنمای لود شدن یا باز کردن در تب جدید */}
-        <p className="text-slate-300 text-sm mt-4">
+        <p className="text-slate-400 text-sm mt-4">
           اگر ابزار در اینجا نمایش داده نشد،{" "}
           <a
             href="https://unitycalculator.onrender.com/"
             target="_blank"
             rel="noopener noreferrer"
-            className="underline hover:text-white"
+            className="underline"
           >
             این لینک
           </a>{" "}

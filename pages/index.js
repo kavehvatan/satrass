@@ -57,16 +57,16 @@ const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
 
 /* 🎨 پالت‌های بنر «محافظت از داده» (بیرون از Home) */
 const BANNER_STYLES = [
-  { label: "Gray soft",   style: { background: "rgba(75,85,99,0.25)" } },   // Gray 600
-  { label: "Slate soft",  style: { background: "rgba(71,85,105,0.25)" } },  // Slate 600
-  { label: "Neutral soft",style: { background: "rgba(82,82,82,0.25)" } },   // Neutral 600
-  { label: "Teal soft",   style: { background: "rgba(13,148,136,0.25)" } }, // Teal 600
-  { label: "Yellow soft", style: { background: "rgba(202,138,4,0.25)" } },  // Yellow 600
-  { label: "Blue soft",   style: { background: "rgba(37,99,235,0.25)" } },  // Blue 600
-  { label: "Red soft",    style: { background: "rgba(220,38,38,0.25)" } },  // Red 600
-  { label: "Emerald soft",style: { background: "rgba(5,150,105,0.25)" } },  // Emerald 600
-  { label: "Indigo soft", style: { background: "rgba(79,70,229,0.25)" } },  // Indigo 600
-  { label: "Purple soft", style: { background: "rgba(147,51,234,0.25)" } }, // Purple 600
+  { label: "Gray 200", style: { background: "rgba(229,231,235,0.25)" } }, // #e5e7eb
+  { label: "Gray 300", style: { background: "rgba(209,213,219,0.25)" } }, // #d1d5db
+  { label: "Gray 400", style: { background: "rgba(156,163,175,0.25)" } }, // #9ca3af
+  { label: "Gray 500", style: { background: "rgba(107,114,128,0.25)" } }, // #6b7280
+  { label: "Gray 600", style: { background: "rgba(75,85,99,0.25)" } },    // #4b5563
+  { label: "Gray 700", style: { background: "rgba(55,65,81,0.25)" } },    // #374151
+  { label: "Gray 800", style: { background: "rgba(31,41,55,0.25)" } },    // #1f2937
+  { label: "Gray 850", style: { background: "rgba(23,31,41,0.25)" } },    // custom between 800-900
+  { label: "Gray 900", style: { background: "rgba(17,24,39,0.25)" } },    // #111827
+  { label: "Black soft", style: { background: "rgba(0,0,0,0.25)" } },     // pure black
 ];
 
 /* =============== GlassModal =============== */

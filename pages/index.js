@@ -57,45 +57,16 @@ const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
 
 /* 🎨 پالت‌های بنر «محافظت از داده» (بیرون از Home) */
 const BANNER_STYLES = [
-  // 🔹 Grays
-  { label: "Gray 600", style: { background: "#4b5563" } },
-  { label: "Gray 700", style: { background: "#374151" } },
-
-  // 🔹 Slate
-  { label: "Slate 600", style: { background: "#475569" } },
-  { label: "Slate 700", style: { background: "#334155" } },
-
-  // 🔹 Neutral
-  { label: "Neutral 600", style: { background: "#525252" } },
-  { label: "Neutral 700", style: { background: "#404040" } },
-
-  // 🔹 Teal
-  { label: "Teal 600", style: { background: "#0d9488" } },
-  { label: "Teal 700", style: { background: "#0f766e" } },
-
-  // 🔹 Yellow
-  { label: "Yellow 600", style: { background: "#ca8a04" } },
-  { label: "Yellow 700", style: { background: "#a16207" } },
-
-  // 🔹 Blue
-  { label: "Blue 600", style: { background: "#2563eb" } },
-  { label: "Blue 700", style: { background: "#1d4ed8" } },
-
-  // 🔹 Red
-  { label: "Red 600", style: { background: "#dc2626" } },
-  { label: "Red 700", style: { background: "#b91c1c" } },
-
-  // 🔹 Emerald (سبز مایل به فیروزه‌ای)
-  { label: "Emerald 600", style: { background: "#059669" } },
-  { label: "Emerald 700", style: { background: "#047857" } },
-
-  // 🔹 Indigo
-  { label: "Indigo 600", style: { background: "#4f46e5" } },
-  { label: "Indigo 700", style: { background: "#4338ca" } },
-
-  // 🔹 Purple
-  { label: "Purple 600", style: { background: "#9333ea" } },
-  { label: "Purple 700", style: { background: "#7e22ce" } },
+  { label: "Gray soft",   style: { background: "rgba(75,85,99,0.25)" } },   // Gray 600
+  { label: "Slate soft",  style: { background: "rgba(71,85,105,0.25)" } },  // Slate 600
+  { label: "Neutral soft",style: { background: "rgba(82,82,82,0.25)" } },   // Neutral 600
+  { label: "Teal soft",   style: { background: "rgba(13,148,136,0.25)" } }, // Teal 600
+  { label: "Yellow soft", style: { background: "rgba(202,138,4,0.25)" } },  // Yellow 600
+  { label: "Blue soft",   style: { background: "rgba(37,99,235,0.25)" } },  // Blue 600
+  { label: "Red soft",    style: { background: "rgba(220,38,38,0.25)" } },  // Red 600
+  { label: "Emerald soft",style: { background: "rgba(5,150,105,0.25)" } },  // Emerald 600
+  { label: "Indigo soft", style: { background: "rgba(79,70,229,0.25)" } },  // Indigo 600
+  { label: "Purple soft", style: { background: "rgba(147,51,234,0.25)" } }, // Purple 600
 ];
 
 /* =============== GlassModal =============== */
@@ -364,12 +335,11 @@ export default function Home() {
       {/* محافظت از داده — بنر سراسری با کلیک تغییر رنگ می‌دهد */}
       <section id="solutions" className="relative py-12" onClick={handleSolutionsClick}>
         {/* بنر سراسری؛ فاصله‌ی بالا/پایین + انتقال نرم رنگ */}
-        <div
-          className="absolute inset-0 z-0 rounded-2xl transition-colors duration-300"
-          style={{ top: 16, bottom: 20, ...BANNER_STYLES[bannerIdx].style }}
-          aria-hidden
-          title={`Banner: ${BANNER_STYLES[bannerIdx].label} — کلیک کن برای بعدی`}
-        />
+       <div
+  className="absolute inset-0 z-0 transition-colors duration-300" // ⬅️ rounded-2xl رو حذف کن
+  style={{ top: 16, bottom: 20, ...BANNER_STYLES[bannerIdx].style }}
+  aria-hidden
+/>
         {/* محتوا */}
         <div className="relative z-10 max-w-6xl mx-auto px-4 pt-7 pb-10">
           <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>

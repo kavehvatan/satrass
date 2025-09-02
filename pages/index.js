@@ -375,28 +375,23 @@ export default function Home() {
       </section>
 
       {/* تجهیزات — بنر زرد سراسری؛ پیش‌فرض مخفی، با اسکرول فِید-این */}
-      <section id="vendors" ref={vendorsRef} className="relative py-12">
-        {/* بنر سراسری (گوشه‌ها صاف؛ تا لبه‌ی صفحه) */}
-        <div
-          className="absolute inset-0 z-0 transition-opacity duration-500 ease-out pointer-events-none"
-          style={{
-            top: 16,
-            bottom: 20,
-            ...VENDORS_BANNER_STYLE,
-            opacity: vendorsBannerVisible ? 1 : 0, // فید-این نرم
-          }}
-          aria-hidden
+     <section id="vendors" className="py-12 bg-[#ccfbf1]">
+  <div className="relative max-w-6xl mx-auto px-4">
+    <SectionTitle as="h2" icon="equipment">تجهیزات</SectionTitle>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {safeVendors.map((v, i) => (
+        <BrandCard
+          key={v.href || v.slug || v.title || i}
+          title={v.title}
+          slug={v.slug}
+          href={v.href}
+          index={i}
+          logo={v.logo}
         />
-        {/* محتوا روی بنر */}
-        <div className="relative z-10 max-w-6xl mx-auto px-4">
-          <SectionTitle as="h2" icon="equipment">تجهیزات</SectionTitle>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {safeVendors.map((v, i) => (
-              <BrandCard key={v.href || v.slug || v.title || i} title={v.title} slug={v.slug} href={v.href} index={i} logo={v.logo} />
-            ))}
-          </div>
-        </div>
-      </section>
+      ))}
+    </div>
+  </div>
+</section>
 
       {/* محافظت از داده — بنر سراسری با کلیک تغییر رنگ می‌دهد */}
       <section id="solutions" className="relative py-12" onClick={handleSolutionsClick}>

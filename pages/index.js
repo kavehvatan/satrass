@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
-// ورودی‌های فعلی پروژه
 import vendors from "../data/vendors";
 import services from "../data/services.json";
 
@@ -13,6 +12,89 @@ const YELLOW = "#f4c21f";
 const BRAND_COLORS = ["#00E5FF", "#2D5BFF"];
 const LOGO_COLORS = [TEAL, YELLOW];
 const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
+
+/* ===================== ابزار اسکرول ===================== */
+function useScrollY() {
+  const [y, setY] = useState(0);
+  useEffect(() => {
+    const onScroll = () => setY(window.scrollY || 0);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  return y;
+}
+
+/* ===================== فازهای اسکرول برای تغییر تم پس‌زمینه ===================== */
+function useScrollPhase() {
+  const [scrollY, setScrollY] = useState(0);
+  const [vh, setVh] = useState(0);
+
+  useEffect(() => {
+    const onScroll = () => setScrollY(window.scrollY || 0);
+    const onResize = () => setVh(window.innerHeight || 0);
+    onResize();
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
+    };
+  }, []);
+
+  // حدود تقریبی: شروع تجهیزات و شروع محافظت از داده
+  const vendorStart = vh * 0.75;
+  const solutionsStart = vh * 1.9;
+
+  let phase = 0;
+  if (scrollY >= solutionsStart) phase = 2;
+  else if (scrollY >= vendorStart) phase = 1;
+
+  return { scrollY, phase };
+}
+
+/* ===================== لایه پس‌زمینه متحرک (پارالاکس) ===================== */
+function BackgroundLayer() {
+  const { scrollY, phase } = useScrollPhase();
+
+  // حرکت عمودی پس‌زمینه؛ حس «آمدن بنر به پشت سکشن‌ها»
+  const translate = Math.min(scrollY * 0.45, 2400);
+
+  // تم‌های گرادینت برای فازهای مختلف
+  const themes = [
+    "from-[#0a0a0a] via-[#101010] to-[#171717]", // هیرو (مشکی)
+    "from-[#0b1220] via-[#0e1a2b] to-[#122033]", // پشت تجهیزات (ته‌رنگ آبی)
+    "from-[#071b18] via-[#0a2421] to-[#0d2c29]", // پشت محافظت از داده و خدمات (ته‌رنگ سبز)
+  ];
+
+  return (
+    <div
+      className="fixed inset-0 -z-10 will-change-transform"
+      style={{ transform: `translateY(${translate}px)` }}
+      aria-hidden="true"
+    >
+      {/* گرادینت زمینه که رنگش با فاز تغییر می‌کند */}
+      <div
+        className={`absolute inset-0 bg-gradient-to-b transition-colors duration-[1200ms] ${themes[phase]}`}
+      />
+      {/* شیشه‌ای کم */}
+      <div className="absolute inset-0 bg-white/5 backdrop-blur-[2px]" />
+      {/* های‌لایت‌های ملایم */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_100%_0%,rgba(255,255,255,.06),transparent_60%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_55%_at_0%_100%,rgba(0,0,0,.12),transparent_60%)]" />
+    </div>
+  );
+}
+
+/* ===================== محو شدن محتوای هیرو با اسکرول ===================== */
+function useHeroFade(max = 320) {
+  const y = useScrollY();
+  const ratio = Math.max(0, Math.min(1, 1 - y / max));
+  const opacity = ratio;
+  const translateY = (1 - ratio) * -14; // کمی به بالا برای فلر نرم
+  return { opacity, transform: `translateY(${translateY}px)` };
+}
 
 /* ===================== Animated headline (typewriter) ===================== */
 function AnimatedHeadline({
@@ -119,7 +201,7 @@ function GlassModal({ open, onClose, title, paragraphs }) {
     setTimeout(() => {
       setClosing(false);
       onClose?.();
-    }, 180);
+    }, 200);
   };
 
   if (!open) return null;
@@ -187,9 +269,9 @@ function BrandCard({ title, slug, href, index, logo }) {
       : (slug || (title || "")).toLowerCase();
 
   const webp = `/avatars/${base}.webp`;
-  const png  = `/avatars/${base}.png`;
+  const png = `/avatars/${base}.png`;
   const artWebp = `/brand-art/${base}.webp`;
-  const artPng  = `/brand-art/${base}.png`;
+  const artPng = `/brand-art/${base}.png`;
 
   return (
     <Link href={link} className="group block">
@@ -213,12 +295,12 @@ function BrandCard({ title, slug, href, index, logo }) {
             src={artPng}
             alt=""
             aria-hidden="true"
-            className="w-full h-full object-cover scale-[1.12] opacity-[.35] contrast-115 saturate-110"
+            className="w-full h-full object-cover scale-[1.12] opacity-[.35] md:opacity-[.35] contrast-115 saturate-110"
             onError={(e) => (e.currentTarget.style.display = "none")}
           />
         </picture>
 
-        {/* هایلایت آرام */}
+        {/* هایلایت رنگی آرام */}
         <div
           className="absolute inset-0 pointer-events-none opacity-30"
           style={{
@@ -304,96 +386,50 @@ const SOLUTIONS = [
   },
 ];
 
-/* ===================== بنر شیشه‌ای مختص «محافظت از داده» ===================== */
-function SolutionsBanner() {
+/* ===================== کارت راهکار (زرد) + مودال ===================== */
+function SolutionCard({ name, slug, p1, p2, p3 }) {
+  const [border, setBorder] = useState("#e5e7eb");
+  const [open, setOpen] = useState(false);
+  const bg = "rgba(244,194,31,0.6)"; // YELLOW
+  const fg = "#000";
+
   return (
-    <div className="pointer-events-none absolute inset-0 -z-10">
-      <div className="absolute inset-0 bg-gradient-to-b from-[#fafafa] via-[#f7f7f7] to-[#f2f2f2]" />
-      <div className="absolute inset-0 bg-white/30 backdrop-blur-md supports-[backdrop-filter]:backdrop-blur-lg" />
-      <div className="absolute inset-0 bg-[radial-gradient(80%_60%_at_100%_0%,rgba(255,255,255,.30),transparent_60%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(70%_55%_at_0%_100%,rgba(0,0,0,.06),transparent_60%)]" />
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-black/10 to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-black/10 to-transparent" />
-    </div>
+    <>
+      <div
+        onMouseEnter={() =>
+          setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
+        }
+        onMouseLeave={() => setBorder("#e5e7eb")}
+        onClick={() => setOpen(true)}
+        className="group flex flex-col items-center justify-center gap-4 p-5 border rounded-2xl hover:shadow-lg transition text-center w-full max-w-[520px] mx-auto h-[140px] cursor-pointer select-none"
+        style={{ borderColor: border, background: bg, color: fg }}
+        role="button"
+        tabIndex={0}
+        aria-haspopup="dialog"
+        aria-expanded={open}
+      >
+        <img
+          src={`/avatars/${slug}.webp`}
+          onError={(e) => (e.currentTarget.src = `/avatars/${slug}.png`)}
+          alt={name}
+          className="w-20 h-20 md:w-24 md:h-24 object-contain drop-shadow-[0_12px_24px_rgba(0,0,0,.18)] transition-transform duration-200 group-hover:scale-105 group-hover:-translate-y-0.5"
+          style={{ transform: "translateZ(0)" }}
+        />
+      </div>
+
+      <GlassModal open={open} onClose={() => setOpen(false)} title={name} paragraphs={[p1, p2, p3]} />
+    </>
   );
-}
-
-/* ===================== Fallback/Ensure helpers ===================== */
-// تجهیزاتی که می‌خوایم حتما نمایش داده بشن
-const REQUIRED_VENDOR_STUBS = [
-  { title: "Dell EMC", slug: "dell" },
-  { title: "HPE", slug: "hpe" },
-  { title: "Lenovo", slug: "lenovo" },
-  { title: "Cisco", slug: "cisco" },
-  { title: "Juniper", slug: "juniper" },
-  { title: "Quantum", slug: "quantum" },
-  { title: "Brocade", slug: "brocade" },
-  { title: "Hitachi", slug: "hitachi" },
-  { title: "PaloAlto", slug: "paloalto" },
-  { title: "F5", slug: "f5" },
-  { title: "Fortinet", slug: "fortinet" },
-  { title: "Oracle", slug: "oracle" },
-];
-
-function ensureVendors(input) {
-  const list = Array.isArray(input) ? input : [];
-  const bySlug = new Map();
-  for (const v of list) {
-    const slug = (v?.slug || v?.title || "").toString().trim().toLowerCase();
-    if (!slug) continue;
-    bySlug.set(slug, v);
-  }
-  for (const stub of REQUIRED_VENDOR_STUBS) {
-    const slug = stub.slug.toLowerCase();
-    if (!bySlug.has(slug)) {
-      bySlug.set(slug, {
-        title: stub.title,
-        slug: stub.slug,
-        // می‌تونی بعداً logo اختصاصی بذاری؛ کارت خودش fallback می‌کند
-        logo: `/avatars/${stub.slug}.png`,
-      });
-    }
-  }
-  return Array.from(bySlug.values());
-}
-
-// سرویس‌هایی که می‌خوایم حتما باشند
-const REQUIRED_SERVICE_STUBS = [
-  { title: "نصب و راه‌اندازی", slug: "install", href: "/services/install", icon: "/icons/services/install.webp" },
-  { title: "پایش", slug: "monitoring", href: "/services/monitoring", icon: "/icons/services/monitoring.webp" },
-  { title: "آموزش", slug: "training", href: "/services/training", icon: "/icons/services/training.webp" },
-  { title: "مشاوره و طراحی", slug: "consulting-design", href: "/services/consulting-design", icon: "/icons/services/consulting-design.webp" },
-  { title: "راهبری", slug: "operations", href: "/services/operations", icon: "/icons/services/operations.webp" },
-  // مواردی که گفتی اضافه شوند:
-  { title: "دسکتاپ مجازی", slug: "virtual-desktop", href: "/services/virtual-desktop", icon: "/icons/services/virtual-desktop.webp" },
-  { title: "رایانش کاربر نهایی", slug: "euc", href: "/services/euc", icon: "/icons/services/euc.webp" },
-  { title: "مجازی‌سازی و ابر", slug: "virtualization-cloud", href: "/services/virtualization-cloud", icon: "/icons/services/virtualization-cloud.webp" },
-  { title: "تداوم کسب‌وکار", slug: "business-continuity", href: "/services/business-continuity", icon: "/icons/services/business-continuity.webp" },
-  { title: "هوش مصنوعی", slug: "ai", href: "/services/ai", icon: "/icons/services/ai.webp" },
-];
-
-function ensureServices(inputItems) {
-  const items = Array.isArray(inputItems) ? inputItems : [];
-  const byTitle = new Map();
-  for (const s of items) {
-    const key = (s?.title || "").toString().trim();
-    if (!key) continue;
-    byTitle.set(key, s);
-  }
-  for (const stub of REQUIRED_SERVICE_STUBS) {
-    if (!byTitle.has(stub.title)) {
-      byTitle.set(stub.title, stub);
-    }
-  }
-  return Array.from(byTitle.values());
 }
 
 /* ===================== صفحه اصلی ===================== */
 export default function Home() {
+  const heroStyle = useHeroFade(320);
+
   // CTAهای هیرو: یکی Filled و یکی Outlined
   const [isConsultFilled, setIsConsultFilled] = useState(() => {
     try {
-      return (typeof window !== "undefined" && localStorage.getItem("cta_swap") || "consult") === "consult";
+      return (localStorage.getItem("cta_swap") || "consult") === "consult";
     } catch {
       return true;
     }
@@ -410,16 +446,20 @@ export default function Home() {
     });
   };
 
-  // اطمینان از کامل بودن لیست‌ها
-  const safeVendors = ensureVendors(vendors);
-  const baseServices = Array.isArray(services?.items) ? services.items : [];
-  const serviceItems = ensureServices(baseServices);
+  const safeVendors = Array.isArray(vendors) ? vendors : [];
+  const serviceItems = Array.isArray(services?.items) ? services.items : [];
 
   return (
-    <main className="min-h-screen font-sans relative">
-      {/* Hero (بنر مشکی بالا) */}
-      <section className="bg-[linear-gradient(135deg,#000_0%,#0a0a0a_60%,#111_100%)] text-white">
-        <div className="max-w-6xl mx-auto px-4 py-12 md:py-16 grid md:grid-cols-2 items-center gap-10">
+    <main className="min-h-screen font-sans relative z-10">
+      {/* لایهٔ پس‌زمینهٔ متحرک (پارالاکس) */}
+      <BackgroundLayer />
+
+      {/* Hero – محتوای قابل محو شدن */}
+      <section className="text-white">
+        <div
+          className="max-w-6xl mx-auto px-4 py-12 md:py-16 grid md:grid-cols-2 items-center gap-10"
+          style={heroStyle}
+        >
           <div>
             <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">
               <AnimatedHeadline phrases={["زیرساخت هوشمند", "دقت مهندسی"]} typeSpeed={140} holdTime={1700} />
@@ -486,10 +526,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* محافظت از داده — با بنر شیشه‌ای طوسی خیلی کمرنگ فقط برای این سکشن */}
-      <section id="solutions" className="relative max-w-6xl mx-auto px-4 pb-10">
-        <SolutionsBanner />
-
+      {/* محافظت از داده */}
+      <section id="solutions" className="max-w-6xl mx-auto px-4 pb-10">
         <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center mb-10">
           {SOLUTIONS.map((s) => (

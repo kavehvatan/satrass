@@ -137,7 +137,7 @@ function BrandCard({ title, slug, href, index, logo }) {
       >
         <picture className="pointer-events-none select-none absolute inset-0">
           <source srcSet={artWebp} type="image/webp" />
-          <img src={artPng} alt="" aria-hidden="true" className="w-full h-full object-cover scale-[1.12] opacity-[.35] contrast-115 saturate-110" onError={(e) => (e.currentTarget.style.display = "none")} />
+          <img src={artPng} alt="" aria-hidden="true" className="w-full h-full object-cover scale-[1.12] opacity-[.8] contrast-115 saturate-110" onError={(e) => (e.currentTarget.style.display = "none")} />
         </picture>
         <div
           className="absolute inset-0 pointer-events-none opacity-30"

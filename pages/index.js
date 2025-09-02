@@ -57,16 +57,16 @@ const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
 
 /* 🎨 پالت‌های بنر «محافظت از داده» (بیرون از Home) */
 const BANNER_STYLES = [
-  { label: "Gray 200", style: { background: "rgba(229,231,235,0.25)" } }, // #e5e7eb
-  { label: "Gray 300", style: { background: "rgba(209,213,219,0.25)" } }, // #d1d5db
-  { label: "Gray 400", style: { background: "rgba(156,163,175,0.25)" } }, // #9ca3af
-  { label: "Gray 500", style: { background: "rgba(107,114,128,0.25)" } }, // #6b7280
-  { label: "Gray 600", style: { background: "rgba(75,85,99,0.25)" } },    // #4b5563
-  { label: "Gray 700", style: { background: "rgba(55,65,81,0.25)" } },    // #374151
-  { label: "Gray 800", style: { background: "rgba(31,41,55,0.25)" } },    // #1f2937
-  { label: "Gray 850", style: { background: "rgba(23,31,41,0.25)" } },    // custom between 800-900
-  { label: "Gray 900", style: { background: "rgba(17,24,39,0.25)" } },    // #111827
-  { label: "Black soft", style: { background: "rgba(0,0,0,0.25)" } },     // pure black
+  { label: "Slate 200", style: { background: "rgba(226,232,240,0.25)" } }, // #e2e8f0
+  { label: "Slate 300", style: { background: "rgba(203,213,225,0.25)" } }, // #cbd5e1
+  { label: "Slate 400", style: { background: "rgba(148,163,184,0.25)" } }, // #94a3b8
+  { label: "Slate 500", style: { background: "rgba(100,116,139,0.25)" } }, // #64748b
+  { label: "Slate 600", style: { background: "rgba(71,85,105,0.25)" } },   // #475569
+  { label: "Slate 650", style: { background: "rgba(60,72,92,0.25)" } },    // custom بین 600 و 700
+  { label: "Slate 700", style: { background: "rgba(51,65,85,0.25)" } },    // #334155
+  { label: "Slate 800", style: { background: "rgba(30,41,59,0.25)" } },    // #1e293b
+  { label: "Slate 850", style: { background: "rgba(22,31,45,0.25)" } },    // custom بین 800 و 900
+  { label: "Slate 900", style: { background: "rgba(15,23,42,0.25)" } },    // #0f172a
 ];
 
 /* =============== GlassModal =============== */

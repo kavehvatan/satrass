@@ -470,44 +470,52 @@ export default function Home() {
         </div>
       </section>
 
-      {/* تجهیزات */}
-      <section id="vendors" className="relative py-12 max-w-6xl mx-auto px-4">
-        <SectionTitle as="h2" icon="equipment">تجهیزات</SectionTitle>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {safeVendors.map((v, i) => (
-            <BrandCard key={v.href || v.slug || v.title || i} title={v.title} slug={v.slug} href={v.href} index={i} logo={v.logo} />
-          ))}
-        </div>
-      </section>
+      {/* 🔶 Wrapper مشترک برای بنر طوسی + سه سکشن زیر */}
+<div className="relative">
+  {/* بنر طوسی کم‌رنگ که فقط پشت این سه سکشن دیده می‌شود */}
+  <div className="absolute inset-0 bg-gray-100 pointer-events-none" style={{ zIndex: 0 }} />
 
-      {/* راهکارها + خدمات */}
-    {/* 🔹 محافظت از داده — با بنر طوسی فقط پشت این بخش */}
-<section id="solutions" className="relative py-12">
-  {/* بنر طوسی کم‌رنگ فقط برای این سکشن */}
-  <div aria-hidden className="absolute inset-0" style={{ background: "#f3f4f6" }} />
-  <div className="relative max-w-6xl mx-auto px-4">
+  {/* تجهیزات */}
+  <section id="vendors" className="relative z-10 py-12 max-w-6xl mx-auto px-4">
+    <SectionTitle as="h2" icon="equipment">تجهیزات</SectionTitle>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {safeVendors.map((v, i) => (
+        <BrandCard
+          key={v.href || v.slug || v.title || i}
+          title={v.title}
+          slug={v.slug}
+          href={v.href}
+          index={i}
+          logo={v.logo}
+        />
+      ))}
+    </div>
+  </section>
+
+  {/* محافظت از داده */}
+  <section id="solutions" className="relative z-10 py-12 max-w-6xl mx-auto px-4">
     <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
       {SOLUTIONS.map((s) => (<SolutionCard key={s.slug} {...s} />))}
     </div>
-  </div>
-</section>
+  </section>
 
-{/* 🔹 خدمات و راهکارها — ۹ آیتم، بدون هیچ بنری زیرش */}
-<section id="services" className="py-12 max-w-6xl mx-auto px-4">
-  <SectionTitle as="h2" icon="services">خدمات و راهکارها</SectionTitle>
-  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-    {serviceItems.map((s, i) => (
-      <ServiceCard
-        key={s.href || s.slug || s.title || i}
-        title={s.title}
-        icon={s.icon}
-        index={i}
-        href={s.href || `/services/${s.slug}`}
-      />
-    ))}
-  </div>
-</section>
+  {/* خدمات و راهکارها */}
+  <section id="services" className="relative z-10 py-12 max-w-6xl mx-auto px-4">
+    <SectionTitle as="h2" icon="services">خدمات و راهکارها</SectionTitle>
+    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+      {serviceItems.map((s, i) => (
+        <ServiceCard
+          key={s.href || s.slug || s.title || i}
+          title={s.title}
+          icon={s.icon}
+          index={i}
+          href={s.href || `/services/${s.slug}`}
+        />
+      ))}
+    </div>
+  </section>
+</div>
 
 {/* Footer + Sitemap (وسط‌چین روی موبایل، راست‌چین روی دسکتاپ) */}
 <footer className="bg-black text-white">

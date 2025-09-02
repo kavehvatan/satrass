@@ -59,16 +59,12 @@ const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
 
 /* 🎨 پالت‌های بنر «محافظت از داده» (بیرون از Home) */
 const BANNER_STYLES = [
-  { label: "Teal 50",  style: { background: "rgba(240,253,250,0.25)" } },  // خیلی خیلی روشن
-  { label: "Teal 100", style: { background: "rgba(204,251,241,0.25)" } },  // سبز آبی محو
-  { label: "Teal 200", style: { background: "rgba(153,246,228,0.25)" } },  // آبی-سبز روشن
+ 
   { label: "Teal 300", style: { background: "rgba(94,234,212,0.25)" } },   // آبی-سبز شاداب
   { label: "Teal 400", style: { background: "rgba(45,212,191,0.25)" } },   // پررنگ‌تر
   { label: "Teal 500", style: { background: "rgba(20,184,166,0.25)" } },   // رنگ اصلی برند
   { label: "Teal 600", style: { background: "rgba(13,148,136,0.25)" } },   // کمی تیره‌تر
-  { label: "Teal 700", style: { background: "rgba(15,118,110,0.25)" } },   // تیره و حرفه‌ای
-  { label: "Teal 800", style: { background: "rgba(17,94,89,0.25)" } },     // نزدیک فیروزه‌ای تیره
-  { label: "Teal 900", style: { background: "rgba(19,78,74,0.25)" } },     // خیلی تیره، نزدیک سبز نفتی
+ 
 ];
 
 /* =============== GlassModal =============== */

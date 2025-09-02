@@ -1,7 +1,6 @@
 // pages/index.js
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import vendors from "../data/vendors";
 import services from "../data/services.json";
 
@@ -55,27 +54,6 @@ const YELLOW = "#f4c21f";
 const BRAND_COLORS = ["#00E5FF", "#2D5BFF"];
 const LOGO_COLORS = [TEAL, YELLOW];
 const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
-
-/* =============== Alternating CTA colors =============== */
-function useAlternatingBrandPair() {
-  const [primary, setPrimary] = useState(YELLOW);
-  const [secondary, setSecondary] = useState(TEAL);
-  useEffect(() => {
-    try {
-      const lastIsTeal = localStorage.getItem("satrass_btn_pair") === "1";
-      const nextIsTeal = !lastIsTeal;
-      localStorage.setItem("satrass_btn_pair", nextIsTeal ? "1" : "0");
-      if (nextIsTeal) {
-        setPrimary(TEAL);
-        setSecondary(YELLOW);
-      } else {
-        setPrimary(YELLOW);
-        setSecondary(TEAL);
-      }
-    } catch {}
-  }, []);
-  return { primary, secondary };
-}
 
 /* =============== GlassModal =============== */
 function GlassModal({ open, onClose, title, paragraphs }) {
@@ -247,10 +225,10 @@ function AnimatedHeadline({ phrases = ["زیرساخت هوشمند", "دقت م
 
 /* =============== Page =============== */
 export default function Home() {
-  const { primary } = useAlternatingBrandPair();
   const safeVendors = Array.isArray(vendors) ? vendors : [];
   const serviceItems = Array.isArray(services?.items) ? services.items : [];
 
+  // CTA swap state
   const [isConsultFilled, setIsConsultFilled] = useState(() => {
     try {
       return (localStorage.getItem("cta_swap") || "consult") === "consult";
@@ -270,77 +248,10 @@ export default function Home() {
     });
   };
 
-  // Moving full-width banner (fixed)
-  useEffect(() => {
-    const ids = ["vendors", "solutions", "services"];
-    const banner = document.getElementById("movingBanner");
-    const heroEdge = document.getElementById("heroEdge");
-    if (!banner || !heroEdge) return;
-
-    let ticking = false;
-    const getActiveRect = () => {
-      const targetY = window.innerHeight * 0.35;
-      let chosen = null;
-      for (const id of ids) {
-        const inner = document.querySelector(`#${id} .section-inner`);
-        if (!inner) continue;
-        const r = inner.getBoundingClientRect();
-        if (r.top <= targetY && r.bottom >= targetY) {
-          chosen = r;
-          break;
-        }
-      }
-      if (!chosen) {
-        let best = Infinity;
-        for (const id of ids) {
-          const inner = document.querySelector(`#${id} .section-inner`);
-          if (!inner) continue;
-          const r = inner.getBoundingClientRect();
-          const d = r.top > targetY ? r.top - targetY : targetY - r.bottom;
-          if (d < best) {
-            best = d;
-            chosen = r;
-          }
-        }
-      }
-      return chosen;
-    };
-
-    const update = () => {
-      const r = getActiveRect();
-      if (r) {
-        const heroTop = heroEdge.getBoundingClientRect().top;
-        const top = Math.max(Math.round(r.top), Math.round(heroTop) + 8);
-        banner.style.top = `${top}px`;
-        banner.style.height = `${Math.round(r.height)}px`;
-        banner.style.width = `${Math.round(window.innerWidth)}px`; // full-width
-      }
-    };
-
-    const onScrollOrResize = () => {
-      if (!ticking) {
-        ticking = true;
-        requestAnimationFrame(() => {
-          update();
-          ticking = false;
-        });
-      }
-    };
-
-    banner.style.willChange = "top,height,width";
-    update();
-    window.addEventListener("scroll", onScrollOrResize, { passive: true });
-    window.addEventListener("resize", onScrollOrResize);
-    return () => {
-      window.removeEventListener("scroll", onScrollOrResize);
-      window.removeEventListener("resize", onScrollOrResize);
-    };
-  }, []);
-
   return (
     <main className="min-h-screen font-sans">
       {/* Hero */}
-      <section id="hero" className="relative z-10 bg-[linear-gradient(135deg,#000_0%,#0a0a0a_60%,#111_100%)] text-white">
+      <section className="bg-[linear-gradient(135deg,#000_0%,#0a0a0a_60%,#111_100%)] text-white">
         <div className="max-w-6xl mx-auto px-4 py-12 md:py-16 grid md:grid-cols-2 items-center gap-10">
           <div>
             <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">
@@ -373,19 +284,10 @@ export default function Home() {
           </div>
         </div>
       </section>
-      {/* مرز پایان هیرو */}
-      <div id="heroEdge" className="h-0" />
 
-      {/* Full-width moving banner */}
-      <div
-        id="movingBanner"
-        className="fixed inset-x-0 bg-gray-100 pointer-events-none transition-all duration-300"
-        style={{ top: 0, width: "100vw", height: 0, zIndex: 0 }}
-      />
-
-      {/* Vendors */}
+      {/* تجهیزات */}
       <section id="vendors" className="py-12">
-        <div className="section-inner relative z-10 max-w-6xl mx-auto px-4">
+        <div className="relative max-w-6xl mx-auto px-4">
           <SectionTitle as="h2" icon="equipment">تجهیزات</SectionTitle>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {safeVendors.map((v, i) => (
@@ -395,19 +297,28 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Data Protection */}
+      {/* محافظت از داده — بنر طوسی ثابت با فاصلهٔ بالا/پایین متناسب */}
       <section id="solutions" className="py-12">
-        <div className="section-inner relative z-10 max-w-6xl mx-auto px-4">
-          <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-            {SOLUTIONS.map((s) => (<SolutionCard key={s.slug} {...s} />))}
+        <div className="relative max-w-6xl mx-auto px-4">
+          {/* بنر طوسی */}
+          <div
+            className="absolute inset-0 -z-10 rounded-2xl bg-gray-100"
+            style={{ top: 12, bottom: 16 }} // فاصله از بالا/پایین تا کارت‌ها نچسبه
+            aria-hidden
+          />
+          {/* محتوا */}
+          <div className="relative z-10 pt-6 pb-8">
+            <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+              {SOLUTIONS.map((s) => (<SolutionCard key={s.slug} {...s} />))}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Services */}
+      {/* خدمات و راهکارها */}
       <section id="services" className="py-12">
-        <div className="section-inner relative z-10 max-w-6xl mx-auto px-4">
+        <div className="relative max-w-6xl mx-auto px-4">
           <SectionTitle as="h2" icon="services">خدمات و راهکارها</SectionTitle>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
             {serviceItems.map((s, i) => (

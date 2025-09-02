@@ -56,6 +56,7 @@ const LOGO_COLORS = [TEAL, YELLOW];
 const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
 
 
+
 /* 🎨 پالت‌های بنر «محافظت از داده» (بیرون از Home) */
 const BANNER_STYLES = [
   { label: "Warm 50",  style: { background: "rgba(255,251,235,0.25)" } }, // warm cream

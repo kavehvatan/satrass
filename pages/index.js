@@ -55,17 +55,20 @@ const BRAND_COLORS = ["#00E5FF", "#2D5BFF"];
 const LOGO_COLORS = [TEAL, YELLOW];
 const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
 
-
-
 /* 🎨 پالت‌های بنر «محافظت از داده» (بیرون از Home) */
 const BANNER_STYLES = [
- 
-  { label: "Teal 300", style: { background: "rgba(94,234,212,0.25)" } },   // آبی-سبز شاداب
-  { label: "Teal 400", style: { background: "rgba(45,212,191,0.25)" } },   // پررنگ‌تر
-  { label: "Teal 500", style: { background: "rgba(20,184,166,0.25)" } },   // رنگ اصلی برند
-  { label: "Teal 600", style: { background: "rgba(13,148,136,0.25)" } },   // کمی تیره‌تر
- 
+  { label: "Teal 300", style: { background: "rgba(94,234,212,0.25)" } },
+  { label: "Teal 400", style: { background: "rgba(45,212,191,0.25)" } },
+  { label: "Teal 500", style: { background: "rgba(20,184,166,0.25)" } },
+  { label: "Teal 600", style: { background: "rgba(13,148,136,0.25)" } },
 ];
+
+/* 🎨 پالت بنر «تجهیزات» (زرد برند با شفافیت لطیف) */
+const VENDORS_BANNER_STYLE = {
+  background: "rgba(244,194,31,0.20)", // YELLOW با 20% شفافیت
+  // جایگزین شیک‌تر (گرادیان گرم):
+  // background: "linear-gradient(180deg, rgba(254,243,199,0.35) 0%, rgba(251,191,36,0.22) 100%)",
+};
 
 /* =============== GlassModal =============== */
 function GlassModal({ open, onClose, title, paragraphs }) {
@@ -257,6 +260,7 @@ export default function Home() {
       return nv;
     });
   };
+
   // --- پالت و کلیکِ بنر «محافظت از داده»
   const [bannerIdx, setBannerIdx] = useState(() => {
     try {
@@ -271,7 +275,6 @@ export default function Home() {
   }, [bannerIdx]);
 
   const handleSolutionsClick = (e) => {
-    // روی لینک/دکمه کلیک نشه رنگ عوض نکن
     const interactive = e.target.closest("a, button, [role='button']");
     if (interactive) return;
     setBannerIdx((i) => (i + 1) % BANNER_STYLES.length);
@@ -281,15 +284,14 @@ export default function Home() {
   const [heroOpacity, setHeroOpacity] = useState(1);
 
   useEffect(() => {
-    const FADE_END = 340; // تا این پیکسل از 1 به 0 فید می‌کنیم
-
+    const FADE_END = 340;
     let ticking = false;
     const onScroll = () => {
       if (ticking) return;
       ticking = true;
       requestAnimationFrame(() => {
         const y = window.scrollY || 0;
-        const next = Math.max(0, Math.min(1, 1 - y / FADE_END)); // clamp 0..1
+        const next = Math.max(0, Math.min(1, 1 - y / FADE_END));
         setHeroOpacity(next);
         ticking = false;
       });
@@ -298,12 +300,35 @@ export default function Home() {
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReduced) {
       setHeroOpacity(1);
-      return; // لیسنر نذار
+      return;
     }
 
     window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll(); // محاسبه‌ی اولیه
+    onScroll();
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // --- بنر «تجهیزات»؛ پیش‌فرض مخفی + ظاهر شدن با اسکرول
+  const [vendorsBannerVisible, setVendorsBannerVisible] = useState(false);
+  const vendorsRef = React.useRef(null);
+
+  useEffect(() => {
+    const el = vendorsRef.current || document.getElementById("vendors");
+    if (!el) return;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.target === el && e.isIntersecting) {
+            setVendorsBannerVisible(true); // فقط یک‌بار ظاهر شود
+          }
+        }
+      },
+      { rootMargin: "-10% 0px -40% 0px", threshold: 0.25 }
+    );
+
+    io.observe(el);
+    return () => io.disconnect();
   }, []);
 
   return (
@@ -351,9 +376,21 @@ export default function Home() {
         </div>
       </section>
 
-      {/* تجهیزات */}
-      <section id="vendors" className="py-12">
-        <div className="relative max-w-6xl mx-auto px-4">
+      {/* تجهیزات — بنر زرد سراسری؛ پیش‌فرض مخفی، با اسکرول فِید-این */}
+      <section id="vendors" ref={vendorsRef} className="relative py-12">
+        {/* بنر سراسری (گوشه‌ها صاف؛ تا لبه‌ی صفحه) */}
+        <div
+          className="absolute inset-0 z-0 transition-opacity duration-500 ease-out pointer-events-none"
+          style={{
+            top: 16,
+            bottom: 20,
+            ...VENDORS_BANNER_STYLE,
+            opacity: vendorsBannerVisible ? 1 : 0, // فید-این نرم
+          }}
+          aria-hidden
+        />
+        {/* محتوا روی بنر */}
+        <div className="relative z-10 max-w-6xl mx-auto px-4">
           <SectionTitle as="h2" icon="equipment">تجهیزات</SectionTitle>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {safeVendors.map((v, i) => (
@@ -366,11 +403,11 @@ export default function Home() {
       {/* محافظت از داده — بنر سراسری با کلیک تغییر رنگ می‌دهد */}
       <section id="solutions" className="relative py-12" onClick={handleSolutionsClick}>
         {/* بنر سراسری؛ فاصله‌ی بالا/پایین + انتقال نرم رنگ */}
-       <div
-  className="absolute inset-0 z-0 transition-colors duration-300" // ⬅️ rounded-2xl رو حذف کن
-  style={{ top: 16, bottom: 20, ...BANNER_STYLES[bannerIdx].style }}
-  aria-hidden
-/>
+        <div
+          className="absolute inset-0 z-0 transition-colors duration-300"
+          style={{ top: 16, bottom: 20, ...BANNER_STYLES[bannerIdx].style }}
+          aria-hidden
+        />
         {/* محتوا */}
         <div className="relative z-10 max-w-6xl mx-auto px-4 pt-7 pb-10">
           <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>

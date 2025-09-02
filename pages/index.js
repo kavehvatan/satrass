@@ -257,39 +257,52 @@ export default function Home() {
   const flipCtas = () => {
     setIsConsultFilled((v) => {
       const nv = !v;
-      try {
-        localStorage.setItem("cta_swap", nv ? "consult" : "tools");
-      } catch {}
+      try { localStorage.setItem("cta_swap", nv ? "consult" : "tools"); } catch {}
       return nv;
     });
   };
 
-  // --- پالت و تغییر رنگ بنر «محافظت از داده»
-  const [bannerIdx, setBannerIdx] = useState(() => {
-    try {
-      const saved = localStorage.getItem("solutions_banner_idx");
-      const n = Number(saved);
-      return Number.isFinite(n) ? n % BANNER_STYLES.length : 0;
-    } catch {
-      return 0;
-    }
-  });
+  // --- Fade کل محتوای هیرو هنگام اسکرول
+  const [heroOpacity, setHeroOpacity] = useState(1);
 
   useEffect(() => {
-    try { localStorage.setItem("solutions_banner_idx", String(bannerIdx)); } catch {}
-  }, [bannerIdx]);
+    const FADE_END = 340; // تا این پیکسل از 1 به 0 فید می‌کنیم
 
-  const handleSolutionsClick = (e) => {
-    const interactive = e.target.closest("a, button, [role='button']");
-    if (interactive) return;
-    setBannerIdx((i) => (i + 1) % BANNER_STYLES.length);
-  };
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const y = window.scrollY || 0;
+        const next = Math.max(0, Math.min(1, 1 - y / FADE_END)); // clamp 0..1
+        setHeroOpacity(next);
+        ticking = false;
+      });
+    };
+
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReduced) {
+      setHeroOpacity(1);
+      return; // لیسنر نذار
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll(); // محاسبه‌ی اولیه
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
     <main className="min-h-screen font-sans">
       {/* Hero */}
       <section className="bg-[linear-gradient(135deg,#000_0%,#0a0a0a_60%,#111_100%)] text-white">
-        <div className="max-w-6xl mx-auto px-4 py-12 md:py-16 grid md:grid-cols-2 items-center gap-10">
+        <div
+          className="max-w-6xl mx-auto px-4 py-12 md:py-16 grid md:grid-cols-2 items-center gap-10"
+          style={{
+            opacity: heroOpacity,
+            transition: "opacity 120ms linear",
+            willChange: "opacity",
+          }}
+        >
           <div>
             <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">
               <AnimatedHeadline phrases={["زیرساخت هوشمند", "دقت مهندسی"]} />
@@ -316,6 +329,7 @@ export default function Home() {
               </a>
             </div>
           </div>
+
           <div className="flex justify-center">
             <img src="/satrass-hero.webp" alt="آواتار ساتراس" className="w-[280px] md:w-[340px] lg:w-[400px] h-auto object-contain" />
           </div>

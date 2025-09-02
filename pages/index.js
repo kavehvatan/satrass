@@ -55,18 +55,13 @@ const BRAND_COLORS = ["#00E5FF", "#2D5BFF"];
 const LOGO_COLORS = [TEAL, YELLOW];
 const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
 
-/* 🎨 پالت‌های بنر «محافظت از داده» (بیرون از Home) */
+/* 🎨 پالت بنر «محافظت از داده» (برای کلیک و تست رنگ) */
 const BANNER_STYLES = [
   { label: "Teal 300", style: { background: "rgba(94,234,212,0.25)" } },
   { label: "Teal 400", style: { background: "rgba(45,212,191,0.25)" } },
   { label: "Teal 500", style: { background: "rgba(20,184,166,0.25)" } },
   { label: "Teal 600", style: { background: "rgba(13,148,136,0.25)" } },
 ];
-
-
-const VENDORS_BANNER_STYLE = {
-  background: "rgba(148,163,184,0.35)", // Slate 400 با شفافیت؛ طوسی-آبی متوسط
-};
 
 /* =============== GlassModal =============== */
 function GlassModal({ open, onClose, title, paragraphs }) {
@@ -204,7 +199,12 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
         aria-haspopup="dialog"
         aria-expanded={open}
       >
-        <img src={`/avatars/${slug}.webp`} onError={(e) => (e.currentTarget.src = `/avatars/${slug}.png`)} alt={name} className="w-20 h-20 md:w-24 md:h-24 object-contain drop-shadow-[0_12px_24px_rgba(0,0,0,.18)] transition-transform duration-200 group-hover:scale-105 group-hover:-translate-y-0.5" />
+        <img
+          src={`/avatars/${slug}.webp`}
+          onError={(e) => (e.currentTarget.src = `/avatars/${slug}.png`)}
+          alt={name}
+          className="w-20 h-20 md:w-24 md:h-24 object-contain drop-shadow-[0_12px_24px_rgba(0,0,0,.18)] transition-transform duration-200 group-hover:scale-105 group-hover:-translate-y-0.5"
+        />
       </div>
       <GlassModal open={open} onClose={() => setOpen(false)} title={name} paragraphs={[p1, p2, p3]} />
     </>
@@ -306,29 +306,6 @@ export default function Home() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // --- بنر «تجهیزات»؛ پیش‌فرض مخفی + ظاهر شدن با اسکرول
-  const [vendorsBannerVisible, setVendorsBannerVisible] = useState(false);
-  const vendorsRef = React.useRef(null);
-
-  useEffect(() => {
-    const el = vendorsRef.current || document.getElementById("vendors");
-    if (!el) return;
-
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (e.target === el && e.isIntersecting) {
-            setVendorsBannerVisible(true); // فقط یک‌بار ظاهر شود
-          }
-        }
-      },
-      { rootMargin: "-10% 0px -40% 0px", threshold: 0.25 }
-    );
-
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
   return (
     <main className="min-h-screen font-sans">
       {/* Hero */}
@@ -374,34 +351,32 @@ export default function Home() {
         </div>
       </section>
 
-      {/* تجهیزات — بنر زرد سراسری؛ پیش‌فرض مخفی، با اسکرول فِید-این */}
-     <section id="vendors" className="py-12 bg-[#ccfbf1]">
-  <div className="relative max-w-6xl mx-auto px-4">
-    <SectionTitle as="h2" icon="equipment">تجهیزات</SectionTitle>
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {safeVendors.map((v, i) => (
-        <BrandCard
-          key={v.href || v.slug || v.title || i}
-          title={v.title}
-          slug={v.slug}
-          href={v.href}
-          index={i}
-          logo={v.logo}
-        />
-      ))}
-    </div>
-  </div>
-</section>
+      {/* تجهیزات — نسخه ساده بدون بنر */}
+      <section id="vendors" className="py-12">
+        <div className="relative max-w-6xl mx-auto px-4">
+          <SectionTitle as="h2" icon="equipment">تجهیزات</SectionTitle>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {safeVendors.map((v, i) => (
+              <BrandCard
+                key={v.href || v.slug || v.title || i}
+                title={v.title}
+                slug={v.slug}
+                href={v.href}
+                index={i}
+                logo={v.logo}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
 
-      {/* محافظت از داده — بنر سراسری با کلیک تغییر رنگ می‌دهد */}
+      {/* محافظت از داده — بنر کلیک‌خور با پالت */}
       <section id="solutions" className="relative py-12" onClick={handleSolutionsClick}>
-        {/* بنر سراسری؛ فاصله‌ی بالا/پایین + انتقال نرم رنگ */}
         <div
           className="absolute inset-0 z-0 transition-colors duration-300"
           style={{ top: 16, bottom: 20, ...BANNER_STYLES[bannerIdx].style }}
           aria-hidden
         />
-        {/* محتوا */}
         <div className="relative z-10 max-w-6xl mx-auto px-4 pt-7 pb-10">
           <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
@@ -450,12 +425,19 @@ export default function Home() {
                 <li><a href="/contact" className="hover:text-white">تماس با ما</a></li>
                 <li><a href="/about" className="hover:text-white">درباره ما</a></li>
                 <li><a href="/warranty" className="hover:text-white">استعلام گارانتی</a></li>
-                <li><a href="/news" className="hover:text-white">تازه‌ها <span className="text-white/60">(اخبار و مقالات)</span></a></li>
+                <li>
+                  <a href="/news" className="hover:text-white">
+                    تازه‌ها <span className="text-white/60">(اخبار و مقالات)</span>
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
+
           <hr className="my-8 border-white/10" />
-          <p className="text-center text-white/80 text-sm">© {new Date().getFullYear()} ساتراس، همه حقوق محفوظ است</p>
+          <p className="text-center text-white/80 text-sm">
+            © {new Date().getFullYear()} ساتراس، همه حقوق محفوظ است
+          </p>
         </div>
       </footer>
     </main>

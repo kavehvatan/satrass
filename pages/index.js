@@ -249,8 +249,6 @@ function BrandCard({ title, slug, href, index, logo }) {
 // --- کارت «خدمات» با پس‌زمینهٔ ۷۰٪ Teal + توضیحات در مودال
 function ServiceCard({ title, icon, index = 0, href }) {
   const [border, setBorder] = useState("#e5e7eb");
-
-  // همیشه Teal
   const bg = "rgba(20,184,166,0.6)"; // TEAL 70%
   const fg = "#fff"; // نوشته سفید
 
@@ -309,8 +307,6 @@ const SOLUTIONS = [
 function SolutionCard({ name, slug, p1, p2, p3 }) {
   const [border, setBorder] = useState("#e5e7eb");
   const [open, setOpen] = useState(false);
-
-  // پس‌زمینه‌ی زرد نیمه‌شفاف مخصوص «محافظت از داده»
   const bg = "rgba(244,194,31,0.6)"; // YELLOW 70%
   const fg = "#000";
 
@@ -329,28 +325,16 @@ function SolutionCard({ name, slug, p1, p2, p3 }) {
         aria-haspopup="dialog"
         aria-expanded={open}
       >
-        {/* فقط لوگو؛ بدون مربع سفید؛ کمی بزرگتر + عمق بصری نرم */}
         <img
           src={`/avatars/${slug}.webp`}
           onError={(e) => (e.currentTarget.src = `/avatars/${slug}.png`)}
           alt={name}
-          className="
-            w-20 h-20 md:w-24 md:h-24 object-contain
-            drop-shadow-[0_12px_24px_rgba(0,0,0,.18)]
-            transition-transform duration-200
-            group-hover:scale-105 group-hover:-translate-y-0.5
-          "
+          className="w-20 h-20 md:w-24 md:h-24 object-contain drop-shadow-[0_12px_24px_rgba(0,0,0,.18)] transition-transform duration-200 group-hover:scale-105 group-hover:-translate-y-0.5"
           style={{ transform: "translateZ(0)" }}
         />
       </div>
 
-      {/* توضیحات در مودال */}
-      <GlassModal
-        open={open}
-        onClose={() => setOpen(false)}
-        title={name}
-        paragraphs={[p1, p2, p3]}
-      />
+      <GlassModal open={open} onClose={() => setOpen(false)} title={name} paragraphs={[p1, p2, p3]} />
     </>
   );
 }
@@ -415,33 +399,70 @@ export default function Home() {
     });
   };
 
-  // 👇 کدام سکشن الان «در دید» است تا فقط همان بنر طوسی بگیرد
-  // 🌫️ کنترل بنر طوسی بر اساس سکشنِ در دید
-const [activeBg, setActiveBg] = useState("vendors");
+  // 🔶 بنر سراسریِ نرم: ابعاد/مکان را با اسکرول به اندازهٔ سکشن فعال تنظیم می‌کنیم
+  useEffect(() => {
+    const ids = ["vendors", "solutions", "services"];
+    const banner = document.getElementById("movingBanner");
+    if (!banner) return;
 
-useEffect(() => {
-  const ids = ["vendors", "solutions", "services"];
+    let ticking = false;
 
-  const io = new IntersectionObserver(
-    (entries) => {
-      // هر ورودی intersect شد، همونو فعال کن
-      for (const e of entries) {
-        if (e.isIntersecting) {
-          setActiveBg(e.target.id);
+    const getActiveRect = () => {
+      const targetY = window.innerHeight * 0.35; // نقطهٔ مرجع
+      let chosen = null;
+
+      // اگر سکشنی targetY را پوشش دهد، همان انتخاب می‌شود
+      for (const id of ids) {
+        const inner = document.querySelector(`#${id} .section-inner`);
+        if (!inner) continue;
+        const r = inner.getBoundingClientRect();
+        if (r.top <= targetY && r.bottom >= targetY) {
+          chosen = r;
           break;
         }
       }
-    },
-    // نرم و طبیعی: از بالا پشت «تجهیزات»، بعد «محافظت از داده»، بعد «خدمات»
-    { threshold: 0.35, rootMargin: "-10% 0px -45% 0px" }
-  );
 
-  for (const id of ids) {
-    const el = document.getElementById(id);
-    if (el) io.observe(el);
-  }
-  return () => io.disconnect();
-}, []);
+      // در غیر این صورت نزدیک‌ترین سکشن به targetY را انتخاب کن
+      if (!chosen) {
+        let bestDist = Infinity;
+        for (const id of ids) {
+          const inner = document.querySelector(`#${id} .section-inner`);
+          if (!inner) continue;
+          const r = inner.getBoundingClientRect();
+          const dist = r.top > targetY ? r.top - targetY : targetY - r.bottom;
+          if (dist < bestDist) { bestDist = dist; chosen = r; }
+        }
+      }
+      return chosen;
+    };
+
+    const update = () => {
+      const r = getActiveRect();
+      if (r) {
+        banner.style.top = `${Math.round(r.top)}px`;
+        banner.style.height = `${Math.round(r.height)}px`;
+        banner.style.width = `${Math.round(r.width)}px`;
+      }
+    };
+
+    const onScrollOrResize = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(() => { update(); ticking = false; });
+      }
+    };
+
+    // اولین محاسبه
+    update();
+
+    window.addEventListener("scroll", onScrollOrResize, { passive: true });
+    window.addEventListener("resize", onScrollOrResize);
+    return () => {
+      window.removeEventListener("scroll", onScrollOrResize);
+      window.removeEventListener("resize", onScrollOrResize);
+    };
+  }, []);
+
   return (
     <main className="min-h-screen font-sans">
       {/* Hero (بنر مشکی بالا) */}
@@ -489,35 +510,53 @@ useEffect(() => {
           </div>
         </div>
       </section>
-{/* بنر سراسریِ خاکستری که نرم جابه‌جا می‌شود */}
-<div
-  id="movingBanner"
-  className="fixed left-1/2 -translate-x-1/2 bg-gray-100 rounded-2xl pointer-events-none transition-all duration-300"
-  style={{ top: 0, width: 0, height: 0, zIndex: 0 }}
-/>
-      {/* تجهیزات — بنر طوسی فقط وقتی این سکشن فعال است */}
-    <section id="vendors" className="py-12">
-  <div className="section-inner relative z-10 max-w-6xl mx-auto px-4">
-    <SectionTitle as="h2" icon="equipment">تجهیزات</SectionTitle>
-    {/* ...grid... */}
-  </div>
-</section>
 
-      {/* محافظت از داده — بنر طوسی فقط وقتی این سکشن فعال است */}
-<section id="solutions" className="py-12">
-  <div className="section-inner relative z-10 max-w-6xl mx-auto px-4">
-    <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
-    {/* ...grid... */}
-  </div>
-</section>
+      {/* بنر سراسریِ خاکستری که نرم جابه‌جا می‌شود */}
+      <div
+        id="movingBanner"
+        className="fixed left-1/2 -translate-x-1/2 bg-gray-100 rounded-2xl pointer-events-none transition-all duration-300"
+        style={{ top: 0, width: 0, height: 0, zIndex: 0 }}
+      />
 
-     {/* خدمات و راهکارها */}
-<section id="services" className="py-12">
-  <div className="section-inner relative z-10 max-w-6xl mx-auto px-4">
-    <SectionTitle as="h2" icon="services">خدمات و راهکارها</SectionTitle>
-    {/* ...grid... */}
-  </div>
-</section>
+      {/* تجهیزات */}
+      <section id="vendors" className="py-12">
+        <div className="section-inner relative z-10 max-w-6xl mx-auto px-4">
+          <SectionTitle as="h2" icon="equipment">تجهیزات</SectionTitle>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {safeVendors.map((v, i) => (
+              <BrandCard key={v.href || v.slug || v.title || i} title={v.title} slug={v.slug} href={v.href} index={i} logo={v.logo} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* محافظت از داده */}
+      <section id="solutions" className="py-12">
+        <div className="section-inner relative z-10 max-w-6xl mx-auto px-4">
+          <SectionTitle as="h2" icon="solutions">محافظت از داده</SectionTitle>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+            {SOLUTIONS.map((s) => (<SolutionCard key={s.slug} {...s} />))}
+          </div>
+        </div>
+      </section>
+
+      {/* خدمات و راهکارها */}
+      <section id="services" className="py-12">
+        <div className="section-inner relative z-10 max-w-6xl mx-auto px-4">
+          <SectionTitle as="h2" icon="services">خدمات و راهکارها</SectionTitle>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+            {serviceItems.map((s, i) => (
+              <ServiceCard
+                key={s.href || s.slug || s.title || i}
+                title={s.title}
+                icon={s.icon}
+                index={i}
+                href={s.href || `/services/${s.slug}`}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Footer + Sitemap */}
       <footer className="bg-black text-white">

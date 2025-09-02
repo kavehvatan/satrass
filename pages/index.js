@@ -312,10 +312,9 @@ export default function Home() {
         </div>
       </section>
 
-{/* محافظت از داده — بنر طوسی سراسری با تغییر رنگ با کلیک */}
-{/* محافظت از داده — بنر طوسی سراسری با تغییر رنگ با کلیک */}
+{/* محافظت از داده — بنر سراسری با کلیک تغییر رنگ می‌دهد */}
 <section id="solutions" className="relative py-12" onClick={handleSolutionsClick}>
-  {/* بنر سراسری؛ فاصله‌ی بالا/پایین + انتقال نرم رنگ */}
+  {/* بنر سراسری؛ با فاصله‌ی بالا/پایین و تغییر نرم رنگ */}
   <div
     className="absolute inset-0 z-0 rounded-2xl transition-colors duration-300"
     style={{ top: 16, bottom: 20, ...BANNER_STYLES[bannerIdx].style }}

@@ -57,17 +57,45 @@ const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
 
 /* 🎨 پالت‌های بنر «محافظت از داده» (بیرون از Home) */
 const BANNER_STYLES = [
-  { label: "Gray 600",  style: { background: "#f3f4f6" } },
-  { label: "Slate 600", style: { background: "#f1f5f9" } },
-  { label: "Neutral 600", style: { background: "#f5f5f5" } },
-  { label: "Gray 600",   style: { background: "#f9fafb" } },
-  // گرادیان‌های لطیف
-  { label: "G: slate→transparent", style: { background: "linear-gradient(180deg,#f1f5f9 0%, #f8fafc 100%)" } },
-  { label: "G: warm",               style: { background: "linear-gradient(180deg,#f8fafc 0%, #fff7ed 100%)" } },
-  { label: "G: cool",               style: { background: "linear-gradient(180deg,#f1f5f9 0%, #eef2ff 100%)" } },
-  // خیلی لطیف رنگ‌دار
-  { label: "Tint teal",   style: { background: "rgba(20,184,166,0.06)" } },
-  { label: "Tint yellow", style: { background: "rgba(244,194,31,0.09)" } },
+  // 🔹 Grays
+  { label: "Gray 600", style: { background: "#4b5563" } },
+  { label: "Gray 700", style: { background: "#374151" } },
+
+  // 🔹 Slate
+  { label: "Slate 600", style: { background: "#475569" } },
+  { label: "Slate 700", style: { background: "#334155" } },
+
+  // 🔹 Neutral
+  { label: "Neutral 600", style: { background: "#525252" } },
+  { label: "Neutral 700", style: { background: "#404040" } },
+
+  // 🔹 Teal
+  { label: "Teal 600", style: { background: "#0d9488" } },
+  { label: "Teal 700", style: { background: "#0f766e" } },
+
+  // 🔹 Yellow
+  { label: "Yellow 600", style: { background: "#ca8a04" } },
+  { label: "Yellow 700", style: { background: "#a16207" } },
+
+  // 🔹 Blue
+  { label: "Blue 600", style: { background: "#2563eb" } },
+  { label: "Blue 700", style: { background: "#1d4ed8" } },
+
+  // 🔹 Red
+  { label: "Red 600", style: { background: "#dc2626" } },
+  { label: "Red 700", style: { background: "#b91c1c" } },
+
+  // 🔹 Emerald (سبز مایل به فیروزه‌ای)
+  { label: "Emerald 600", style: { background: "#059669" } },
+  { label: "Emerald 700", style: { background: "#047857" } },
+
+  // 🔹 Indigo
+  { label: "Indigo 600", style: { background: "#4f46e5" } },
+  { label: "Indigo 700", style: { background: "#4338ca" } },
+
+  // 🔹 Purple
+  { label: "Purple 600", style: { background: "#9333ea" } },
+  { label: "Purple 700", style: { background: "#7e22ce" } },
 ];
 
 /* =============== GlassModal =============== */

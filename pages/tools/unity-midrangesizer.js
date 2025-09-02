@@ -16,13 +16,13 @@ export default function UnityMidrangeSizer() {
         </h1>
 
         {/* قاب/کانتینر واسط برای iFrame */}
-        <div className="relative rounded-2xl overflow-hidden shadow-2xl ring-1 ring-black/10 border border-white/10 bg-white">
-          {/* نوار بالایی شبیه اپ دسکتاپ */}
-          <div className="flex items-center gap-2 px-4 py-2 border-b border-black/5 bg-slate-50/90 backdrop-blur">
+        <div className="relative rounded-2xl overflow-hidden shadow-2xl ring-1 ring-black/20 bg-white">
+          {/* نوار بالایی شبیه اپ دسکتاپ (کاملاً مات) */}
+          <div className="flex items-center gap-2 px-4 py-2 border-b border-slate-200 bg-slate-100">
             <span className="w-3 h-3 rounded-full bg-red-400" aria-hidden="true" />
             <span className="w-3 h-3 rounded-full bg-amber-400" aria-hidden="true" />
             <span className="w-3 h-3 rounded-full bg-emerald-400" aria-hidden="true" />
-            <span className="ms-3 text-[13px] text-slate-500 select-none">Midrange Sizer</span>
+            <span className="ms-3 text-[13px] text-slate-700 select-none">Midrange Sizer</span>
           </div>
 
           {/* بدنه پنل + iFrame */}
@@ -30,7 +30,7 @@ export default function UnityMidrangeSizer() {
             <iframe
               src="https://unitycalculator.onrender.com/"
               title="Unity Midrange Sizer"
-              className="w-full rounded-lg bg-white"
+              className="w-full rounded-xl bg-white"
               style={{ height: "calc(100vh - 240px)", border: 0 }}
               loading="lazy"
               referrerPolicy="no-referrer"

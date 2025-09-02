@@ -3,10 +3,7 @@ import Head from "next/head";
 
 export default function UnityMidrangeSizer() {
   return (
-    <main
-      dir="rtl"
-      className="min-h-screen bg-[linear-gradient(180deg,#0b0b0b_0%,#111_100%)] text-right"
-    >
+    <main dir="rtl" className="min-h-screen bg-white text-right">
       <Head>
         <title>Unity MidrangeSizer | Satrass</title>
         <meta
@@ -16,12 +13,12 @@ export default function UnityMidrangeSizer() {
       </Head>
 
       <section className="max-w-5xl mx-auto px-4 py-8 md:py-10">
-        <h1 className="text-white text-2xl md:text-3xl font-extrabold mb-4">
+        <h1 className="text-slate-800 text-2xl md:text-3xl font-extrabold mb-4">
           Unity MidrangeSizer
         </h1>
 
-        {/* قاب تمیز برای iFrame */}
-        <div className="rounded-2xl overflow-hidden shadow-lg shadow-black/10 border border-slate-200 bg-white">
+        {/* قاب برای iFrame */}
+        <div className="rounded-xl overflow-hidden shadow-md border border-slate-200 bg-white">
           <iframe
             src="https://unitycalculator.onrender.com/"
             title="Unity MidrangeSizer"
@@ -30,13 +27,13 @@ export default function UnityMidrangeSizer() {
           />
         </div>
 
-        <p className="text-slate-400 text-sm mt-4">
+        <p className="text-slate-600 text-sm mt-4">
           اگر ابزار در اینجا نمایش داده نشد،{" "}
           <a
             href="https://unitycalculator.onrender.com/"
             target="_blank"
             rel="noopener noreferrer"
-            className="underline hover:text-white"
+            className="underline hover:text-slate-800"
           >
             این لینک
           </a>{" "}

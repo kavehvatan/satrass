@@ -47,8 +47,8 @@ export default function UnityMidrangeSizer() {
             <iframe
               src="https://unitycalculator.onrender.com/"
               title="Unity Midrange Sizer"
-              className="w-full rounded-xl bg-white"
-              style={{ height: "calc(100vh - 240px)", border: 0 }}
+              className="w-full h-[80vh] bg-white"
+              style={{ border: 0 }}
               loading="lazy"
               referrerPolicy="no-referrer"
             />

@@ -416,22 +416,32 @@ export default function Home() {
   };
 
   // 👇 کدام سکشن الان «در دید» است تا فقط همان بنر طوسی بگیرد
-  const [activeBg, setActiveBg] = useState("vendors");
-  useEffect(() => {
-    const ids = ["vendors", "solutions", "services"];
-   onst io = new IntersectionObserver(
-     (entries) => {
-       entries.forEach((e) => {
-         if (e.isIntersecting) setActiveBg(e.target.id);
-       });
-     },
-    ids.forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) io.observe(el);
-    });
-    return () => io.disconnect();
-  }, []);
+  // 🌫️ کنترل بنر طوسی بر اساس سکشنِ در دید
+const [activeBg, setActiveBg] = useState("vendors");
 
+useEffect(() => {
+  const ids = ["vendors", "solutions", "services"];
+
+  const io = new IntersectionObserver(
+    (entries) => {
+      // هر ورودی intersect شد، همونو فعال کن
+      for (const e of entries) {
+        if (e.isIntersecting) {
+          setActiveBg(e.target.id);
+          break;
+        }
+      }
+    },
+    // نرم و طبیعی: از بالا پشت «تجهیزات»، بعد «محافظت از داده»، بعد «خدمات»
+    { threshold: 0.35, rootMargin: "-10% 0px -45% 0px" }
+  );
+
+  for (const id of ids) {
+    const el = document.getElementById(id);
+    if (el) io.observe(el);
+  }
+  return () => io.disconnect();
+}, []);
   return (
     <main className="min-h-screen font-sans">
       {/* Hero (بنر مشکی بالا) */}

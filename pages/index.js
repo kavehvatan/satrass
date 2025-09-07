@@ -141,7 +141,7 @@ function BrandCard({ title, slug, href, index, logo }) {
           border bg-white/50 supports-[backdrop-filter]:bg-white/30
           backdrop-blur-xl
           p-5 transition duration-300 ease-in-out
-          hover:bg-white/100
+          hover:bg-white
           hover:-translate-y-0.5 hover:shadow-xl
         "
         style={{ borderColor: border, borderWidth: 1 }}

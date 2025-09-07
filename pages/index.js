@@ -57,6 +57,11 @@ const colorOf = (i) => BRAND_COLORS[i % BRAND_COLORS.length];
 
 /* 🎨 پالت بنر «محافظت از داده» (برای کلیک و تست رنگ) */
 const BANNER_STYLES = [
+  { label: "Gray light",  style: { background: "#f3f4f6" } },   // طوسی خیلی کم‌رنگ (gray-100)
+  { label: "Gray medium", style: { background: "#d1d5db" } },   // طوسی متوسط (gray-300)
+  { label: "Teal brand",  style: { background: "rgba(20,184,166,0.25)" } }, // Teal روشن از رنگ سایت
+  { label: "Navy light",  style: { background: "#1e3a8a22" } }, // سرمه‌ای خیلی کم‌رنگ (indigo-900 با شفافیت)
+  { label: "Navy medium", style: { background: "#1e3a8a55" } }, // سرمه‌ای متوسط
   { label: "Teal 300", style: { background: "rgba(94,234,212,0.25)" } },
   { label: "Teal 400", style: { background: "rgba(45,212,191,0.25)" } },
   { label: "Teal 500", style: { background: "rgba(20,184,166,0.25)" } },

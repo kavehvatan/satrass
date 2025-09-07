@@ -9,30 +9,30 @@ const TOOLS = [
   {
     title: "PowerStore Configurator",
     desc: "انتخاب و پیکربندی کامل مدل‌های PowerStore",
-    href: "#", // لینک واقعی ابزار را بعداً بگذار
+    href: "https://powerstoreconfigurator.onrender.com",
     external: true,
   },
   {
     title: "Unity MidrangeSizer",
     desc: "محاسبه ظرفیت و پیکربندی بهینه Unity",
-    href: "/tools/unity-midrangesizer", // ← داخل سایت خودت باز می‌شود
+    href: "/tools/unity-midrangesizer",
     external: false,
   },
   {
     title: "PowerStore RAID Calculator",
     desc: "محاسبه ظرفیت و افزونگی آرایه‌های RAID در PowerStore",
-    href: "#",
+    href: "", // فعلاً نداریم → دکمه غیرفعال می‌شود
     external: true,
   },
   {
     title: "Unity Configurator",
     desc: "طراحی و انتخاب پیکربندی مناسب برای خانواده Unity XT",
-    href: "#",
+    href: "https://unity-configurator.onrender.com",
     external: true,
   },
 ];
 
-// ترکیب‌های دکمه: براساس ایندکس کارت، یکی از چهار حالت را برمی‌گرداند
+// دکمه‌ها: پر/سیونۀ زرد-فیروزه‌ای طبق ایندکس کارت
 function variantForIndex(i) {
   const mod = i % 4;
   if (mod === 0) return { type: "filled", color: TEAL };
@@ -53,8 +53,6 @@ export default function Tools() {
             const isFilled = v.type === "filled";
             const isYellow = v.color === YELLOW;
 
-
-            // استایل مشترک دکمه
             const btnClass =
               "rounded-full px-5 py-2.5 font-bold transition inline-flex items-center";
             const btnStyle = isFilled
@@ -67,47 +65,59 @@ export default function Tools() {
 
             const onEnter =
               !isFilled
-                ? (e) => {
-                    // یک ته‌رنگ ملایم روی هاور برای حالت outlined
-                    e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.03)";
-                  }
+                ? (e) => (e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.03)")
                 : undefined;
             const onLeave =
               !isFilled
-                ? (e) => {
-                    e.currentTarget.style.backgroundColor = "transparent";
-                  }
+                ? (e) => (e.currentTarget.style.backgroundColor = "transparent")
                 : undefined;
 
-            // اگر لینک داخلی است، از Link استفاده می‌کنیم؛ اگر خارجی است، <a target=_blank>
-            const Button = t.external ? (
-              <a
-                href={t.href}
-                target="_blank"
-                rel="noreferrer"
-                className={btnClass}
-                style={btnStyle}
-                onMouseEnter={onEnter}
-                onMouseLeave={onLeave}
-              >
-                باز کردن ابزار
-              </a>
-            ) : (
-              <Link
-                href={t.href}
-                className={btnClass}
-                style={btnStyle}
-                onMouseEnter={onEnter}
-                onMouseLeave={onLeave}
-              >
-                باز کردن ابزار
-              </Link>
-            );
+            const isDisabled = !t.href || t.href === "#";
+
+            let Button;
+            if (isDisabled) {
+              Button = (
+                <span
+                  className={`${btnClass} opacity-50 cursor-not-allowed select-none`}
+                  style={btnStyle}
+                  aria-disabled="true"
+                  title="به‌زودی"
+                >
+                  به‌زودی
+                </span>
+              );
+            } else if (t.external) {
+              Button = (
+                <a
+                  href={t.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={btnClass}
+                  style={btnStyle}
+                  onMouseEnter={onEnter}
+                  onMouseLeave={onLeave}
+                >
+                  باز کردن ابزار
+                </a>
+              );
+            } else {
+              Button = (
+                <Link
+                  href={t.href}
+                  className={btnClass}
+                  style={btnStyle}
+                  onMouseEnter={onEnter}
+                  onMouseLeave={onLeave}
+                >
+                  باز کردن ابزار
+                </Link>
+              );
+            }
 
             return (
               <article
                 key={t.title}
-                className="border rounded-2xl p-6 shadow-sm hover:shadow-md transition"
+                className="border rounded-2xl p-6 shadow-sm hover:shadow-md transition bg-white"
               >
                 <h2 className="text-xl font-bold">{t.title}</h2>
                 <p className="mt-2 text-gray-600">{t.desc}</p>

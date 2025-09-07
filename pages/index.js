@@ -140,21 +140,27 @@ function BrandCard({ title, slug, href, index, logo }) {
 
   return (
     <Link href={link} className="group block">
-      <div
-        className="
-          relative overflow-hidden rounded-2xl
-          border bg-white/50 supports-[backdrop-filter]:bg-white/30
-          backdrop-blur-xl
-          p-5 transition duration-300 ease-in-out
-          hover:bg-white
-          hover:-translate-y-0.5 hover:shadow-xl
-        "
-        style={{ borderColor: border, borderWidth: 1 }}
-        onMouseEnter={() =>
-          setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
-        }
-        onMouseLeave={() => setBorder("#e5e7eb")}
-      >
+     <div
+  className="
+    relative overflow-hidden rounded-2xl
+    border backdrop-blur-xl
+    p-5 transition duration-300 ease-in-out
+    hover:-translate-y-0.5 hover:shadow-xl
+  "
+  style={{
+    borderColor: border,
+    borderWidth: 1,
+    backgroundColor: "rgba(255,255,255,0.5)", // پیش‌فرض 50%
+  }}
+  onMouseEnter={(e) => {
+    e.currentTarget.style.backgroundColor = "rgba(255,255,255,1)"; // 100% سفید
+    setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)]);
+  }}
+  onMouseLeave={(e) => {
+    e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.5)"; // برگرده به 50%
+    setBorder("#e5e7eb");
+  }}
+>
         {/* پس‌زمینه کارت برند */}
         <picture className="pointer-events-none select-none absolute inset-0">
           <source srcSet={artWebp} type="image/webp" />

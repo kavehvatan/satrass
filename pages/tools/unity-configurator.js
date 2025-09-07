@@ -8,7 +8,7 @@ export default function UnityConfigurator() {
         <title>Unity Configurator | Satrass</title>
         <meta
           name="description"
-          content="ابزار محاسبه و پیکربندی Dell EMC Unity"
+          content="طراحی و انتخاب پیکربندی مناسب برای خانواده Unity XT"
         />
       </Head>
 

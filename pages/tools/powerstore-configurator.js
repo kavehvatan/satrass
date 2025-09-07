@@ -8,7 +8,7 @@ export default function PowerStoreConfigurator() {
         <title>PowerStore Configurator | Satrass</title>
         <meta
           name="description"
-          content="ابزار محاسبه و پیکربندی Dell EMC PowerStore"
+          content="انتخاب و پیکربندی کامل مدل‌های PowerStore"
         />
       </Head>
 

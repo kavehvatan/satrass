@@ -118,36 +118,71 @@ function GlassModal({ open, onClose, title, paragraphs }) {
 }
 
 /* =============== Cards =============== */
+// pages/index.js (بخش BrandCard)
+
 function BrandCard({ title, slug, href, index, logo }) {
   const [border, setBorder] = useState("#e5e7eb");
   const link = href || `/products/${slug || (title || "").toLowerCase()}`;
-  const base = logo ? logo.replace(/^\/?avatars\//, "").replace(/\.(png|webp)$/i, "") : (slug || (title || "")).toLowerCase();
+  const base =
+    logo
+      ? logo.replace(/^\/?avatars\//, "").replace(/\.(png|webp)$/i, "")
+      : (slug || (title || "")).toLowerCase();
+
   const webp = `/avatars/${base}.webp`;
-  const png = `/avatars/${base}.png`;
+  const png  = `/avatars/${base}.png`;
   const artWebp = `/brand-art/${base}.webp`;
-  const artPng = `/brand-art/${base}.png`;
+  const artPng  = `/brand-art/${base}.png`;
 
   return (
     <Link href={link} className="group block">
       <div
-        className="relative overflow-hidden rounded-2xl border bg-white/70 supports-[backdrop-filter]:bg-white/35 backdrop-blur-xl p-5 transition duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+        className="
+          relative overflow-hidden rounded-2xl
+          border bg-white/50 supports-[backdrop-filter]:bg-white/30
+          backdrop-blur-xl
+          p-5 transition duration-300 ease-in-out
+          hover:bg-white/100
+          hover:-translate-y-0.5 hover:shadow-xl
+        "
         style={{ borderColor: border, borderWidth: 1 }}
-        onMouseEnter={() => setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])}
+        onMouseEnter={() =>
+          setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)])
+        }
         onMouseLeave={() => setBorder("#e5e7eb")}
       >
+        {/* پس‌زمینه کارت برند */}
         <picture className="pointer-events-none select-none absolute inset-0">
           <source srcSet={artWebp} type="image/webp" />
-          <img src={artPng} alt="" aria-hidden="true" className="w-full h-full object-cover scale-[1.12] opacity-[.7] contrast-115 saturate-110" onError={(e) => (e.currentTarget.style.display = "none")} />
+          <img
+            src={artPng}
+            alt=""
+            aria-hidden="true"
+            className="w-full h-full object-cover scale-[1.12] opacity-[.35] md:opacity-[.35] contrast-115 saturate-110"
+            onError={(e) => (e.currentTarget.style.display = "none")}
+          />
         </picture>
+
+        {/* هایلایت رنگی آرام */}
         <div
-          className="absolute inset-0 pointer-events-none opacity-30"
-          style={{ background: `radial-gradient(140% 120% at -10% -10%, ${colorOf(index)}33 0%, transparent 60%)` }}
+          className="absolute inset-0 pointer-events-none opacity-30 transition-opacity duration-300 ease-in-out"
+          style={{
+            background: `radial-gradient(140% 120% at -10% -10%, ${colorOf(index)}33 0%, transparent 60%)`,
+          }}
         />
+
+        {/* لوگو */}
         <div className="relative flex items-center ltr:justify-start rtl:justify-end">
           <div className="w-14 h-14 shrink-0 rounded-xl bg-white ring-1 ring-black/5 shadow-sm grid place-items-center transition-transform duration-200 group-hover:scale-[1.03] overflow-hidden">
             <picture>
               <source srcSet={webp} type="image/webp" />
-              <img src={png} alt={title} width={56} height={56} className="w-10 h-10 object-contain" onError={(e) => (e.currentTarget.src = "/avatars/default.png")} />
+              <img
+                src={png}
+                alt={title}
+                width={56}
+                height={56}
+                className="w-10 h-10 object-contain"
+                onError={(e) => (e.currentTarget.src = "/avatars/default.png")}
+              />
             </picture>
           </div>
         </div>
@@ -155,6 +190,11 @@ function BrandCard({ title, slug, href, index, logo }) {
     </Link>
   );
 }
+
+// تغییرات:
+// - transition duration-300 ease-in-out → کل کارت نرم تغییر کند.
+// - transition-opacity روی هایلایت پس‌زمینه اضافه شد تا فید رنگی نرم‌تر شود.
+
 
 function ServiceCard({ title, icon, href }) {
   const [border, setBorder] = useState("#e5e7eb");

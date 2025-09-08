@@ -370,9 +370,9 @@ export default function Home() {
           }}
         >
           <div>
-           <h1
+         <h1
   className="text-4xl md:text-5xl font-extrabold leading-tight"
-  style={{ color: "#00FF00" }} // سبز ترمینالی
+  style={{ color: "#f4c21f" }} // زرد برند
 >
   <AnimatedHeadline phrases={["زیرساخت هوشمند", "دقت مهندسی"]} />
 </h1>

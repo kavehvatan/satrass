@@ -48,7 +48,7 @@ export default function Tools() {
           {TOOLS.map((tool, i) => (
             <Link key={i} href={tool.href}>
               <div
-               + className={`
+               className={`
 rounded-2xl p-5 w-full md:w-[80%] mx-auto
 text-center shadow-md cursor-pointer
 transition-all duration-300 transform hover:scale-105

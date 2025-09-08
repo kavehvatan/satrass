@@ -81,7 +81,7 @@ export default function ToolsIndex() {
 
       {/* کارت‌ها */}
       <section className="max-w-7xl mx-auto px-4 pt-7 pb-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 place-items-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 place-items-center">
           {TOOLS.map((t, i) => (
             <ToolCard
               key={t.title}

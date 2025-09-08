@@ -6,63 +6,62 @@ const TEAL = "#14b8a6";
 const YELLOW = "#f4c21f";
 
 const TOOLS = [
-  { title: "Unity MidrangeSizer", desc: "محاسبه ظرفیت و پیکربندی بهینه Unity", href: "/tools/unity-midrangesizer" },
   { title: "PowerStore Configurator", desc: "انتخاب و پیکربندی کامل مدل‌های PowerStore", href: "/tools/powerstore-configurator" },
-  { title: "Unity Configurator", desc: "طراحی و انتخاب پیکربندی مناسب برای خانواده Unity XT", href: "/tools/unity-configurator" },
+  { title: "Unity MidrangeSizer", desc: "محاسبه ظرفیت و پیکربندی بهینه Unity", href: "/tools/unity-midrangesizer" },
   { title: "PowerStore RAID Calculator", desc: "محاسبه ظرفیت و افزونگی آرایه‌های RAID در PowerStore", href: "#", disabled: true },
+  { title: "Unity Configurator", desc: "طراحی و انتخاب پیکربندی مناسب برای خانواده Unity XT", href: "/tools/unity-configurator" },
 ];
 
 function ToolCard({ title, desc, href, disabled = false, tone = "teal" }) {
   const bg = tone === "teal" ? TEAL : YELLOW;
-  const fg = tone === "teal" ? "#fff" : "#0f172a";
+
+  // رنگ متن: روی teal = yellow، روی yellow = teal
+  const titleColor = tone === "teal" ? YELLOW : TEAL;
+  const descColor  = tone === "teal" ? "rgba(244,194,31,.95)" : "#0f766e"; // teal700
 
   const card =
     "rounded-2xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition " +
-    // ارتفاع یکسان و کوچیک‌تر
-    "h-[90px] sm:h-[100px] md:h-[110px] " +
-    // متن وسط و فاصله داخلی کم
-    "flex items-center justify-center text-center px-4";
+    "h-[90px] sm:h-[100px] md:h-[110px] flex items-center justify-center text-center px-4";
 
-  const innerText =
-    "max-w-[520px] w-full"; // عرض متن محدود تا دانلود/کشش ایجاد نشه
-
-  const body = (
-    <article className={card} style={{ background: bg, color: fg }}>
-      <div className={innerText}>
-        <h2 className="text-base sm:text-lg md:text-xl font-extrabold leading-tight">
-          {title}
-        </h2>
-        <p
-          className="mt-1 text-xs sm:text-sm md:text-[15px] leading-relaxed"
-          style={{ color: fg === "#fff" ? "rgba(255,255,255,.9)" : "#334155" }}
-        >
-          {desc}
-        </p>
-        {disabled && (
+  return disabled ? (
+    <div className="block w-full max-w-[392px] md:max-w-[400px] mx-auto cursor-not-allowed select-none">
+      <article className={card} style={{ background: bg }}>
+        <div className="w-full">
+          <h2 className="text-base sm:text-lg md:text-xl font-extrabold leading-tight" style={{ color: titleColor }}>
+            {title}
+          </h2>
+          <p className="mt-1 text-xs sm:text-sm md:text-[15px] leading-relaxed" style={{ color: descColor }}>
+            {desc}
+          </p>
           <span
             className="mt-2 inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium"
             style={{
-              background: fg === "#fff" ? "rgba(255,255,255,.16)" : "rgba(15,23,42,.08)",
-              color: fg,
-              border: fg === "#fff" ? "1px solid rgba(255,255,255,.35)" : "1px solid rgba(15,23,42,.15)",
+              background: "rgba(255,255,255,.16)",
+              color: titleColor,
+              border: "1px solid rgba(255,255,255,.35)",
             }}
           >
             به‌زودی
           </span>
-        )}
-      </div>
-    </article>
-  );
-
-  if (disabled) return <div className="block w-full max-w-[560px] mx-auto">{body}</div>;
-
-  return (
+        </div>
+      </article>
+    </div>
+  ) : (
     <Link
       href={href}
-      className="block w-full max-w-[560px] mx-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-teal-500 rounded-2xl"
+      className="block w-full max-w-[392px] md:max-w-[400px] mx-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-teal-500 rounded-2xl"
       aria-label={title}
     >
-      {body}
+      <article className={card} style={{ background: bg }}>
+        <div className="w-full">
+          <h2 className="text-base sm:text-lg md:text-xl font-extrabold leading-tight" style={{ color: titleColor }}>
+            {title}
+          </h2>
+          <p className="mt-1 text-xs sm:text-sm md:text-[15px] leading-relaxed" style={{ color: descColor }}>
+            {desc}
+          </p>
+        </div>
+      </article>
     </Link>
   );
 }
@@ -83,9 +82,9 @@ export default function ToolsIndex() {
         </div>
       </section>
 
-      {/* کارت‌ها: عرض محدود + ارتفاع یکسان */}
+      {/* کارت‌ها */}
       <section className="max-w-7xl mx-auto px-4 pt-7 pb-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 place-items-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 place-items-center">
           {TOOLS.map((t, i) => (
             <ToolCard
               key={t.title}
@@ -93,7 +92,7 @@ export default function ToolsIndex() {
               desc={t.desc}
               href={t.href}
               disabled={t.disabled}
-              tone={i % 2 ? "yellow" : "teal"} // یکی در میان
+              tone={i % 2 ? "teal" : "yellow"} // یکی در میان
             />
           ))}
         </div>

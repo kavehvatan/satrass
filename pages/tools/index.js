@@ -4,6 +4,7 @@ import Link from "next/link";
 
 const TEAL = "#14b8a6";
 const YELLOW = "#f4c21f";
+const NAVY_TEXT = "#334155"; // سرمه‌ای متوسط برای متن‌ها
 
 const TOOLS = [
   { title: "PowerStore Configurator", desc: "انتخاب و پیکربندی کامل مدل‌های PowerStore", href: "/tools/powerstore-configurator" },
@@ -15,29 +16,25 @@ const TOOLS = [
 function ToolCard({ title, desc, href, disabled = false, tone = "teal" }) {
   const bg = tone === "teal" ? TEAL : YELLOW;
 
-  // رنگ متن: روی teal = yellow، روی yellow = teal
-  const titleColor = tone === "teal" ? YELLOW : TEAL;
-  const descColor  = tone === "teal" ? "rgba(244,194,31,.95)" : "#0f766e"; // teal700
-
   const card =
     "rounded-2xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition " +
     "h-[90px] sm:h-[100px] md:h-[110px] flex items-center justify-center text-center px-4";
 
   return disabled ? (
-    <div className="block w-full max-w-[392px] md:max-w-[400px] mx-auto cursor-not-allowed select-none">
+    <div className="block w-full max-w-[432px] mx-auto cursor-not-allowed select-none">
       <article className={card} style={{ background: bg }}>
         <div className="w-full">
-          <h2 className="text-base sm:text-lg md:text-xl font-extrabold leading-tight" style={{ color: titleColor }}>
+          <h2 className="text-base sm:text-lg md:text-xl font-extrabold leading-tight" style={{ color: NAVY_TEXT }}>
             {title}
           </h2>
-          <p className="mt-1 text-xs sm:text-sm md:text-[15px] leading-relaxed" style={{ color: descColor }}>
+          <p className="mt-1 text-xs sm:text-sm md:text-[15px] leading-relaxed" style={{ color: NAVY_TEXT }}>
             {desc}
           </p>
           <span
             className="mt-2 inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium"
             style={{
               background: "rgba(255,255,255,.16)",
-              color: titleColor,
+              color: NAVY_TEXT,
               border: "1px solid rgba(255,255,255,.35)",
             }}
           >
@@ -49,15 +46,15 @@ function ToolCard({ title, desc, href, disabled = false, tone = "teal" }) {
   ) : (
     <Link
       href={href}
-      className="block w-full max-w-[392px] md:max-w-[400px] mx-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-teal-500 rounded-2xl"
+      className="block w-full max-w-[432px] mx-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-teal-500 rounded-2xl"
       aria-label={title}
     >
       <article className={card} style={{ background: bg }}>
         <div className="w-full">
-          <h2 className="text-base sm:text-lg md:text-xl font-extrabold leading-tight" style={{ color: titleColor }}>
+          <h2 className="text-base sm:text-lg md:text-xl font-extrabold leading-tight" style={{ color: NAVY_TEXT }}>
             {title}
           </h2>
-          <p className="mt-1 text-xs sm:text-sm md:text-[15px] leading-relaxed" style={{ color: descColor }}>
+          <p className="mt-1 text-xs sm:text-sm md:text-[15px] leading-relaxed" style={{ color: NAVY_TEXT }}>
             {desc}
           </p>
         </div>
@@ -84,7 +81,7 @@ export default function ToolsIndex() {
 
       {/* کارت‌ها */}
       <section className="max-w-7xl mx-auto px-4 pt-7 pb-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 place-items-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 place-items-center">
           {TOOLS.map((t, i) => (
             <ToolCard
               key={t.title}
@@ -92,7 +89,7 @@ export default function ToolsIndex() {
               desc={t.desc}
               href={t.href}
               disabled={t.disabled}
-              tone={i % 2 ? "teal" : "yellow"} // یکی در میان
+              tone={i % 2 ? "teal" : "yellow"}
             />
           ))}
         </div>

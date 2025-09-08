@@ -140,37 +140,37 @@ function BrandCard({ title, slug, href, index, logo }) {
 
   return (
     <Link href={link} className="group block">
-     <div
+    <div
   className="
-    relative overflow-hidden rounded-2xl
-    border backdrop-blur-xl
+    group relative overflow-hidden rounded-2xl
+    border backdrop-blur-xl hover:backdrop-blur-0
     p-5 transition duration-300 ease-in-out
     hover:-translate-y-0.5 hover:shadow-xl
   "
   style={{
     borderColor: border,
     borderWidth: 1,
-    backgroundColor: "rgba(255,255,255,0.5)", // پیش‌فرض 50%
+    backgroundColor: "rgba(255,255,255,0.5)", // پیش‌فرض 50% (شیشه‌ای)
   }}
   onMouseEnter={(e) => {
-    e.currentTarget.style.backgroundColor = "rgba(255,255,255,1)"; // 100% سفید
+    e.currentTarget.style.backgroundColor = "transparent"; // روی هاور: کاملاً شفاف
     setBorder(LOGO_COLORS[Math.floor(Math.random() * LOGO_COLORS.length)]);
   }}
   onMouseLeave={(e) => {
-    e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.5)"; // برگرده به 50%
+    e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.5)"; // برگشت به 50%
     setBorder("#e5e7eb");
   }}
 >
         {/* پس‌زمینه کارت برند */}
         <picture className="pointer-events-none select-none absolute inset-0">
           <source srcSet={artWebp} type="image/webp" />
-          <img
-            src={artPng}
-            alt=""
-            aria-hidden="true"
-            className="w-full h-full object-cover scale-[1.12] opacity-[.35] md:opacity-[.35] contrast-115 saturate-110"
-            onError={(e) => (e.currentTarget.style.display = "none")}
-          />
+         <img
+  src={artPng}
+  alt=""
+  aria-hidden="true"
+  className="w-full h-full object-cover scale-[1.12] opacity-40 group-hover:opacity-90 transition-opacity duration-300 contrast-115 saturate-110"
+  onError={(e) => (e.currentTarget.style.display = "none")}
+/>
         </picture>
 
         {/* هایلایت رنگی آرام */}

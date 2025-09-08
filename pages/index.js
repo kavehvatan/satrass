@@ -370,9 +370,12 @@ export default function Home() {
           }}
         >
           <div>
-            <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">
-              <AnimatedHeadline phrases={["زیرساخت هوشمند", "دقت مهندسی"]} />
-            </h1>
+           <h1
+  className="text-4xl md:text-5xl font-extrabold leading-tight"
+  style={{ color: "#00FF00" }} // سبز ترمینالی
+>
+  <AnimatedHeadline phrases={["زیرساخت هوشمند", "دقت مهندسی"]} />
+</h1>
             <p className="mt-4 text-gray-300">از مشاوره تا پشتیبانی، درکنار شما.</p>
             <div className="mt-6 flex gap-3">
               <a

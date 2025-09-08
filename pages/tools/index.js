@@ -1,33 +1,36 @@
 // pages/tools/index.js
-import Head from "next/head";
+import React from "react";
 import Link from "next/link";
 
 const TEAL = "#14b8a6";
 const YELLOW = "#f4c21f";
 
+// لیست ابزارها (همه داخلی باز می‌شن مثل بقیه صفحات ابزار)
 const TOOLS = [
-  {
-    title: "PowerStore Configurator",
-    desc: "انتخاب و پیکربندی کامل مدل‌های PowerStore",
-    href: "/tools/powerstore-configurator",
-  },
   {
     title: "Unity MidrangeSizer",
     desc: "محاسبه ظرفیت و پیکربندی بهینه Unity",
     href: "/tools/unity-midrangesizer",
   },
   {
-    title: "PowerStore RAID Calculator",
-    desc: "محاسبه ظرفیت و افزونگی آرایه‌های RAID در PowerStore",
-    href: "", // فعلاً نداریم؛ غیرفعال نمایش بده
+    title: "PowerStore Configurator",
+    desc: "انتخاب و پیکربندی کامل مدل‌های PowerStore",
+    href: "/tools/powerstore-configurator",
   },
   {
     title: "Unity Configurator",
     desc: "طراحی و انتخاب پیکربندی مناسب برای خانواده Unity XT",
     href: "/tools/unity-configurator",
   },
+  {
+    title: "PowerStore RAID Calculator",
+    desc: "محاسبه ظرفیت و افزونگی آرایه‌های RAID در PowerStore",
+    href: "#", // بعداً اگر صفحه‌اش آماده شد مسیرش را بگذار
+    disabled: true,
+  },
 ];
 
+// استایل دکمه‌ها (چرخشی بر اساس ایندکس برای تنوع)
 function variantForIndex(i) {
   const mod = i % 4;
   if (mod === 0) return { type: "filled", color: TEAL };
@@ -38,62 +41,56 @@ function variantForIndex(i) {
 
 export default function ToolsIndex() {
   return (
-    <main dir="rtl" className="min-h-screen bg-[#f8fafc] text-right">
-      <Head>
-        <title>ابزارها | Satrass</title>
-      </Head>
+    <main dir="rtl" className="min-h-screen bg-[#f8fafc]">
+      {/* بنر سرمه‌ای با تیتر دو رنگ */}
+      <section className="bg-slate-900 text-white py-8 shadow-md">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <h1 className="text-2xl md:text-3xl font-extrabold tracking-wide">
+            <span style={{ color: TEAL }}>ابزار</span>
+            <span className="mx-1" style={{ color: YELLOW }}>
+              ها
+            </span>
+          </h1>
+          <p className="text-slate-400 mt-2 text-sm md:text-base">
+            مجموعه ابزارهای کمکی ساتراس برای برآورد، پیکربندی و محاسبه
+          </p>
+        </div>
+      </section>
 
-      <section className="max-w-6xl mx-auto px-4 pt-10 pb-6">
-        <h1 className="text-3xl font-extrabold mb-6 text-slate-900">ابزارها</h1>
-
+      {/* لیست کارت‌ها */}
+      <section className="max-w-7xl mx-auto px-4 pt-8 pb-10">
         <div className="grid md:grid-cols-2 gap-6">
           {TOOLS.map((t, i) => {
             const v = variantForIndex(i);
             const isFilled = v.type === "filled";
             const isYellow = v.color === YELLOW;
 
-            const btnClass =
-              "rounded-full px-5 py-2.5 font-bold transition inline-flex items-center";
-            const btnStyle = isFilled
+            const btnBase =
+              "rounded-full px-5 py-2.5 font-bold transition inline-flex items-center justify-center min-w-[132px]";
+            const btnStyle = t.disabled
+              ? { border: "1px solid #e5e7eb", color: "#9ca3af", background: "transparent", cursor: "not-allowed" }
+              : isFilled
               ? { backgroundColor: v.color, color: isYellow ? "#000" : "#fff" }
               : { border: `1px solid ${v.color}`, color: v.color, backgroundColor: "transparent" };
 
-            const onEnter = !isFilled
-              ? (e) => (e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.03)")
-              : undefined;
-            const onLeave = !isFilled
-              ? (e) => (e.currentTarget.style.backgroundColor = "transparent")
-              : undefined;
-
-            const isDisabled = !t.href;
+            const Button = t.disabled ? (
+              <span className={btnBase} style={btnStyle} aria-disabled="true">
+                به‌زودی
+              </span>
+            ) : (
+              <Link href={t.href} className={btnBase} style={btnStyle}>
+                باز کردن ابزار
+              </Link>
+            );
 
             return (
-              <article key={t.title} className="border rounded-2xl p-6 shadow-sm hover:shadow-md transition bg-white">
-                <h2 className="text-xl font-bold text-slate-900">{t.title}</h2>
-                <p className="mt-2 text-gray-600">{t.desc}</p>
-
-                <div className="mt-5">
-                  {isDisabled ? (
-                    <span
-                      className={`${btnClass} opacity-50 cursor-not-allowed select-none`}
-                      style={btnStyle}
-                      aria-disabled="true"
-                      title="به‌زودی"
-                    >
-                      به‌زودی
-                    </span>
-                  ) : (
-                    <Link
-                      href={t.href}
-                      className={btnClass}
-                      style={btnStyle}
-                      onMouseEnter={onEnter}
-                      onMouseLeave={onLeave}
-                    >
-                      باز کردن ابزار
-                    </Link>
-                  )}
-                </div>
+              <article
+                key={t.title}
+                className="border rounded-2xl p-6 shadow-sm hover:shadow-md transition bg-white/80"
+              >
+                <h2 className="text-xl font-extrabold text-slate-800">{t.title}</h2>
+                <p className="mt-2 text-slate-600">{t.desc}</p>
+                <div className="mt-5">{Button}</div>
               </article>
             );
           })}

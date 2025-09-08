@@ -1,7 +1,7 @@
 // pages/tools/powerstore-configurator.js
 import Head from "next/head";
 
-const MOBILE_IFRAME_WIDTH = 1280; // در صورت نیاز 1400 یا 1500 کن
+const MOBILE_IFRAME_WIDTH = 1280;
 
 export default function PowerStoreConfigurator() {
   return (
@@ -14,11 +14,20 @@ export default function PowerStoreConfigurator() {
         />
       </Head>
 
-      <section className="max-w-7xl mx-auto px-2 sm:px-4 py-8 md:py-10">
-        <h1 className="text-slate-800 text-2xl md:text-3xl font-extrabold mb-6 text-center">
-          PowerStore Configurator
-        </h1>
+      {/* 🔹 بنر مشکی بالای صفحه */}
+      <section className="bg-black text-white py-8 shadow-md">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <h1 className="text-2xl md:text-3xl font-extrabold tracking-wide">
+            PowerStore Configurator
+          </h1>
+          <p className="text-gray-400 mt-2 text-sm md:text-base">
+            انتخاب و پیکربندی کامل مدل‌های PowerStore
+          </p>
+        </div>
+      </section>
 
+      {/* 🔹 بدنه اصلی */}
+      <section className="max-w-7xl mx-auto px-2 sm:px-4 py-8 md:py-10">
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-[#f8fafc] shadow-md">
           {/* موبایل: اسکرول افقی */}
           <div
@@ -41,7 +50,7 @@ export default function PowerStoreConfigurator() {
             </div>
           </div>
 
-          {/* دسکتاپ/تبلت */}
+          {/* دسکتاپ */}
           <iframe
             src="https://powerstoreconfigurator.onrender.com/"
             title="PowerStore Configurator"

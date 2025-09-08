@@ -2,6 +2,8 @@
 import Head from "next/head";
 
 const MOBILE_IFRAME_WIDTH = 1280;
+const TEAL = "#14b8a6";
+const YELLOW = "#f4c21f";
 
 export default function PowerStoreConfigurator() {
   return (
@@ -14,11 +16,12 @@ export default function PowerStoreConfigurator() {
         />
       </Head>
 
-      {/* 🔹 بنر سرمه‌ای تیره */}
+      {/* 🔹 بنر سرمه‌ای تیره با تیتر رنگی */}
       <section className="bg-slate-900 text-white py-8 shadow-md">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <h1 className="text-2xl md:text-3xl font-extrabold tracking-wide">
-            PowerStore Configurator
+            <span style={{ color: TEAL }}>PowerStore</span>{" "}
+            <span style={{ color: YELLOW }}>Configurator</span>
           </h1>
           <p className="text-slate-400 mt-2 text-sm md:text-base">
             انتخاب و پیکربندی کامل مدل‌های PowerStore
@@ -26,7 +29,7 @@ export default function PowerStoreConfigurator() {
         </div>
       </section>
 
-      {/* 🔹 iFrame فقط (بدون قاب سفید) */}
+      {/* 🔹 iFrame بدون قاب سفید */}
       <section className="max-w-7xl mx-auto px-2 sm:px-4 py-6 md:py-10">
         {/* موبایل: اسکرول افقی */}
         <div

@@ -1,6 +1,8 @@
 // pages/tools/unity-configurator.js
 import Head from "next/head";
 
+const MOBILE_IFRAME_WIDTH = 1280; // اگر باز هم تنگ بود 1400 یا 1500 کن
+
 export default function UnityConfigurator() {
   return (
     <main dir="rtl" className="min-h-screen bg-[#f8fafc] text-right">
@@ -17,21 +19,30 @@ export default function UnityConfigurator() {
           Unity Configurator
         </h1>
 
-        {/* قاب ماشین‌حساب */}
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-[#f8fafc] shadow-md">
-          {/* موبایل: با اسکرول افقی */}
-          <div className="relative w-full md:hidden overflow-x-auto">
-            <iframe
-              src="https://unity-configurator.onrender.com/"
-              title="Unity Configurator"
-              className="min-w-[700px] h-[80vh]"
-              style={{ border: 0 }}
-              loading="lazy"
-              referrerPolicy="no-referrer"
-            />
+          {/* موبایل: iFrame پهن + اسکرول افقی */}
+          <div
+            className="relative w-full md:hidden overflow-x-auto"
+            style={{ WebkitOverflowScrolling: "touch" }}
+          >
+            {/* باکس داخلیِ پهن برای فعال‌کردن اسکرول افقی */}
+            <div className="inline-block" style={{ width: MOBILE_IFRAME_WIDTH }}>
+              <iframe
+                src="https://unity-configurator.onrender.com/"
+                title="Unity Configurator"
+                className="block"
+                style={{
+                  width: MOBILE_IFRAME_WIDTH,
+                  height: "80vh",
+                  border: 0,
+                }}
+                loading="lazy"
+                referrerPolicy="no-referrer"
+              />
+            </div>
           </div>
 
-          {/* دسکتاپ/تبلت: ارتفاع داینامیک مثل قبل */}
+          {/* تبلت/دسکتاپ: ارتفاع داینامیک مثل قبل */}
           <iframe
             src="https://unity-configurator.onrender.com/"
             title="Unity Configurator"

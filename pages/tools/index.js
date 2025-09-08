@@ -52,18 +52,13 @@ export default function Tools() {
                   rounded-2xl p-6 w-[90%] md:w-[80%] mx-auto
                   text-center shadow-md cursor-pointer
                   transition hover:shadow-lg
-                  ${
-                    tool.tone === "teal"
-                      ? "bg-teal-500/30"
-                      : "bg-yellow-400/30"
-                  }
-                  backdrop-blur-md
+                  ${tool.tone === "teal" ? "bg-teal-500" : "bg-yellow-400"}
                 `}
               >
-                <h2 className="text-lg md:text-xl font-extrabold text-slate-700">
+                <h2 className="text-lg md:text-xl font-extrabold text-slate-800">
                   {tool.title}
                 </h2>
-                <p className="mt-2 text-slate-600">{tool.desc}</p>
+                <p className="mt-2 text-slate-700">{tool.desc}</p>
               </div>
             </Link>
           ))}

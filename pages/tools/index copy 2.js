@@ -51,8 +51,7 @@ export default function Tools() {
                 className={`
                   rounded-2xl p-6 w-[90%] md:w-[80%] mx-auto
                   text-center shadow-md cursor-pointer
-                  transition-all duration-300 transform
-                  hover:scale-105
+                  transition-all duration-300
                   ${tool.tone === "teal"
                     ? "bg-teal-500 hover:bg-teal-400"
                     : "bg-yellow-400 hover:bg-yellow-300"}

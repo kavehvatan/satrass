@@ -1,45 +1,56 @@
 // pages/tools/index.js
-import React from "react";
+import React, { useMemo } from "react";
 import Link from "next/link";
 
 const TEAL = "#14b8a6";
 const YELLOW = "#f4c21f";
 
-// لیست ابزارها (همه داخلی باز می‌شن مثل بقیه صفحات ابزار)
+// پالت‌های روشن برای بک‌گراند کارت‌ها (خوانایی خوب با متن تیره)
+const BG_TEAL = ["#f0fdfa", "#ccfbf1", "#99f6e4"];    // teal-50/100/200
+const BG_YELLOW = ["#fffbeb", "#fef3c7", "#fde68a"]; // amber/yellow-50/100/200
+
+// لیست ابزارها
 const TOOLS = [
-  {
-    title: "Unity MidrangeSizer",
-    desc: "محاسبه ظرفیت و پیکربندی بهینه Unity",
-    href: "/tools/unity-midrangesizer",
-  },
   {
     title: "PowerStore Configurator",
     desc: "انتخاب و پیکربندی کامل مدل‌های PowerStore",
     href: "/tools/powerstore-configurator",
   },
   {
-    title: "Unity Configurator",
-    desc: "طراحی و انتخاب پیکربندی مناسب برای خانواده Unity XT",
-    href: "/tools/unity-configurator",
+    title: "Unity MidrangeSizer",
+    desc: "محاسبه ظرفیت و پیکربندی بهینه Unity",
+    href: "/tools/unity-midrangesizer",
   },
   {
     title: "PowerStore RAID Calculator",
     desc: "محاسبه ظرفیت و افزونگی آرایه‌های RAID در PowerStore",
-    href: "#", // بعداً اگر صفحه‌اش آماده شد مسیرش را بگذار
+    href: "#",
     disabled: true,
+  },
+  {
+    title: "Unity Configurator",
+    desc: "طراحی و انتخاب پیکربندی مناسب برای خانواده Unity XT",
+    href: "/tools/unity-configurator",
   },
 ];
 
-// استایل دکمه‌ها (چرخشی بر اساس ایندکس برای تنوع)
-function variantForIndex(i) {
-  const mod = i % 4;
-  if (mod === 0) return { type: "filled", color: TEAL };
-  if (mod === 1) return { type: "outlined", color: TEAL };
-  if (mod === 2) return { type: "filled", color: YELLOW };
-  return { type: "outlined", color: YELLOW };
+// انتخاب رنگ تصادفی پایدار در هر رندر (بر اساس ایندکس)
+function useCardColors(count) {
+  return useMemo(() => {
+    return Array.from({ length: count }).map((_, i) => {
+      // به تناوب teal/yellow و درون هرکدام یکی از طیف‌های روشن
+      const isTeal = i % 2 === 0 ? Math.random() > 0.4 : Math.random() > 0.6; // کمی تنوع
+      const palette = isTeal ? BG_TEAL : BG_YELLOW;
+      const bg = palette[Math.floor(Math.random() * palette.length)];
+      const tone = isTeal ? "teal" : "yellow";
+      return { bg, tone };
+    });
+  }, [count]);
 }
 
 export default function ToolsIndex() {
+  const colors = useCardColors(TOOLS.length);
+
   return (
     <main dir="rtl" className="min-h-screen bg-[#f8fafc]">
       {/* بنر سرمه‌ای با تیتر دو رنگ */}
@@ -57,41 +68,42 @@ export default function ToolsIndex() {
         </div>
       </section>
 
-      {/* لیست کارت‌ها */}
       <section className="max-w-7xl mx-auto px-4 pt-8 pb-10">
         <div className="grid md:grid-cols-2 gap-6">
           {TOOLS.map((t, i) => {
-            const v = variantForIndex(i);
-            const isFilled = v.type === "filled";
-            const isYellow = v.color === YELLOW;
+            const { bg, tone } = colors[i] || {};
+            const textColor = "#0f172a"; // slate-900 برای خوانایی روی پس‌زمینه روشن
+            const ringColor = tone === "teal" ? "ring-[rgba(20,184,166,.25)]" : "ring-[rgba(244,194,31,.28)]";
+            const shadowGlow =
+              tone === "teal"
+                ? "shadow-[0_10px_30px_-12px_rgba(20,184,166,.35)]"
+                : "shadow-[0_10px_30px_-12px_rgba(244,194,31,.35)]";
 
-            const btnBase =
-              "rounded-full px-5 py-2.5 font-bold transition inline-flex items-center justify-center min-w-[132px]";
-            const btnStyle = t.disabled
-              ? { border: "1px solid #e5e7eb", color: "#9ca3af", background: "transparent", cursor: "not-allowed" }
-              : isFilled
-              ? { backgroundColor: v.color, color: isYellow ? "#000" : "#fff" }
-              : { border: `1px solid ${v.color}`, color: v.color, backgroundColor: "transparent" };
+            const CardInner = (
+              <article
+                className={`rounded-3xl ${shadowGlow} hover:shadow-xl hover:-translate-y-0.5 transition
+                            ring-1 ${ringColor} p-8 text-center`}
+                style={{ background: bg, color: textColor }}
+                aria-label={t.title}
+              >
+                <h2 className="text-xl md:text-2xl font-extrabold">{t.title}</h2>
+                <p className="mt-3 text-slate-700">{t.desc}</p>
 
-            const Button = t.disabled ? (
-              <span className={btnBase} style={btnStyle} aria-disabled="true">
-                به‌زودی
-              </span>
-            ) : (
-              <Link href={t.href} className={btnBase} style={btnStyle}>
-                باز کردن ابزار
-              </Link>
+                {t.disabled && (
+                  <div className="mt-5 inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-slate-300 bg-white/70 text-slate-600 text-sm select-none cursor-not-allowed">
+                    به‌زودی
+                  </div>
+                )}
+              </article>
             );
 
-            return (
-              <article
-                key={t.title}
-                className="border rounded-2xl p-6 shadow-sm hover:shadow-md transition bg-white/80"
-              >
-                <h2 className="text-xl font-extrabold text-slate-800">{t.title}</h2>
-                <p className="mt-2 text-slate-600">{t.desc}</p>
-                <div className="mt-5">{Button}</div>
-              </article>
+            // کل کارت لینک باشد (اگر غیرفعال نیست)
+            return t.disabled ? (
+              <div key={t.title} className="cursor-not-allowed select-none">{CardInner}</div>
+            ) : (
+              <Link key={t.title} href={t.href} className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-teal-500 rounded-3xl">
+                {CardInner}
+              </Link>
             );
           })}
         </div>
